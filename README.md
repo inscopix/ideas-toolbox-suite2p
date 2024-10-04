@@ -12,7 +12,7 @@
   - [Run tests](#run-tests)
 
 ## Toolbox Description
-A toolbox for running suite2p-based tools on the IDEAS platform.
+A toolbox for running [suite2p](https://github.com/MouseLand/suite2p)-based tools on the IDEAS platform.
 
 This toolbox is designed to run as a Docker image, which can be run on the IDEAS platform. This toolbox consists of the following tools:
 
@@ -69,6 +69,7 @@ The command will excute the tool with inputs specified in the `inputs` folder. T
 │── pyproject.toml          # Configuration for the python project
 │── setup.py                # Specifies dependencies of the python project
 │── user_deps.txt           # Specifies user dependencies of the python project
+|── LICENSE                 # License file
 ```
 
 ## Usage Instructions
