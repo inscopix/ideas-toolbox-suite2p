@@ -72,6 +72,10 @@ The command will excute the tool with inputs specified in the `inputs` folder. T
 └── .gitignore              # Tells Git which files & folders to ignore
 ```
 
+## License
+
+This project is licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/deed.en). Note that the software is provided "as is", without warrantee of any kind.
+
 ## Usage Instructions
 
 ### List available commands
