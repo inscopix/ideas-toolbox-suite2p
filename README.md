@@ -61,7 +61,6 @@ The command will excute the tool with inputs specified in the `inputs` folder. T
 │   ├── tools               # Contains the individual analysis tools
 │   ├── utils               # General utilities used by the tools
 │   ├── tests               # Unit tests for the individual tools
-└── .gitignore              # Tells Git which files & folders to ignore
 │── Dockerfile              # Commands to assemble the Docker image
 │── Makefile                # To automate and standardize toolbox usage
 │── check_tool.sh           # Checks if tool is valid before execution
@@ -70,6 +69,7 @@ The command will excute the tool with inputs specified in the `inputs` folder. T
 │── setup.py                # Specifies dependencies of the python project
 │── user_deps.txt           # Specifies user dependencies of the python project
 |── LICENSE                 # License file
+└── .gitignore              # Tells Git which files & folders to ignore
 ```
 
 ## Usage Instructions
