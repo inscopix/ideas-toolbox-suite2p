@@ -1,0 +1,28 @@
+{
+    "suite2p_individual_steps__suite2p_roi_extraction": {
+        "stat": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "F": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "Fneu": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "ops_ROI_extraction": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "extracted_sample_sources_traces_only": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "extracted_sample_sources_footprints": {
+            "pattern": [],
+            "custom_string": ""
+        }
+    }
+}

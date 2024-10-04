@@ -1,0 +1,3353 @@
+{
+    "contributor": {
+        "tenant": "inscopix",
+        "user": "ludovic.bellier@gmail.com"
+    },
+    "details": {},
+    "exit_status": {
+        "codes": [
+            {
+                "code": "DEFAULT_TOOLBOX_ERROR_0001",
+                "description": "Placeholder error description",
+                "type": "ERROR"
+            }
+        ],
+        "file_location": "exit_status.txt"
+    },
+    "help": "Help text for this toolbox.",
+    "key": "suite2p",
+    "name": "suite2p",
+    "schema_version": "2.0.0",
+    "tools": [
+        {
+            "name": "Run suite2p pipeline",
+            "key": "suite2p_wrapper__run_suite2p_end_to_end",
+            "help": "Tool to run suite2p end-to-end on any format of 2p movie",
+            "version": "0.4.0",
+            "maturity": "production",
+            "visibility": "public",
+            "toolkit": "Calcium Imaging Processing",
+            "command": "suite2p_wrapper__run_suite2p_end_to_end.sh",
+            "resources": {
+                "cpu": 8,
+                "gpu": 0,
+                "memory": 64000,
+                "storage": 100000,
+                "max_file_size": 40000
+            },
+            "params": [
+                {
+                    "key": "raw_movie_files",
+                    "name": "Raw Movie Files",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input 2P movie(s) [.isxd, .zip, .tiff]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": true,
+                        "file_formats": [
+                            "isxd",
+                            "zip",
+                            "tiff"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "miniscope_movie",
+                                "file_structure": "movie",
+                                "file_format": "isxd"
+                            },
+                            {
+                                "file_type": "bruker2p_movie",
+                                "file_structure": "archive",
+                                "file_format": "zip"
+                            },
+                            {
+                                "file_type": "image",
+                                "file_structure": "image_stack",
+                                "file_format": "tiff"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "ops_file",
+                    "name": "Optional Parameters File",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Optional parameters file that allows for more granular control of all available suite2p parameters. See documentation for more details [.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "config",
+                                "file_structure": "key_value_pairs",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "classifier_path",
+                    "name": "Optional Classifier File",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <classifier_path>] \"Path to classifier file you want to use for cell classification.\" [.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "suite2p_classifier",
+                                "file_structure": "key_value_pairs",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "params_from",
+                    "name": "Overwrite Analysis Table Parameters",
+                    "required": true,
+                    "hidden": false,
+                    "help": "When a parameters file is provided as input, whether the parameters from the analysis table columns should be overwritten by the values from the file. Only effective when an optional parameters file is provided. Defaults to False. [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Main Settings",
+                            "group_order": 1
+                        }
+                    },
+                    "default": false
+                },
+                {
+                    "key": "tau",
+                    "name": "Tau",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <tau>] \"The timescale of the sensor (in seconds), used for deconvolution kernel. The kernel is fixed to have this decay and is not fit to the data. We recommend: 0.7 for GCaMP6f; 1.0 for GCaMP6m; 1.25-1.5 for GCaMP6s.\" [float, >=0.001]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Main Settings",
+                            "group_order": 1
+                        },
+                        "min": 0.001
+                    },
+                    "default": 1.0
+                },
+                {
+                    "key": "frames_include",
+                    "name": "Frames to Include",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <frames_include>] \"If greater than zero, only [the first] <frames_include> frames are processed. Useful for testing parameters on a subset of data.\" Note that suite2p will not run on less than 50 frames, and might have unpredictable behavior on less than 200 frames [int, -1 or >=50]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Main Settings",
+                            "group_order": 1
+                        },
+                        "min": -1
+                    },
+                    "default": -1
+                },
+                {
+                    "key": "save_npy",
+                    "name": "Save NPY",
+                    "required": false,
+                    "hidden": false,
+                    "help": "If true, save suite2p NPY output (as a ZIP file) [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Output Format",
+                            "group_order": 2
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "save_isxd",
+                    "name": "Save ISXD",
+                    "required": false,
+                    "hidden": false,
+                    "help": "If true, save suite2p output as ISXD files [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Output Format",
+                            "group_order": 2
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "save_NWB",
+                    "name": "Save NWB",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <save_NWB>] \"Whether to save output as NWB file.\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Output Format",
+                            "group_order": 2
+                        }
+                    },
+                    "default": false
+                },
+                {
+                    "key": "save_mat",
+                    "name": "Save MAT",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <save_mat>] \"Whether to save the results in matlab format in file \"Fall.mat\".\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Output Format",
+                            "group_order": 2
+                        }
+                    },
+                    "default": false
+                },
+                {
+                    "key": "maxregshift",
+                    "name": "Maximum Registration Shift",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <maxregshift>] \"The maximum shift as a fraction of the frame size. If the frame is Ly pixels x Lx pixels, then the maximum pixel shift in pixels will be max(Ly,Lx) * ops['maxregshift'].\" [float, [0.01 1]]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Registration",
+                            "group_order": 3
+                        },
+                        "min": 0.01,
+                        "max": 1
+                    },
+                    "default": 0.1
+                },
+                {
+                    "key": "th_badframes",
+                    "name": "Threshold for Bad Frames",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <th_badframes>] \"Involved with setting threshold for excluding frames for cropping. Set this smaller to exclude more frames.\" [float, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Registration",
+                            "group_order": 3
+                        },
+                        "min": 0
+                    },
+                    "default": 1.0
+                },
+                {
+                    "key": "nonrigid",
+                    "name": "Nonrigid Registration",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <nonrigid>] \"Whether or not to perform non-rigid registration, which splits the field of view into blocks and computes registration offsets in each block separately.\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Registration",
+                            "group_order": 3
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "threshold_scaling",
+                    "name": "ROI Threshold Scaling",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <threshold_scaling>] \"This controls the threshold at which to detect ROIs (how much the ROIs have to stand out from the noise to be detected). If you set this higher, then fewer ROIs will be detected, and if you set it lower, more ROIs will be detected.\" [float, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "ROI Detection",
+                            "group_order": 4
+                        },
+                        "min": 0
+                    },
+                    "default": 1.0
+                },
+                {
+                    "key": "neucoeff",
+                    "name": "Neuropil Coefficient",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <neucoeff>] \"Neuropil coefficient for all ROIs.\" [float, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Spike Deconvolution",
+                            "group_order": 5
+                        },
+                        "min": 0
+                    },
+                    "default": 0.7
+                },
+                {
+                    "key": "thresh_spks_perc",
+                    "name": "Spikes Percentile Threshold",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Threshold for denoising the deconvolved spike trains, in percentile. Any value in the ROIs-by-time-point deconvolved spike matrix that is below the matrix's xth percentile value is set to 0. Note that the same threshold is applied to all ROIs, and that this thresholding step does not binarize the deconvolved spike trains but simply filters out the low-amplitude spike events [float, [0 100)]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Spike Deconvolution",
+                            "group_order": 5
+                        },
+                        "min": 0,
+                        "max": 100
+                    },
+                    "default": 99.7
+                },
+                {
+                    "key": "viz_vmin_perc",
+                    "name": "FOV vmin Percentile",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Minimum value for the colormap range, as percentile of the FOV fluorescence [float, [0 <FOV vmax Percentile>)]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 6
+                        },
+                        "min": 0,
+                        "max": 100
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "viz_vmax_perc",
+                    "name": "FOV vmax Percentile",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Maximum value for the colormap range, as percentile of the FOV fluorescence [float, (<FOV vmin Percentile> 100]]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 6
+                        },
+                        "min": 0,
+                        "max": 100
+                    },
+                    "default": 99
+                },
+                {
+                    "key": "viz_cmap",
+                    "name": "FOV Colormap",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Colormap for plotting the FOV [str]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolStringParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 6
+                        }
+                    },
+                    "default": "plasma"
+                },
+                {
+                    "key": "viz_show_grid",
+                    "name": "Show Grid on FOV",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Whether or not to show the grid on FOVs [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 6
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "viz_ticks_step",
+                    "name": "FOV Ticks Step",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Step for the x- and y-ticks [int, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 6
+                        },
+                        "min": 1
+                    },
+                    "default": 128
+                },
+                {
+                    "key": "viz_display_rate",
+                    "name": "Movie Display Rate",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Display rate for the preview movies, in Hz [float, >=0.1]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 6
+                        },
+                        "min": 0.1
+                    },
+                    "default": 10
+                },
+                {
+                    "key": "viz_n_samp_cells",
+                    "name": "Number of Sample Cells",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Number of sample cells for the cell extraction preview [int, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 6
+                        },
+                        "min": 1
+                    },
+                    "default": 20
+                },
+                {
+                    "key": "viz_random_seed",
+                    "name": "Random Seed",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Random seed for selecting sample cells [int, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 6
+                        },
+                        "min": 0
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "viz_show_all_footprints",
+                    "name": "Show Non-Sample Cells' Footprints",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 6
+                        }
+                    },
+                    "default": true
+                }
+            ],
+            "results": [
+                {
+                    "group_key": "suite2p_wrapper__run_suite2p_end_to_end",
+                    "group_name": "Suite2P Wrapper  Run Suite2P End To End",
+                    "group_type": "tool_output",
+                    "required": true,
+                    "multiple": false,
+                    "files": [
+                        {
+                            "result_key": "suite2p_output",
+                            "result_name": "NPY Output",
+                            "help": "suite2p output in NPY format",
+                            "required": false,
+                            "multiple": false,
+                            "file_formats": [
+                                "zip"
+                            ],
+                            "file_type": "suite2p_data"
+                        },
+                        {
+                            "result_key": "cellset_raw",
+                            "result_name": "ISXD Cellset",
+                            "help": "suite2p raw fluorescence output in Inscopix format",
+                            "required": false,
+                            "multiple": false,
+                            "file_formats": [
+                                "isxd"
+                            ],
+                            "file_type": "cell_set"
+                        },
+                        {
+                            "result_key": "eventset",
+                            "result_name": "ISXD Eventset",
+                            "help": "suite2p deconvolved spikes output in Inscopix format",
+                            "required": false,
+                            "multiple": false,
+                            "file_formats": [
+                                "isxd"
+                            ],
+                            "file_type": "neural_events"
+                        },
+                        {
+                            "result_key": "ophys",
+                            "result_name": "NWB Output",
+                            "help": "suite2p output in NWB format",
+                            "required": false,
+                            "multiple": false,
+                            "file_formats": [
+                                "nwb"
+                            ],
+                            "file_type": "nwb_data"
+                        },
+                        {
+                            "result_key": "Fall",
+                            "result_name": "MATLAB Output",
+                            "help": "suite2p output in MATLAB format",
+                            "required": false,
+                            "multiple": false,
+                            "file_formats": [
+                                "mat"
+                            ],
+                            "file_type": "suite2p_data"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "suite2p binary conversion",
+            "key": "suite2p_individual_steps__suite2p_binary_conversion",
+            "help": "Tool to convert raw 2p input movie(s) into a suite2p binary file",
+            "version": "0.2.0",
+            "maturity": "production",
+            "visibility": "public",
+            "toolkit": "Calcium Imaging Processing",
+            "command": "suite2p_individual_steps__suite2p_binary_conversion.sh",
+            "resources": {
+                "cpu": 8,
+                "gpu": 0,
+                "memory": 64000,
+                "storage": 100000,
+                "max_file_size": 40000
+            },
+            "params": [
+                {
+                    "key": "raw_movie_files",
+                    "name": "Raw Movie Files",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input 2P movie(s) [.isxd, .zip, .tiff]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": true,
+                        "file_formats": [
+                            "isxd",
+                            "zip",
+                            "tiff"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "miniscope_movie",
+                                "file_structure": "movie",
+                                "file_format": "isxd"
+                            },
+                            {
+                                "file_type": "bruker2p_movie",
+                                "file_structure": "archive",
+                                "file_format": "zip"
+                            },
+                            {
+                                "file_type": "image",
+                                "file_structure": "image_stack",
+                                "file_format": "tiff"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "nplanes",
+                    "name": "Number of Planes",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <nplanes>] \"Each tiff has this many planes in sequence.\" [int, >=1]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Binary Conversion Parameters",
+                            "group_order": 1
+                        },
+                        "min": 1
+                    },
+                    "default": 1
+                },
+                {
+                    "key": "nchannels",
+                    "name": "Number of Channels",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <nchannels>] \"Each tiff has this many channels per plane.\" [int, >=1]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Binary Conversion Parameters",
+                            "group_order": 1
+                        },
+                        "min": 1
+                    },
+                    "default": 1
+                },
+                {
+                    "key": "functional_chan",
+                    "name": "Functional Channel",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <functional_chan>] \"This channel is used to extract functional ROIs (1-based, so 1 means first channel, and 2 means second channel).\" [int, >=1]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Binary Conversion Parameters",
+                            "group_order": 1
+                        },
+                        "min": 1
+                    },
+                    "default": 1
+                },
+                {
+                    "key": "fs",
+                    "name": "Sampling Rate",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <fs>] \"Sampling rate (per plane). For instance, if you have a 10 plane recording acquired at 30Hz, then the sampling rate per plane is 3Hz, so set ops['fs'] = 3.\" If None (default), fs is automatically detected for Inscopix .isxd and Bruker 2P .zip files, and set to 10 Hz (suite2p default) for .tiff files. [float, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Binary Conversion Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0.001
+                    }
+                },
+                {
+                    "key": "bruker_bidirectional",
+                    "name": "Bruker Bidirectional",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <bruker_bidirectional>] \"Specifies whether BRUKER files are bidirectional multiplane recordings. The True setting corresponds to the following plane order (first plane is indexed as zero): [0,1,2,2,1,0]. False corresponds to [0,1,2,0,1,2].\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Binary Conversion Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": false
+                }
+            ],
+            "results": [
+                {
+                    "group_key": "suite2p_individual_steps__suite2p_binary_conversion",
+                    "group_name": "Suite2P Individual Steps  Suite2P Binary Conversion",
+                    "group_type": "tool_output",
+                    "required": true,
+                    "multiple": false,
+                    "files": [
+                        {
+                            "result_key": "data_raw",
+                            "result_name": "Raw Binary Movie",
+                            "help": "Raw suite2p binary movie",
+                            "required": true,
+                            "multiple": false,
+                            "file_formats": [
+                                "bin"
+                            ],
+                            "file_type": "suite2p_data"
+                        },
+                        {
+                            "result_key": "ops_binary_conversion",
+                            "result_name": "Binary Conversion Output Parameters File",
+                            "help": "Parameters file outputted by the binary conversion tool",
+                            "required": true,
+                            "multiple": false,
+                            "file_formats": [
+                                "npy"
+                            ],
+                            "file_type": "config"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "suite2p registration",
+            "key": "suite2p_individual_steps__suite2p_registration",
+            "help": "Tool to run suite2p registration on a raw suite2p binary movie",
+            "version": "0.2.0",
+            "maturity": "production",
+            "visibility": "public",
+            "toolkit": "Calcium Imaging Processing",
+            "command": "suite2p_individual_steps__suite2p_registration.sh",
+            "resources": {
+                "cpu": 8,
+                "gpu": 0,
+                "memory": 64000,
+                "storage": 100000,
+                "max_file_size": 40000
+            },
+            "params": [
+                {
+                    "key": "raw_binary_file",
+                    "name": "Raw Binary Movie",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input raw suite2p binary movie [<data_raw>.bin]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "bin"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "suite2p_data",
+                                "file_structure": "binary",
+                                "file_format": "bin"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "ops_file",
+                    "name": "Parameters file",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input suite2p parameters file, as outputted by the binary conversion tool [<ops_binary_conversion>.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "config",
+                                "file_structure": "key_value_pairs",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "frames_include",
+                    "name": "Frames to Include",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <frames_include>] \"If greater than zero, only [the first] <frames_include> frames are processed. Useful for testing parameters on a subset of data.\" Note that suite2p will not run on less than 50 frames, and might have unpredictable behavior on less than 200 frames [int, -1 or >=50]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        },
+                        "min": -1
+                    },
+                    "default": -1
+                },
+                {
+                    "key": "align_by_chan",
+                    "name": "Align By Channel",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <align_by_chan>] \"Which channel to use for alignment (1-based, so 1 means 1st channel and 2 means 2nd channel). If you have a non-functional channel with something like td-Tomato expression, you may want to use this channel for alignment rather than the functional channel.\" [int, [1 <nchannels>]]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        },
+                        "min": 1
+                    },
+                    "default": 1
+                },
+                {
+                    "key": "nimg_init",
+                    "name": "Number of Frames for Initialization",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <nimg_init>] \"How many frames to use to compute reference image for registration.\" [int, >=1]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        },
+                        "min": 1
+                    },
+                    "default": 300
+                },
+                {
+                    "key": "batch_size",
+                    "name": "Batch Size",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <batch_size>] \"How many frames to register simultaneously in each batch. This depends on memory constraints - it will be faster to run if the batch is larger, but it will require more RAM.\" [int, >=1]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        },
+                        "min": 1
+                    },
+                    "default": 500
+                },
+                {
+                    "key": "maxregshift",
+                    "name": "Maximum Registration Shift",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <maxregshift>] \"The maximum shift as a fraction of the frame size. If the frame is Ly pixels x Lx pixels, then the maximum pixel shift in pixels will be max(Ly,Lx) * ops['maxregshift'].\" [float, [0.01 1]]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0.01,
+                        "max": 1
+                    },
+                    "default": 0.1
+                },
+                {
+                    "key": "smooth_sigma",
+                    "name": "Smooth Sigma",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <smooth_sigma>] \"Standard deviation in pixels of the gaussian used to smooth the phase correlation between the reference image and the frame which is being registered. A value of >4 is recommended for one-photon recordings (with a 512x512 pixel FOV).\" [float, >=0.01]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0.01
+                    },
+                    "default": 1.15
+                },
+                {
+                    "key": "smooth_sigma_time",
+                    "name": "Smooth Sigma Time",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <smooth_sigma_time>] \"Standard deviation in time frames of the gaussian used to smooth the data before phase correlation is computed. Might need this to be set to 1 or 2 for low SNR data.\" [float, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "two_step_registration",
+                    "name": "Two-Step Registration",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <two_step_registration>] \"Whether or not to run registration twice (for low SNR data). `keep_movie_raw` must be True for this to work.\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": false
+                },
+                {
+                    "key": "subpixel",
+                    "name": "Subpixel",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <subpixel>] \"Precision of Subpixel Registration (1/subpixel steps).\" [float, >=1]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        },
+                        "min": 1
+                    },
+                    "default": 10
+                },
+                {
+                    "key": "th_badframes",
+                    "name": "Threshold for Bad Frames",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <th_badframes>] \"Involved with setting threshold for excluding frames for cropping. Set this smaller to exclude more frames.\" [float, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0
+                    },
+                    "default": 1.0
+                },
+                {
+                    "key": "norm_frames",
+                    "name": "Normalize Frames",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <norm_frames>] \"Normalize frames when detecting shifts.\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "force_refImg",
+                    "name": "Force refImg",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <force_refImg>] \"Specifies whether to use refImg stored in ops. Make sure that ops['refImg'] has a valid file pathname.\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": false
+                },
+                {
+                    "key": "pad_fft",
+                    "name": "Pad FFT",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <pad_fft>] \"Specifies whether to pad image or not during FFT portion of registration.\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": false
+                },
+                {
+                    "key": "one_p_reg",
+                    "name": "1P Registration",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <1Preg>] \"Whether to perform high-pass spatial filtering and tapering (parameters set below), which help with 1P registration.\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": false
+                },
+                {
+                    "key": "spatial_hp_reg",
+                    "name": "Spatial HP Registration",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <spatial_hp_reg>] \"Window in pixels for spatial high-pass filtering before registration.\" [int, >=1]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        },
+                        "min": 1
+                    },
+                    "default": 42
+                },
+                {
+                    "key": "pre_smooth",
+                    "name": "Pre Smooth",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <pre_smooth>] \"If > 0, defines stddev of Gaussian smoothing, which is applied before spatial high-pass filtering.\" [float]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "spatial_taper",
+                    "name": "Spatial Taper",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <spatial_taper>] \"How many pixels to ignore on edges - they are set to zero (important for vignetted windows, for FFT padding do not set BELOW 3*ops['smooth_sigma']).\" [float, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0
+                    },
+                    "default": 40.0
+                },
+                {
+                    "key": "nonrigid",
+                    "name": "Nonrigid Registration",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <nonrigid>] \"Whether or not to perform non-rigid registration, which splits the field of view into blocks and computes registration offsets in each block separately.\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "block_size",
+                    "name": "Block Size",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <block_size>] \"Size of blocks for non-rigid registration, in pixels. HIGHLY recommend keeping this a power of 2 and/or 3 (e.g. 128, 256, 384, etc) for efficient FFT.\" [list[int, int] with int > 1]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolStringParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": "[128, 128]"
+                },
+                {
+                    "key": "snr_thresh",
+                    "name": "SNR Threshold",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <snr_thresh>] \"How big the phase correlation peak has to be relative to the noise in the phase correlation map for the block shift to be accepted. In low SNR recordings like one-photon, I'd recommend a larger value like 1.5, so that block shifts are only accepted if there is significant SNR in the phase correlation.\" [float, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0.001
+                    },
+                    "default": 1.2
+                },
+                {
+                    "key": "maxregshiftNR",
+                    "name": "Maximum Registration Shift for Nonrigid",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <maxregshiftNR>] \"Maximum shift in pixels of a block relative to the rigid shift.\" [float, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0
+                    },
+                    "default": 5.0
+                },
+                {
+                    "key": "do_bidiphase",
+                    "name": "Compute Bidirectional Phase Offset",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <do_bidiphase>] \"Whether or not to compute bidirectional phase offset from misaligned line scanning experiment (applies to 2P recordings only). suite2p will estimate the bidirectional phase offset from ops['nimg_init'] frames if this is set to 1 (and ops['bidiphase']=0), and then apply this computed offset to all frames.\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": false
+                },
+                {
+                    "key": "bidiphase",
+                    "name": "Bidirectional Phase Offset",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <bidiphase>] \"Bidirectional phase offset from line scanning (set by user). If set to any value besides 0, then this offset is used and applied to all frames in the recording.\" [int, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "bidi_corrected",
+                    "name": "Bidirectional Correction",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <bidi_corrected>] \"Specifies whether to do bidi correction.\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Registration Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": false
+                },
+                {
+                    "key": "viz_vmin_perc",
+                    "name": "FOV vmin Percentile",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Minimum value for the colormap range, as percentile of the FOV fluorescence [float, [0 <FOV vmax Percentile>)]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        },
+                        "min": 0,
+                        "max": 100
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "viz_vmax_perc",
+                    "name": "FOV vmax Percentile",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Maximum value for the colormap range, as percentile of the FOV fluorescence [float, (<FOV vmin Percentile> 100]]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        },
+                        "min": 0,
+                        "max": 100
+                    },
+                    "default": 99
+                },
+                {
+                    "key": "viz_cmap",
+                    "name": "FOV Colormap",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Colormap for plotting the FOV [str]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolStringParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        }
+                    },
+                    "default": "plasma"
+                },
+                {
+                    "key": "viz_show_grid",
+                    "name": "Show Grid on FOV",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Whether or not to show the grid on FOVs [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "viz_ticks_step",
+                    "name": "FOV Ticks Step",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Step for the x- and y-ticks [int, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        },
+                        "min": 1
+                    },
+                    "default": 128
+                },
+                {
+                    "key": "viz_display_rate",
+                    "name": "Movie Display Rate",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Display rate for the preview movies, in Hz [float, >=0.1]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        },
+                        "min": 0.1
+                    },
+                    "default": 10
+                }
+            ],
+            "results": [
+                {
+                    "group_key": "suite2p_individual_steps__suite2p_registration",
+                    "group_name": "Suite2P Individual Steps  Suite2P Registration",
+                    "group_type": "tool_output",
+                    "required": true,
+                    "multiple": false,
+                    "files": [
+                        {
+                            "result_key": "data",
+                            "result_name": "Registered Binary Movie",
+                            "help": "Registered suite2p binary movie",
+                            "required": true,
+                            "multiple": false,
+                            "file_formats": [
+                                "bin"
+                            ],
+                            "file_type": "suite2p_data"
+                        },
+                        {
+                            "result_key": "ops_registration",
+                            "result_name": "Registration Output Parameters File",
+                            "help": "Parameters file outputted by the registration tool",
+                            "required": true,
+                            "multiple": false,
+                            "file_formats": [
+                                "npy"
+                            ],
+                            "file_type": "config"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "suite2p ROI detection",
+            "key": "suite2p_individual_steps__suite2p_roi_detection",
+            "help": "Tool to run suite2p ROI detection on a registered suite2p binary movie",
+            "version": "0.1.0",
+            "maturity": "production",
+            "visibility": "public",
+            "toolkit": "Calcium Imaging Processing",
+            "command": "suite2p_individual_steps__suite2p_roi_detection.sh",
+            "resources": {
+                "cpu": 8,
+                "gpu": 0,
+                "memory": 64000,
+                "storage": 100000,
+                "max_file_size": 40000
+            },
+            "params": [
+                {
+                    "key": "reg_binary_file",
+                    "name": "Registered Binary Movie",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input registered suite2p binary movie [<data>.bin]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "bin"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "suite2p_data",
+                                "file_structure": "binary",
+                                "file_format": "bin"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "ops_file",
+                    "name": "Parameters File",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input suite2p parameters file, as outputted by the registration tool [<ops_registration>.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "config",
+                                "file_structure": "key_value_pairs",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "classifier_path",
+                    "name": "Optional Classifier File",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <classifier_path>] \"Path to classifier file you want to use for cell classification.\" [.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "suite2p_classifier",
+                                "file_structure": "key_value_pairs",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "tau",
+                    "name": "Tau",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <tau>] \"The timescale of the sensor (in seconds), used for deconvolution kernel. The kernel is fixed to have this decay and is not fit to the data. We recommend: 0.7 for GCaMP6f; 1.0 for GCaMP6m; 1.25-1.5 for GCaMP6s.\" [float, >=0.001]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0.001
+                    },
+                    "default": 1.0
+                },
+                {
+                    "key": "sparse_mode",
+                    "name": "Sparse Mode",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <sparse_mode>] \"Whether or not to use sparse_mode cell detection.\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "spatial_scale",
+                    "name": "Spatial Scale",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <spatial_scale>] \"What the optimal scale of the recording is in pixels. if set to 0, then the algorithm determines it automatically (recommend this on the first try). If it seems off, set it yourself to the following values: 1 (=6 pixels), 2 (=12 pixels), 3 (=24 pixels), or 4 (=48 pixels).\" [int, [0 4]]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0,
+                        "max": 4
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "connected",
+                    "name": "Connected",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <connected>] \"Whether or not to require ROIs to be fully connected (set to 0 for dendrites/boutons).\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "threshold_scaling",
+                    "name": "Threshold Scaling",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <threshold_scaling>] \"This controls the threshold at which to detect ROIs (how much the ROIs have to stand out from the noise to be detected). if you set this higher, then fewer ROIs will be detected, and if you set it lower, more ROIs will be detected.\" [float]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": 1.0
+                },
+                {
+                    "key": "spatial_hp_detect",
+                    "name": "Spatial HP Detect",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <spatial_hp_detect>] \"Window for spatial high-pass filtering for neuropil subtracation before ROI detection takes place.\" [int, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        },
+                        "min": 1
+                    },
+                    "default": 25
+                },
+                {
+                    "key": "max_overlap",
+                    "name": "Max Overlap",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <max_overlap>] \"We allow overlapping ROIs during cell detection. After detection, ROIs with more than ops['max_overlap'] fraction of their pixels overlapping with other ROIs will be discarded. Therefore, to throw out NO ROIs, set this to 1.0.\" [float, [0 1]]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0.0,
+                        "max": 1.0
+                    },
+                    "default": 0.75
+                },
+                {
+                    "key": "high_pass",
+                    "name": "High Pass",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <high_pass>] \"Running mean subtraction across time with window of size 'high_pass'. Values of less than 10 are recommended for 1P data where there are often large full-field changes in brightness.\" [int, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        },
+                        "min": 1
+                    },
+                    "default": 100
+                },
+                {
+                    "key": "smooth_masks",
+                    "name": "Smooth Masks",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <smooth_masks>] \"Whether to smooth masks in final pass of cell detection. This is useful especially if you are in a high noise regime.\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "max_iterations",
+                    "name": "Max Iterations",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <max_iterations>] \"How many iterations over which to extract cells - at most ops['max_iterations'], but usually stops before due to ops['threshold_scaling'] criterion.\" [int, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        },
+                        "min": 1
+                    },
+                    "default": 20
+                },
+                {
+                    "key": "nbinned",
+                    "name": "Number of Binned Frames",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <nbinned>] \"Maximum number of binned frames to use for ROI detection.\" [int, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        },
+                        "min": 1
+                    },
+                    "default": 5000
+                },
+                {
+                    "key": "denoise",
+                    "name": "Denoise",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <denoise>] \"Whether or not binned movie should be denoised before cell detection in sparse_mode. If True, make sure to set ops['sparse_mode'] is also set to True.\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": false
+                },
+                {
+                    "key": "anatomical_only",
+                    "name": "Anatomical Only",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <anatomical_only>] \"If greater than 0, specifies what to use Cellpose on.  1: Will find masks on max projection image divided by mean image.  2: Will find masks on mean image  3: Will find masks on enhanced mean image  4: Will find masks on maximum projection image.\" [int, [0 4]]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0,
+                        "max": 4
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "diameter",
+                    "name": "Diameter",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <diameter>] \"Diameter that will be used for cellpose. If set to zero, diameter is estimated.\" [int, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "cellprob_threshold",
+                    "name": "Cellprob Threshold",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <cellprob_threshold>] \"Specifies threshold for cell detection that will be used by cellpose.\" [float]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "flow_threshold",
+                    "name": "Flow Threshold",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <flow_threshold>] \"Specifies flow threshold that will be used for cellpose.\" [float]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": 1.5
+                },
+                {
+                    "key": "spatial_hp_cp",
+                    "name": "Spatial HP CP",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <spatial_hp_cp>] \"Window for spatial high-pass filtering of image to be used for cellpose.\" [int, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "pretrained_model",
+                    "name": "Pretrained Model",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <pretrained_model>] \"Path to pretrained model or string for model type (can be user's model ).\" See cellpose docs for a list of available models, e.g., 'cyto', 'cyto2', 'cyto3', 'nuclei'. [str]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolStringParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": "cyto"
+                },
+                {
+                    "key": "preclassify",
+                    "name": "Preclassify",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <preclassify>] \"Apply classifier before signal extraction with probability threshold of 'preclassify'. If this is set to 0.0, then all detected ROIs are kept and signals are computed.\" [float, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0.0
+                    },
+                    "default": 0.0
+                },
+                {
+                    "key": "chan2_thres",
+                    "name": "Channel 2 Threshold",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <chan2_thres>] \"threshold for calling an ROI \"detected\" on a second channel.\" [float, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "ROI Detection Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0.0
+                    },
+                    "default": 0.65
+                },
+                {
+                    "key": "viz_vmin_perc",
+                    "name": "FOV vmin Percentile",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Minimum value for the colormap range, as percentile of the FOV fluorescence [float, [0 <FOV vmax Percentile>)]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        },
+                        "min": 0,
+                        "max": 100
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "viz_vmax_perc",
+                    "name": "FOV vmax Percentile",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Maximum value for the colormap range, as percentile of the FOV fluorescence [float, (<FOV vmin Percentile> 100]]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        },
+                        "min": 0,
+                        "max": 100
+                    },
+                    "default": 99
+                },
+                {
+                    "key": "viz_cmap",
+                    "name": "FOV Colormap",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Colormap for plotting the FOV [str]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolStringParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        }
+                    },
+                    "default": "plasma"
+                },
+                {
+                    "key": "viz_show_grid",
+                    "name": "Show Grid on FOV",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Whether or not to show the grid on FOVs [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "viz_ticks_step",
+                    "name": "FOV Ticks Step",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Step for the x- and y-ticks [int, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        },
+                        "min": 1
+                    },
+                    "default": 128
+                }
+            ],
+            "results": [
+                {
+                    "group_key": "suite2p_individual_steps__suite2p_roi_detection",
+                    "group_name": "Suite2P Individual Steps  Suite2P ROI Detection",
+                    "group_type": "tool_output",
+                    "required": true,
+                    "multiple": false,
+                    "files": [
+                        {
+                            "result_key": "stat_ROI_detection",
+                            "result_name": "Detection Statistics",
+                            "help": "ROI detection suite2p statistics file",
+                            "required": true,
+                            "multiple": false,
+                            "file_formats": [
+                                "npy"
+                            ],
+                            "file_type": "suite2p_data"
+                        },
+                        {
+                            "result_key": "ops_ROI_detection",
+                            "result_name": "ROI Detection Output Parameters File",
+                            "help": "Parameters file outputted by the ROI detection tool",
+                            "required": true,
+                            "multiple": false,
+                            "file_formats": [
+                                "npy"
+                            ],
+                            "file_type": "config"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "suite2p ROI extraction",
+            "key": "suite2p_individual_steps__suite2p_roi_extraction",
+            "help": "Tool to run suite2p ROI extraction on a registered suite2p binary movie, using the previously detected ROIs",
+            "version": "0.1.0",
+            "maturity": "production",
+            "visibility": "public",
+            "toolkit": "Calcium Imaging Processing",
+            "command": "suite2p_individual_steps__suite2p_roi_extraction.sh",
+            "resources": {
+                "cpu": 8,
+                "gpu": 0,
+                "memory": 64000,
+                "storage": 100000,
+                "max_file_size": 40000
+            },
+            "params": [
+                {
+                    "key": "reg_binary_file",
+                    "name": "Registered Binary Movie",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input registered suite2p binary movie [<data>.bin]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "bin"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "suite2p_data",
+                                "file_structure": "binary",
+                                "file_format": "bin"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "stat_file",
+                    "name": "Detection Statistics File",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input cell statistics file, as outputted by the ROI detection step [<stat_ROI_detection>.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "suite2p_data",
+                                "file_structure": "key_value_pairs",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "ops_file",
+                    "name": "Parameters File",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input suite2p parameters file, as outputted by the ROI detection tool [<ops_ROI_detection>.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "config",
+                                "file_structure": "key_value_pairs",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "neuropil_extract",
+                    "name": "Neuropil Extraction",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <neuropil_extract>] \"Whether or not to extract signal from neuropil. If False, Fneu is set to zero.\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "ROI Extraction Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "allow_overlap",
+                    "name": "Allow Overlap",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <allow_overlap>] \"Whether or not to extract signals from pixels which belong to two ROIs. By default, any pixels which belong to two ROIs (overlapping pixels) are excluded from the computation of the ROI trace.\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "ROI Extraction Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": false
+                },
+                {
+                    "key": "min_neuropil_pixels",
+                    "name": "Minimum Neuropil Pixels",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <min_neuropil_pixels>] \"Minimum number of pixels used to compute neuropil for each cell.\" [int, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "ROI Extraction Parameters",
+                            "group_order": 1
+                        },
+                        "min": 1
+                    },
+                    "default": 350
+                },
+                {
+                    "key": "inner_neuropil_radius",
+                    "name": "Inner Neuropil Radius",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <inner_neuropil_radius>] \"Number of pixels to keep between ROI and neuropil donut.\" [int, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "ROI Extraction Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0
+                    },
+                    "default": 2
+                },
+                {
+                    "key": "lam_percentile",
+                    "name": "Lambda Percentile",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <lam_percentile>] \"Percentile of Lambda within area to ignore when excluding cell pixels for neuropil extraction.\" [int, [0 100]]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "ROI Extraction Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0,
+                        "max": 100
+                    },
+                    "default": 50
+                },
+                {
+                    "key": "viz_show_grid",
+                    "name": "Show Grid on FOV",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Whether or not to show the grid on FOVs [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "viz_ticks_step",
+                    "name": "FOV Ticks Step",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Step for the x- and y-ticks [int, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        },
+                        "min": 1
+                    },
+                    "default": 128
+                },
+                {
+                    "key": "viz_n_samp_cells",
+                    "name": "Number of Sample Cells",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Number of sample cells for the cell extraction preview [int, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        },
+                        "min": 1
+                    },
+                    "default": 20
+                },
+                {
+                    "key": "viz_random_seed",
+                    "name": "Random Seed",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Random seed for selecting sample cells [int, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        },
+                        "min": 0
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "viz_show_all_footprints",
+                    "name": "Show Non-Sample Cells' Footprints",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        }
+                    },
+                    "default": true
+                }
+            ],
+            "results": [
+                {
+                    "group_key": "suite2p_individual_steps__suite2p_roi_extraction",
+                    "group_name": "Suite2P Individual Steps  Suite2P ROI Extraction",
+                    "group_type": "tool_output",
+                    "required": true,
+                    "multiple": false,
+                    "files": [
+                        {
+                            "result_key": "stat",
+                            "result_name": "Extraction Statistics",
+                            "help": "ROI extraction suite2p statistics file",
+                            "required": true,
+                            "multiple": false,
+                            "file_formats": [
+                                "npy"
+                            ],
+                            "file_type": "suite2p_data"
+                        },
+                        {
+                            "result_key": "F",
+                            "result_name": "Fluorescence Traces",
+                            "help": "suite2p fluorescence traces file",
+                            "required": true,
+                            "multiple": false,
+                            "file_formats": [
+                                "npy"
+                            ],
+                            "file_type": "suite2p_data"
+                        },
+                        {
+                            "result_key": "Fneu",
+                            "result_name": "Neuropil Fluorescence Traces",
+                            "help": "suite2p neuropil fluorescence traces file",
+                            "required": true,
+                            "multiple": false,
+                            "file_formats": [
+                                "npy"
+                            ],
+                            "file_type": "suite2p_data"
+                        },
+                        {
+                            "result_key": "ops_ROI_extraction",
+                            "result_name": "ROI Extraction Output Parameters File",
+                            "help": "Parameters file outputted by the ROI extraction tool",
+                            "required": true,
+                            "multiple": false,
+                            "file_formats": [
+                                "npy"
+                            ],
+                            "file_type": "config"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "suite2p ROI classification",
+            "key": "suite2p_individual_steps__suite2p_roi_classification",
+            "help": "Tool to run suite2p ROI classification on the extracted ROIs",
+            "version": "0.1.0",
+            "maturity": "production",
+            "visibility": "public",
+            "toolkit": "Calcium Imaging Processing",
+            "command": "suite2p_individual_steps__suite2p_roi_classification.sh",
+            "resources": {
+                "cpu": 8,
+                "gpu": 0,
+                "memory": 64000,
+                "storage": 100000,
+                "max_file_size": 40000
+            },
+            "params": [
+                {
+                    "key": "stat_file",
+                    "name": "Extraction Statistics File",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input cell statistics file, as outputted by the ROI extraction step [<stat>.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "suite2p_data",
+                                "file_structure": "key_value_pairs",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "ops_file",
+                    "name": "Parameters File",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input suite2p parameters file, as outputted by the ROI extraction tool [<ops_ROI_extraction>.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "config",
+                                "file_structure": "key_value_pairs",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "classifier_path",
+                    "name": "Optional Classifier File",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <classifier_path>] \"Path to classifier file you want to use for cell classification.\" [.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "suite2p_classifier",
+                                "file_structure": "key_value_pairs",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "soma_crop",
+                    "name": "Soma Crop",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <soma_crop>] \"Specifies whether to crop dendrites for cell classification stats (e.g., compactness).\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "ROI Classification Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "viz_vmin_perc",
+                    "name": "FOV vmin Percentile",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Minimum value for the colormap range, as percentile of the FOV fluorescence [float, [0 <FOV vmax Percentile>)]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        },
+                        "min": 0,
+                        "max": 100
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "viz_vmax_perc",
+                    "name": "FOV vmax Percentile",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Maximum value for the colormap range, as percentile of the FOV fluorescence [float, (<FOV vmin Percentile> 100]]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        },
+                        "min": 0,
+                        "max": 100
+                    },
+                    "default": 99
+                },
+                {
+                    "key": "viz_cmap",
+                    "name": "FOV Colormap",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Colormap for plotting the FOV [str]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolStringParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        }
+                    },
+                    "default": "plasma"
+                },
+                {
+                    "key": "viz_show_grid",
+                    "name": "Show Grid on FOV",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Whether or not to show the grid on FOVs [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "viz_ticks_step",
+                    "name": "FOV Ticks Step",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Step for the x- and y-ticks [int, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        },
+                        "min": 1
+                    },
+                    "default": 128
+                }
+            ],
+            "results": [
+                {
+                    "group_key": "suite2p_individual_steps__suite2p_roi_classification",
+                    "group_name": "Suite2P Individual Steps  Suite2P ROI Classification",
+                    "group_type": "tool_output",
+                    "required": true,
+                    "multiple": false,
+                    "files": [
+                        {
+                            "result_key": "iscell",
+                            "result_name": "Classification Labels",
+                            "help": "ROI classification suite2p labels file",
+                            "required": true,
+                            "multiple": false,
+                            "file_formats": [
+                                "npy"
+                            ],
+                            "file_type": "suite2p_data"
+                        },
+                        {
+                            "result_key": "ops_ROI_classification",
+                            "result_name": "ROI Classification Output Parameters File",
+                            "help": "Parameters file outputted by the ROI classification tool",
+                            "required": true,
+                            "multiple": false,
+                            "file_formats": [
+                                "npy"
+                            ],
+                            "file_type": "config"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "suite2p spike deconvolution",
+            "key": "suite2p_individual_steps__suite2p_spike_deconvolution",
+            "help": "Tool to run suite2p spike deconvolution on the extracted fluorescence traces",
+            "version": "0.1.0",
+            "maturity": "production",
+            "visibility": "public",
+            "toolkit": "Calcium Imaging Processing",
+            "command": "suite2p_individual_steps__suite2p_spike_deconvolution.sh",
+            "resources": {
+                "cpu": 8,
+                "gpu": 0,
+                "memory": 64000,
+                "storage": 100000,
+                "max_file_size": 40000
+            },
+            "params": [
+                {
+                    "key": "fluo_file",
+                    "name": "Fluorescence Traces File",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input fluorescence traces file, as outputted by the ROI extraction step [<F>.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "suite2p_data",
+                                "file_structure": "time_series",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "neuropil_fluo_file",
+                    "name": "Neuropil Fluorescence Traces File",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input neuropil fluorescence traces file, as outputted by the ROI extraction step [<Fneu>.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "suite2p_data",
+                                "file_structure": "time_series",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "ops_file",
+                    "name": "Parameters File",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input suite2p parameters file, as outputted by the ROI extraction tool [<ops_ROI_extraction>.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "config",
+                                "file_structure": "key_value_pairs",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "tau",
+                    "name": "Tau",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <tau>] \"The timescale of the sensor (in seconds), used for deconvolution kernel. The kernel is fixed to have this decay and is not fit to the data. We recommend: 0.7 for GCaMP6f; 1.0 for GCaMP6m; 1.25-1.5 for GCaMP6s.\" [float, >=0.001]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Spike Deconvolution Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0.001
+                    },
+                    "default": 1.0
+                },
+                {
+                    "key": "neucoeff",
+                    "name": "Neuropil Coefficient",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <neucoeff>] \"Neuropil coefficient for all ROIs.\" [float, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Spike Deconvolution Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0
+                    },
+                    "default": 0.7
+                },
+                {
+                    "key": "baseline",
+                    "name": "Baseline",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <baseline>] \"How to compute the baseline of each trace. This baseline is then subtracted from each cell. 'maximin' computes a moving baseline by filtering the data with a Gaussian of width ops['sig_baseline'] * ops['fs'], and then minimum filtering with a window of ops['win_baseline'] * ops['fs'], and then maximum filtering with the same window. 'constant' computes a constant baseline by filtering with a Gaussian of width ops['sig_baseline'] * ops['fs'] and then taking the minimum value of this filtered trace. 'constant_percentile' computes a constant baseline by taking the ops['prctile_baseline'] percentile of the trace.\" [str, ['maximin', 'constant', 'constant_percentile']]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolStringParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Spike Deconvolution Parameters",
+                            "group_order": 1
+                        }
+                    },
+                    "default": "maximin"
+                },
+                {
+                    "key": "win_baseline",
+                    "name": "Window Baseline",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <win_baseline>] \"Window for maximin filter in seconds.\" [float, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Spike Deconvolution Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0.001
+                    },
+                    "default": 60.0
+                },
+                {
+                    "key": "sig_baseline",
+                    "name": "Sig Baseline",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <sig_baseline>] \"Gaussian filter width in seconds, used before maximin filtering or taking the minimum value of the trace, ops['baseline'] = 'maximin' or 'constant'.\" [float, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Spike Deconvolution Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0.001
+                    },
+                    "default": 10.0
+                },
+                {
+                    "key": "prctile_baseline",
+                    "name": "Percentile Baseline",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <prctile_baseline>] \"Percentile of trace to use as baseline if ops['baseline'] = 'constant_percentile'.\" [float, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Spike Deconvolution Parameters",
+                            "group_order": 1
+                        },
+                        "min": 0.001
+                    },
+                    "default": 8.0
+                },
+                {
+                    "key": "viz_n_samp_cells",
+                    "name": "Number of Sample Cells",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Number of sample cells for the spike deconvolution preview [int, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        },
+                        "min": 1
+                    },
+                    "default": 20
+                },
+                {
+                    "key": "viz_random_seed",
+                    "name": "Random Seed",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Random seed for selecting sample cells [int, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        },
+                        "min": 0
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "viz_show_all_footprints",
+                    "name": "Show Non-Sample Cells' Footprints",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 2
+                        }
+                    },
+                    "default": true
+                }
+            ],
+            "results": [
+                {
+                    "group_key": "suite2p_individual_steps__suite2p_spike_deconvolution",
+                    "group_name": "Suite2P Individual Steps  Suite2P Spike Deconvolution",
+                    "group_type": "tool_output",
+                    "required": true,
+                    "multiple": false,
+                    "files": [
+                        {
+                            "result_key": "spks",
+                            "result_name": "Deconvolved Spikes",
+                            "help": "suite2p deconvolved spikes file",
+                            "required": true,
+                            "multiple": false,
+                            "file_formats": [
+                                "npy"
+                            ],
+                            "file_type": "suite2p_data"
+                        },
+                        {
+                            "result_key": "ops_spike_deconvolution",
+                            "result_name": "Spike Deconvolution Output Parameters File",
+                            "help": "Parameters file outputted by the spike deconvolution tool",
+                            "required": true,
+                            "multiple": false,
+                            "file_formats": [
+                                "npy"
+                            ],
+                            "file_type": "config"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "suite2p output conversion",
+            "key": "suite2p_individual_steps__suite2p_output_conversion",
+            "help": "Tool to output suite2p results in specific formats",
+            "version": "0.2.0",
+            "maturity": "production",
+            "visibility": "public",
+            "toolkit": "Calcium Imaging Processing",
+            "command": "suite2p_individual_steps__suite2p_output_conversion.sh",
+            "resources": {
+                "cpu": 8,
+                "gpu": 0,
+                "memory": 64000,
+                "storage": 100000,
+                "max_file_size": 40000
+            },
+            "params": [
+                {
+                    "key": "fluo_file",
+                    "name": "Fluorescence Traces File",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input fluorescence traces file, as outputted by the ROI extraction step [<F>.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "suite2p_data",
+                                "file_structure": "time_series",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "neuropil_fluo_file",
+                    "name": "Neuropil Fluo File",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input neuropil fluorescence traces file, as outputted by the ROI extraction step [<Fneu>.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "suite2p_data",
+                                "file_structure": "time_series",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "spks_file",
+                    "name": "Deconvolved Spikes File",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input deconvolved spikes file, as outputted by the spike deconvolution step [<spks>.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "suite2p_data",
+                                "file_structure": "time_series",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "stat_file",
+                    "name": "Extraction Statistics File",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input extraction statistics file, as outputted by the ROI extraction step [<stat>.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "suite2p_data",
+                                "file_structure": "key_value_pairs",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "ops_file",
+                    "name": "Parameters File",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input parameters file, as outputted by the spike deconvolution step [<ops_spike_deconvolution>.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "config",
+                                "file_structure": "key_value_pairs",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "iscell_file",
+                    "name": "Classification Labels File",
+                    "required": true,
+                    "hidden": false,
+                    "help": "Input classification labels file, as outputted by the ROI classification step [<iscell>.npy]",
+                    "type": {
+                        "is_source": true,
+                        "param_type": "ToolPathParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Input Data",
+                            "group_order": 0
+                        },
+                        "is_dir": false,
+                        "multiple": false,
+                        "file_formats": [
+                            "npy"
+                        ],
+                        "file_filters": [
+                            {
+                                "file_type": "suite2p_data",
+                                "file_structure": "key_value_pairs",
+                                "file_format": "npy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "save_npy",
+                    "name": "Save NPY",
+                    "required": false,
+                    "hidden": false,
+                    "help": "If true, save suite2p NPY output (as a ZIP file) [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Output Format",
+                            "group_order": 1
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "save_isxd",
+                    "name": "Save ISXD",
+                    "required": false,
+                    "hidden": false,
+                    "help": "If true, save suite2p output as ISXD files [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Output Format",
+                            "group_order": 1
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "save_NWB",
+                    "name": "Save NWB",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <save_NWB>] \"Whether to save output as NWB file.\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Output Format",
+                            "group_order": 1
+                        }
+                    },
+                    "default": false
+                },
+                {
+                    "key": "save_mat",
+                    "name": "Save MAT",
+                    "required": false,
+                    "hidden": false,
+                    "help": "[from suite2p docs for <save_mat>] \"Whether to save the results in matlab format in file \"Fall.mat\".\" [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Output Format",
+                            "group_order": 1
+                        }
+                    },
+                    "default": false
+                },
+                {
+                    "key": "thresh_spks_perc",
+                    "name": "Spikes Percentile Threshold",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Threshold for denoising the deconvolved spike trains, in percentile. Any value in the ROIs-by-time-point deconvolved spike matrix that is below the matrix's xth percentile value is set to 0. Note that the same threshold is applied to all ROIs, and that this thresholding step does not binarize the deconvolved spike trains but simply filters out the low-amplitude spike events [float, [0 100)]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Extra Parameters",
+                            "group_order": 2
+                        },
+                        "min": 0,
+                        "max": 100
+                    },
+                    "default": 99.7
+                },
+                {
+                    "key": "viz_vmin_perc",
+                    "name": "FOV vmin Percentile",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Minimum value for the colormap range, as percentile of the FOV fluorescence [float, [0 <FOV vmax Percentile>)]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 3
+                        },
+                        "min": 0,
+                        "max": 100
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "viz_vmax_perc",
+                    "name": "FOV vmax Percentile",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Maximum value for the colormap range, as percentile of the FOV fluorescence [float, (<FOV vmin Percentile> 100]]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 3
+                        },
+                        "min": 0,
+                        "max": 100
+                    },
+                    "default": 99
+                },
+                {
+                    "key": "viz_cmap",
+                    "name": "FOV Colormap",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Colormap for plotting the FOV [str]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolStringParam",
+                        "param_datatype": "string",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 3
+                        }
+                    },
+                    "default": "plasma"
+                },
+                {
+                    "key": "viz_show_grid",
+                    "name": "Show Grid on FOV",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Whether or not to show the grid on FOVs [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 3
+                        }
+                    },
+                    "default": true
+                },
+                {
+                    "key": "viz_ticks_step",
+                    "name": "FOV Ticks Step",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Step for the x- and y-ticks [int, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolFloatRangeParam",
+                        "param_datatype": "float",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 3
+                        },
+                        "min": 1
+                    },
+                    "default": 128
+                },
+                {
+                    "key": "viz_n_samp_cells",
+                    "name": "Number of Sample Cells",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Number of sample cells for the cell extraction preview [int, >0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 3
+                        },
+                        "min": 1
+                    },
+                    "default": 20
+                },
+                {
+                    "key": "viz_random_seed",
+                    "name": "Random Seed",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Random seed for selecting sample cells [int, >=0]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolIntRangeParam",
+                        "param_datatype": "integer",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 3
+                        },
+                        "min": 0
+                    },
+                    "default": 0
+                },
+                {
+                    "key": "viz_show_all_footprints",
+                    "name": "Show Non-Sample Cells' Footprints",
+                    "required": false,
+                    "hidden": false,
+                    "help": "Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed [bool]",
+                    "type": {
+                        "is_source": false,
+                        "param_type": "ToolBooleanParam",
+                        "param_datatype": "boolean",
+                        "display": {
+                            "group": "Visualization Parameters",
+                            "group_order": 3
+                        }
+                    },
+                    "default": true
+                }
+            ],
+            "results": [
+                {
+                    "group_key": "suite2p_individual_steps__suite2p_output_conversion",
+                    "group_name": "Suite2P Individual Steps  Suite2P Output Conversion",
+                    "group_type": "tool_output",
+                    "required": true,
+                    "multiple": false,
+                    "files": [
+                        {
+                            "result_key": "suite2p_output",
+                            "result_name": "NPY Output",
+                            "help": "suite2p output in NPY format",
+                            "required": false,
+                            "multiple": false,
+                            "file_formats": [
+                                "zip"
+                            ],
+                            "file_type": "suite2p_data"
+                        },
+                        {
+                            "result_key": "cellset_raw",
+                            "result_name": "ISXD Cellset",
+                            "help": "suite2p raw fluorescence output in Inscopix format",
+                            "required": false,
+                            "multiple": false,
+                            "file_formats": [
+                                "isxd"
+                            ],
+                            "file_type": "cell_set"
+                        },
+                        {
+                            "result_key": "eventset",
+                            "result_name": "ISXD Eventset",
+                            "help": "suite2p deconvolved spikes output in Inscopix format",
+                            "required": false,
+                            "multiple": false,
+                            "file_formats": [
+                                "isxd"
+                            ],
+                            "file_type": "neural_events"
+                        },
+                        {
+                            "result_key": "ophys",
+                            "result_name": "NWB Output",
+                            "help": "suite2p output in NWB format",
+                            "required": false,
+                            "multiple": false,
+                            "file_formats": [
+                                "nwb"
+                            ],
+                            "file_type": "nwb_data"
+                        },
+                        {
+                            "result_key": "Fall",
+                            "result_name": "MATLAB Output",
+                            "help": "suite2p output in MATLAB format",
+                            "required": false,
+                            "multiple": false,
+                            "file_formats": [
+                                "mat"
+                            ],
+                            "file_type": "suite2p_data"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "version": "1.0.0"
+}

@@ -1,0 +1,55 @@
+[
+    {
+        "key": "data_raw",
+        "analysis_table_result_column_name": "Raw Binary Movie",
+        "file_type": "suite2p_data",
+        "file_format": "bin",
+        "file_structure": "binary",
+        "file_category": "result",
+        "help": "Raw suite2p binary movie",
+        "required": true,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "raw_movie_files"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "ops_binary_conversion",
+        "analysis_table_result_column_name": "Binary Conversion Output Parameters File",
+        "file_type": "config",
+        "file_format": "npy",
+        "file_structure": "key_value_pairs",
+        "file_category": "result",
+        "help": "Parameters file outputted by the binary conversion tool",
+        "required": true,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "raw_movie_files"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "movie_preview",
+        "analysis_table_result_column_name": "Preview Binary Movie",
+        "file_type": "movie",
+        "file_format": "mp4",
+        "file_structure": "movie",
+        "file_category": "result",
+        "help": "Preview raw binary movie (from data_raw.bin)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "raw_movie_files"
+        ],
+        "preview_of": [
+            "data_raw"
+        ]
+    }
+]

@@ -1,0 +1,105 @@
+[
+    {
+        "key": "spks",
+        "analysis_table_result_column_name": "Deconvolved Spikes",
+        "file_type": "suite2p_data",
+        "file_format": [
+            "npy"
+        ],
+        "file_structure": "binary",
+        "file_category": "result",
+        "help": "suite2p deconvolved spikes file",
+        "required": true,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "ops_file"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "ops_spike_deconvolution",
+        "analysis_table_result_column_name": "Spike Deconvolution Output Parameters File",
+        "file_type": "config",
+        "file_format": "npy",
+        "file_structure": "key_value_pairs",
+        "file_category": "result",
+        "help": "Parameters file outputted by the spike deconvolution tool",
+        "required": true,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "ops_file"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "extracted_sample_sources_traces_spikes",
+        "analysis_table_result_column_name": "Preview Extraction Sample Sources Traces and Spikes",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "Sample fluorescence traces and deconvolved spikes (from ops.npy, F.npy, and spks.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "ops_file"
+        ],
+        "preview_of": [
+            "spks"
+        ]
+    },
+    {
+        "key": "raster_deconvolved_spikes",
+        "analysis_table_result_column_name": "Preview Extraction Raster Deconvolved Spikes",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "Raster plot of the deconvolved spikes (from ops.npy, spks.npy, and iscell.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "ops_file"
+        ],
+        "preview_of": [
+            "spks"
+        ]
+    },
+    {
+        "key": "extracted_sample_sources_traces_suite2p",
+        "analysis_table_result_column_name": "Preview Extraction Sample Sources Traces suite2p",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "Sample fluorescence traces, neuropil traces and deconvolved spikes (from ops.npy, F.npy, Fneu.npy, spks.npy, and iscell.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "ops_file"
+        ],
+        "preview_of": [
+            "spks"
+        ]
+    }
+]

@@ -1,0 +1,24 @@
+{
+    "suite2p_individual_steps__suite2p_spike_deconvolution": {
+        "spks": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "ops_spike_deconvolution": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "extracted_sample_sources_traces_spikes": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "extracted_sample_sources_traces_suite2p": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "raster_deconvolved_spikes": {
+            "pattern": [],
+            "custom_string": ""
+        }
+    }
+}

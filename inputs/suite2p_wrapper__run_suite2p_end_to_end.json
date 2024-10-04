@@ -1,0 +1,27 @@
+{
+    "raw_movie_files": [
+        "/ideas/data/sample_300x512x512_movie.isxd"
+    ],
+    "params_from": false,
+    "tau": 1.0,
+    "frames_include": -1,
+    "save_npy": true,
+    "save_isxd": true,
+    "save_NWB": true,
+    "save_mat": true,
+    "maxregshift": 0.1,
+    "th_badframes": 1.0,
+    "nonrigid": true,
+    "threshold_scaling": 1.0,
+    "neucoeff": 0.7,
+    "thresh_spks_perc": 99.7,
+    "viz_vmin_perc": 0,
+    "viz_vmax_perc": 99.0,
+    "viz_cmap": "plasma",
+    "viz_show_grid": true,
+    "viz_ticks_step": 128.0,
+    "viz_display_rate": 10.0,
+    "viz_n_samp_cells": 20,
+    "viz_random_seed": 0,
+    "viz_show_all_footprints": true
+}

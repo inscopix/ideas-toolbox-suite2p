@@ -1,0 +1,16 @@
+{
+    "suite2p_individual_steps__suite2p_binary_conversion": {
+        "data_raw": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "ops_binary_conversion": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "movie_preview": {
+            "pattern": [],
+            "custom_string": ""
+        }
+    }
+}

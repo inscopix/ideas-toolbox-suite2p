@@ -1,0 +1,20 @@
+{
+    "suite2p_individual_steps__suite2p_roi_classification": {
+        "iscell": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "ops_ROI_classification": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "detection_footprints_all": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "detection_footprints_accepted": {
+            "pattern": [],
+            "custom_string": ""
+        }
+    }
+}

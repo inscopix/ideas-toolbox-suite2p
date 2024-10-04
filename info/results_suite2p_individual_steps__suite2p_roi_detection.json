@@ -1,0 +1,78 @@
+[
+    {
+        "key": "stat_ROI_detection",
+        "analysis_table_result_column_name": "Detection Statistics",
+        "file_type": "suite2p_data",
+        "file_format": "npy",
+        "file_structure": "key_value_pairs",
+        "file_category": "result",
+        "help": "ROI detection suite2p statistics file",
+        "required": true,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "reg_binary_file",
+            "ops_file"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "ops_ROI_detection",
+        "analysis_table_result_column_name": "ROI Detection Output Parameters File",
+        "file_type": "config",
+        "file_format": "npy",
+        "file_structure": "key_value_pairs",
+        "file_category": "result",
+        "help": "Parameters file outputted by the ROI detection tool",
+        "required": true,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "reg_binary_file",
+            "ops_file"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "detection_footprints_all",
+        "analysis_table_result_column_name": "Preview ROI Detection",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "Various FOVs from the ROI detection process (from ops.npy and stat_ROI_detection.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "reg_binary_file",
+            "ops_file"
+        ],
+        "preview_of": [
+            "stat_ROI_detection"
+        ]
+    },
+    {
+        "key": "detection_footprints_detected",
+        "analysis_table_result_column_name": "Preview detected ROIs",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "FOV of the detected ROIs (from ops.npy and stat_ROI_detection.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "reg_binary_file",
+            "ops_file"
+        ],
+        "preview_of": [
+            "stat_ROI_detection"
+        ]
+    }
+]

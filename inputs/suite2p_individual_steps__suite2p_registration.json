@@ -1,0 +1,28 @@
+{
+    "raw_binary_file": [
+        "/ideas/data/data_raw.bin"
+    ],
+    "ops_file": [
+        "/ideas/data/ops_bin.npy"
+    ],
+    "align_by_chan": 1,
+    "nimg_init": 300,
+    "batch_size": 500,
+    "maxregshift": 0.1,
+    "smooth_sigma": 1.15,
+    "smooth_sigma_time": "",
+    "two_step_registration": false,
+    "subpixel": 10,
+    "th_badframes": 1.0,
+    "norm_frames": true,
+    "force_refImg": false,
+    "pad_fft": false,
+    "one_p_reg": false,
+    "spatial_hp_reg": 42,
+    "pre_smooth": "",
+    "spatial_taper": 40.0,
+    "nonrigid": true,
+    "block_size": "[128, 128]",
+    "snr_thresh": 1.2,
+    "maxregshiftNR": 5.0
+}

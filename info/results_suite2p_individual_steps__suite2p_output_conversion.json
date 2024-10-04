@@ -1,0 +1,346 @@
+[
+    {
+        "key": "suite2p_output",
+        "analysis_table_result_column_name": "NPY Output",
+        "file_type": "suite2p_data",
+        "file_format": "zip",
+        "file_structure": "archive",
+        "file_category": "result",
+        "help": "suite2p output in NPY format",
+        "required": false,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "spks_file",
+            "stat_file",
+            "ops_file",
+            "iscell_file"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "cellset_raw",
+        "analysis_table_result_column_name": "ISXD Cellset",
+        "file_type": "cell_set",
+        "file_format": "isxd",
+        "file_structure": "binary",
+        "file_category": "result",
+        "help": "suite2p raw fluorescence output in Inscopix format",
+        "required": false,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "spks_file",
+            "stat_file",
+            "ops_file",
+            "iscell_file"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "eventset",
+        "analysis_table_result_column_name": "ISXD Eventset",
+        "file_type": "neural_events",
+        "file_format": "isxd",
+        "file_structure": "binary",
+        "file_category": "result",
+        "help": "suite2p deconvolved spikes output in Inscopix format",
+        "required": false,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "spks_file",
+            "stat_file",
+            "ops_file",
+            "iscell_file"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "ophys",
+        "analysis_table_result_column_name": "NWB Output",
+        "file_type": "nwb_data",
+        "file_format": "nwb",
+        "file_structure": "binary",
+        "file_category": "result",
+        "help": "suite2p output in NWB format",
+        "required": true,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "spks_file",
+            "stat_file",
+            "ops_file",
+            "iscell_file"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "Fall",
+        "analysis_table_result_column_name": "MATLAB Output",
+        "file_type": "suite2p_data",
+        "file_format": "mat",
+        "file_structure": "binary",
+        "file_category": "result",
+        "help": "suite2p output in MATLAB format",
+        "required": false,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "spks_file",
+            "stat_file",
+            "ops_file",
+            "iscell_file"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "registration_fovs",
+        "analysis_table_result_column_name": "Preview Registration Fovs",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "Various FOVs from the registration process (from ops.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "spks_file",
+            "stat_file",
+            "ops_file",
+            "iscell_file"
+        ],
+        "preview_of": [
+            "suite2p_output",
+            "ophys",
+            "Fall"
+        ]
+    },
+    {
+        "key": "registration_offsets",
+        "analysis_table_result_column_name": "Preview Registration Offsets",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "x and y offsets for both rigid and non-rigid registration (from ops.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "spks_file",
+            "stat_file",
+            "ops_file",
+            "iscell_file"
+        ],
+        "preview_of": [
+            "suite2p_output",
+            "Fall"
+        ]
+    },
+    {
+        "key": "detection_footprints_all",
+        "analysis_table_result_column_name": "Preview ROI Detection",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "Various FOVs from the ROI detection process (from ops.npy, stat.npy, and iscell.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "spks_file",
+            "stat_file",
+            "ops_file",
+            "iscell_file"
+        ],
+        "preview_of": [
+            "suite2p_output",
+            "ophys",
+            "Fall"
+        ]
+    },
+    {
+        "key": "detection_footprints_accepted",
+        "analysis_table_result_column_name": "Preview accepted ROIs",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "FOV of the accepted ROIs from the ROI detection process (from ops.npy, stat.npy, and iscell.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "spks_file",
+            "stat_file",
+            "ops_file",
+            "iscell_file"
+        ],
+        "preview_of": [
+            "suite2p_output",
+            "ophys",
+            "Fall"
+        ]
+    },
+    {
+        "key": "extracted_sample_sources_traces_spikes",
+        "analysis_table_result_column_name": "Preview Extraction Sample Sources Traces and Spikes",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "Sample fluorescence traces and deconvolved spikes (from ops.npy, F.npy, spks.npy, and iscell.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "spks_file",
+            "stat_file",
+            "ops_file",
+            "iscell_file"
+        ],
+        "preview_of": [
+            "suite2p_output",
+            "eventset",
+            "ophys",
+            "Fall"
+        ]
+    },
+    {
+        "key": "extracted_sample_sources_traces_only",
+        "analysis_table_result_column_name": "Preview Extraction Sample Sources Traces Only",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "Sample fluorescence traces only (from ops.npy, F.npy, and iscell.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "spks_file",
+            "stat_file",
+            "ops_file",
+            "iscell_file"
+        ],
+        "preview_of": [
+            "cellset_raw"
+        ]
+    },
+    {
+        "key": "extracted_sample_sources_footprints",
+        "analysis_table_result_column_name": "Preview Extraction Sample Sources Footprints",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "Footprints of the sample sources (from ops.npy, stat.npy, and iscell.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "spks_file",
+            "stat_file",
+            "ops_file",
+            "iscell_file"
+        ],
+        "preview_of": [
+            "suite2p_output",
+            "cellset_raw",
+            "ophys",
+            "Fall"
+        ]
+    },
+    {
+        "key": "raster_deconvolved_spikes",
+        "analysis_table_result_column_name": "Preview Extraction Raster Deconvolved Spikes",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "Raster plot of the deconvolved spikes (from ops.npy, spks.npy, and iscell.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "spks_file",
+            "stat_file",
+            "ops_file",
+            "iscell_file"
+        ],
+        "preview_of": [
+            "suite2p_output",
+            "eventset",
+            "ophys",
+            "Fall"
+        ]
+    },
+    {
+        "key": "extracted_sample_sources_traces_suite2p",
+        "analysis_table_result_column_name": "Preview Extraction Sample Sources Traces suite2p",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "Sample fluorescence traces, neuropil traces and deconvolved spikes (from ops.npy, F.npy, Fneu.npy, spks.npy, and iscell.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "fluo_file",
+            "neuropil_fluo_file",
+            "spks_file",
+            "stat_file",
+            "ops_file",
+            "iscell_file"
+        ],
+        "preview_of": [
+            "suite2p_output",
+            "ophys",
+            "Fall"
+        ]
+    }
+]

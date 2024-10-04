@@ -1,0 +1,64 @@
+{
+    "suite2p_wrapper__run_suite2p_end_to_end": {
+        "cellset_raw": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "eventset": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "ophys": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "suite2p_output": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "Fall": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "registration_fovs": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "registration_offsets": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "registration_movies": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "detection_footprints_all": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "detection_footprints_accepted": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "extracted_sample_sources_traces_spikes": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "extracted_sample_sources_traces_only": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "extracted_sample_sources_footprints": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "extracted_sample_sources_traces_suite2p": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "raster_deconvolved_spikes": {
+            "pattern": [],
+            "custom_string": ""
+        }
+    }
+}

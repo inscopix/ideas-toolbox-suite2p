@@ -1,0 +1,20 @@
+{
+    "suite2p_individual_steps__suite2p_roi_detection": {
+        "stat_ROI_detection": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "ops_ROI_detection": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "detection_footprints_all": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "detection_footprints_detected": {
+            "pattern": [],
+            "custom_string": ""
+        }
+    }
+}

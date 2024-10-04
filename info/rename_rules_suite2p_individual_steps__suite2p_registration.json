@@ -1,0 +1,24 @@
+{
+    "suite2p_individual_steps__suite2p_registration": {
+        "data": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "ops_registration": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "registration_fovs": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "registration_offsets": {
+            "pattern": [],
+            "custom_string": ""
+        },
+        "registration_movies": {
+            "pattern": [],
+            "custom_string": ""
+        }
+    }
+}

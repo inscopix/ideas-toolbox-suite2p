@@ -1,0 +1,121 @@
+[
+    {
+        "key": "stat",
+        "analysis_table_result_column_name": "Extraction Statistics",
+        "file_type": "suite2p_data",
+        "file_format": "npy",
+        "file_structure": "key_value_pairs",
+        "file_category": "result",
+        "help": "ROI extraction suite2p statistics file",
+        "required": true,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "reg_binary_file",
+            "stat_file",
+            "ops_file"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "F",
+        "analysis_table_result_column_name": "Fluorescence Traces",
+        "file_type": "suite2p_data",
+        "file_format": "npy",
+        "file_structure": "time_series",
+        "file_category": "result",
+        "help": "suite2p fluorescence traces file",
+        "required": true,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "reg_binary_file",
+            "stat_file",
+            "ops_file"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "Fneu",
+        "analysis_table_result_column_name": "Neuropil Fluorescence Traces",
+        "file_type": "suite2p_data",
+        "file_format": "npy",
+        "file_structure": "time_series",
+        "file_category": "result",
+        "help": "suite2p neuropil fluorescence traces file",
+        "required": true,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "reg_binary_file",
+            "stat_file",
+            "ops_file"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "ops_ROI_extraction",
+        "analysis_table_result_column_name": "ROI Extraction Output Parameters File",
+        "file_type": "config",
+        "file_format": "npy",
+        "file_structure": "key_value_pairs",
+        "file_category": "result",
+        "help": "Parameters file outputted by the ROI extraction tool",
+        "required": true,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "reg_binary_file",
+            "stat_file",
+            "ops_file"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "extracted_sample_sources_traces_only",
+        "analysis_table_result_column_name": "Preview Extraction Sample Sources Traces Only",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "Sample fluorescence traces only (from ops.npy and F.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "reg_binary_file",
+            "stat_file",
+            "ops_file"
+        ],
+        "preview_of": [
+            "F"
+        ]
+    },
+    {
+        "key": "extracted_sample_sources_footprints",
+        "analysis_table_result_column_name": "Preview Extraction Sample Sources Footprints",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "Footprints of the sample sources (from ops.npy and stat.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "reg_binary_file",
+            "stat_file",
+            "ops_file"
+        ],
+        "preview_of": [
+            "stat",
+            "F"
+        ]
+    }
+]

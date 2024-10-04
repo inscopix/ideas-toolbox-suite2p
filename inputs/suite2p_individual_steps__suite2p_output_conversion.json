@@ -1,0 +1,25 @@
+{
+    "fluo_file": [
+        "/ideas/data/F.npy"
+    ],
+    "neuropil_fluo_file": [
+        "/ideas/data/Fneu.npy"
+    ],
+    "spks_file": [
+        "/ideas/data/spks.npy"
+    ],
+    "stat_file": [
+        "/ideas/data/stat.npy"
+    ],
+    "ops_file": [
+        "/ideas/data/ops_ext.npy"
+    ],
+    "iscell_file": [
+        "/ideas/data/iscell.npy"
+    ],
+    "save_npy": true,
+    "save_isxd": true,
+    "save_NWB": true,
+    "save_mat": true,
+    "thresh_spks_perc": 99.7
+}

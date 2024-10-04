@@ -1,0 +1,11 @@
+{
+    "reg_binary_file": [
+        "/ideas/data/data.bin"
+    ],
+    "stat_file": [
+        "/ideas/data/stat_det.npy"
+    ],
+    "ops_file": [
+        "/ideas/data/ops_det.npy"
+    ]
+}

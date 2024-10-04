@@ -1,0 +1,98 @@
+[
+    {
+        "key": "data",
+        "analysis_table_result_column_name": "Registered Binary Movie",
+        "file_type": "suite2p_data",
+        "file_format": "bin",
+        "file_structure": "binary",
+        "file_category": "result",
+        "help": "Registered suite2p binary movie",
+        "required": true,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "raw_binary_file",
+            "ops_file"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "ops_registration",
+        "analysis_table_result_column_name": "Registration Output Parameters File",
+        "file_type": "config",
+        "file_format": "npy",
+        "file_structure": "key_value_pairs",
+        "file_category": "result",
+        "help": "Parameters file outputted by the registration tool",
+        "required": true,
+        "multiple": false,
+        "is_preview": false,
+        "is_output": true,
+        "parent_keys": [
+            "raw_binary_file",
+            "ops_file"
+        ],
+        "preview_of": []
+    },
+    {
+        "key": "registration_fovs",
+        "analysis_table_result_column_name": "Preview Registration Fovs",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "Various FOVs from the registration process (from ops_registration.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "raw_binary_file",
+            "ops_file"
+        ],
+        "preview_of": [
+            "data"
+        ]
+    },
+    {
+        "key": "registration_offsets",
+        "analysis_table_result_column_name": "Preview Registration Offsets",
+        "file_type": "image",
+        "file_format": "png",
+        "file_structure": "image",
+        "file_category": "result",
+        "help": "x and y offsets for both rigid and non-rigid registration (from ops_registration.npy)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "raw_binary_file",
+            "ops_file"
+        ],
+        "preview_of": [
+            "data"
+        ]
+    },
+    {
+        "key": "registration_movies",
+        "analysis_table_result_column_name": "Preview Registration Movies",
+        "file_type": "movie",
+        "file_format": "mp4",
+        "file_structure": "movie",
+        "file_category": "result",
+        "help": "Side-by-side raw and registered movies (from ops_registration.npy, data_raw.bin, and data.bin)",
+        "required": false,
+        "multiple": false,
+        "is_preview": true,
+        "is_output": false,
+        "parent_keys": [
+            "raw_binary_file",
+            "ops_file"
+        ],
+        "preview_of": [
+            "data"
+        ]
+    }
+]
