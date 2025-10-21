@@ -1,0 +1,279 @@
+{
+    "key": "isx.suite_2p_end_to_end",
+    "name": "isx.suite_2p_end_to_end",
+    "schema_version": "3.0.0",
+    "container_image": {
+        "repository": "suite2p",
+        "label": "latest"
+    },
+    "command": {
+        "file_path": "toolbox/tools/suite2p_wrapper.py",
+        "entry_point": "run_suite2p_end_to_end",
+        "program_type": "PYTHON"
+    },
+    "params": [
+        {
+            "key": "raw_movie_files",
+            "name": "raw_movie_files",
+            "required": false,
+            "description": "raw_movie_files",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true
+            }
+        },
+        {
+            "key": "ops_file",
+            "name": "ops_file",
+            "required": false,
+            "description": "ops_file",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": false
+            }
+        },
+        {
+            "key": "classifier_path",
+            "name": "classifier_path",
+            "required": false,
+            "description": "classifier_path",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": false
+            }
+        },
+        {
+            "key": "params_from",
+            "name": "params_from",
+            "required": false,
+            "description": "params_from",
+            "type": {
+                "param_type": "ToolStringParam",
+                "default": "table"
+            }
+        },
+        {
+            "key": "tau",
+            "name": "tau",
+            "required": false,
+            "description": "tau",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 1.0
+            }
+        },
+        {
+            "key": "frames_include",
+            "name": "frames_include",
+            "required": false,
+            "description": "frames_include",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": -1
+            }
+        },
+        {
+            "key": "save_npy",
+            "name": "save_npy",
+            "required": false,
+            "description": "save_npy",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            }
+        },
+        {
+            "key": "save_isxd",
+            "name": "save_isxd",
+            "required": false,
+            "description": "save_isxd",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            }
+        },
+        {
+            "key": "save_NWB",
+            "name": "save_NWB",
+            "required": false,
+            "description": "save_NWB",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": false
+            }
+        },
+        {
+            "key": "save_mat",
+            "name": "save_mat",
+            "required": false,
+            "description": "save_mat",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": false
+            }
+        },
+        {
+            "key": "maxregshift",
+            "name": "maxregshift",
+            "required": false,
+            "description": "maxregshift",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 0.1
+            }
+        },
+        {
+            "key": "th_badframes",
+            "name": "th_badframes",
+            "required": false,
+            "description": "th_badframes",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 1.0
+            }
+        },
+        {
+            "key": "nonrigid",
+            "name": "nonrigid",
+            "required": false,
+            "description": "nonrigid",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            }
+        },
+        {
+            "key": "threshold_scaling",
+            "name": "threshold_scaling",
+            "required": false,
+            "description": "threshold_scaling",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 1.0
+            }
+        },
+        {
+            "key": "neucoeff",
+            "name": "neucoeff",
+            "required": false,
+            "description": "neucoeff",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 0.7
+            }
+        },
+        {
+            "key": "thresh_spks_perc",
+            "name": "thresh_spks_perc",
+            "required": false,
+            "description": "thresh_spks_perc",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 99.7
+            }
+        },
+        {
+            "key": "viz_vmin_perc",
+            "name": "viz_vmin_perc",
+            "required": false,
+            "description": "viz_vmin_perc",
+            "type": {
+                "param_type": "ToolFloatRangeParam"
+            }
+        },
+        {
+            "key": "viz_vmax_perc",
+            "name": "viz_vmax_perc",
+            "required": false,
+            "description": "viz_vmax_perc",
+            "type": {
+                "param_type": "ToolFloatRangeParam"
+            }
+        },
+        {
+            "key": "viz_cmap",
+            "name": "viz_cmap",
+            "required": false,
+            "description": "viz_cmap",
+            "type": {
+                "param_type": "ToolStringParam",
+                "default": "plasma"
+            }
+        },
+        {
+            "key": "viz_show_grid",
+            "name": "viz_show_grid",
+            "required": false,
+            "description": "viz_show_grid",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            }
+        },
+        {
+            "key": "viz_ticks_step",
+            "name": "viz_ticks_step",
+            "required": false,
+            "description": "viz_ticks_step",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 128
+            }
+        },
+        {
+            "key": "viz_display_rate",
+            "name": "viz_display_rate",
+            "required": false,
+            "description": "viz_display_rate",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 10
+            }
+        },
+        {
+            "key": "viz_n_samp_cells",
+            "name": "viz_n_samp_cells",
+            "required": false,
+            "description": "viz_n_samp_cells",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 20
+            }
+        },
+        {
+            "key": "viz_random_seed",
+            "name": "viz_random_seed",
+            "required": false,
+            "description": "viz_random_seed",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 0
+            }
+        },
+        {
+            "key": "viz_show_all_footprints",
+            "name": "viz_show_all_footprints",
+            "required": false,
+            "description": "viz_show_all_footprints",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            }
+        }
+    ],
+    "results": [
+        {
+            "key": "tool_output_group",
+            "name": "Tool Outputs",
+            "description": "Tool outputs",
+            "file_patterns": [
+                "**/*"
+            ]
+        }
+    ],
+    "resources": {
+        "cpu": 1,
+        "gpu": 0,
+        "memory": 1000
+    }
+}

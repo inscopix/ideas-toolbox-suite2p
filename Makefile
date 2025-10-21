@@ -1,12 +1,15 @@
 # toolbox variables
-REPO=inscopix
-PROJECT=ideas
-MODULE=toolbox
 IMAGE_NAME=suite2p
-VERSION=$(shell git describe --tags --always --dirty)
-IMAGE_TAG=${REPO}/${PROJECT}/${MODULE}/${IMAGE_NAME}:${VERSION}
-FULL_NAME=${REPO}/${PROJECT}/${MODULE}/${IMAGE_NAME}
-CONTAINER_NAME=${REPO}-${PROJECT}-${MODULE}-${IMAGE_NAME}-${VERSION}
+# VERSION=$(shell git describe --tags --always --dirty)
+# Label may be specified in codebuild pipeline
+# Locally, use default "latest"
+ifndef LABEL
+	LABEL=latest
+endif
+
+
+IMAGE_TAG=${IMAGE_NAME}:${LABEL}
+FULL_NAME=${IMAGE_NAME}
 PLATFORM=linux/amd64
 
 # jupyter-lab configurations
@@ -79,20 +82,3 @@ test: build clean
 		${IMAGE_TAG} \
 		pytest $(TEST_ARGS) 
 	
-
-
-run: build clean
-	@bash check_tool.sh $(TOOL)
-	@echo "Running the $(TOOL) tool in a Docker container. Outputs will be in /outputs/$(TOOL)"
-	-rm -rf $(PWD)/outputs/
-	docker run \
-			--platform ${PLATFORM} \
-			-v $(PWD)/data:/ideas/data \
-			-v $(PWD)/inputs:/ideas/inputs \
-			-v $(PWD)/commands:/ideas/commands \
-			-e TC_NO_RENAME=$(TC_NO_RENAME) \
-			--name $(CONTAINER_NAME) \
-	    $(IMAGE_TAG) \
-		$(call run_command,$(TOOL)) \
-	&& docker cp $(CONTAINER_NAME):/ideas/outputs $(PWD)/outputs \
-	&& docker rm $(CONTAINER_NAME)

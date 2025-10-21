@@ -9,6 +9,8 @@ from tarfile import TarFile
 from toolbox.utils import io, metadata, preview, utilities
 import xml.etree.ElementTree as ET
 from zipfile import ZipFile
+from typing import List, Optional
+import pathlib
 
 # from toolbox.tools.process_file import process_file
 
@@ -17,31 +19,31 @@ logger = logging.getLogger()
 
 
 def run_suite2p_end_to_end(
-    raw_movie_files,
-    ops_file=None,
-    classifier_path=None,
-    params_from="table",
-    tau=1.0,
-    frames_include=-1,
-    save_npy=True,
-    save_isxd=True,
-    save_NWB=False,
-    save_mat=False,
-    maxregshift=0.1,
-    th_badframes=1.0,
-    nonrigid=True,
-    threshold_scaling=1.0,
-    neucoeff=0.7,
-    thresh_spks_perc=99.7,
-    viz_vmin_perc=0,
-    viz_vmax_perc=99,
-    viz_cmap="plasma",
-    viz_show_grid=True,
-    viz_ticks_step=128,
-    viz_display_rate=10,
-    viz_n_samp_cells=20,
-    viz_random_seed=0,
-    viz_show_all_footprints=True,
+    raw_movie_files: List[pathlib.Path],
+    ops_file: Optional[pathlib.Path]=None,
+    classifier_path: Optional[pathlib.Path]=None,
+    params_from: str="table",
+    tau: float=1.0,
+    frames_include: int=-1,
+    save_npy: bool=True,
+    save_isxd: bool=True,
+    save_NWB: bool=False,
+    save_mat: bool=False,
+    maxregshift: float=0.1,
+    th_badframes: float=1.0,
+    nonrigid: bool=True,
+    threshold_scaling: float=1.0,
+    neucoeff: float=0.7,
+    thresh_spks_perc: float=99.7,
+    viz_vmin_perc: float=0,
+    viz_vmax_perc: float=99,
+    viz_cmap: str="plasma",
+    viz_show_grid: bool=True,
+    viz_ticks_step: float=128,
+    viz_display_rate: float=10,
+    viz_n_samp_cells: int=20,
+    viz_random_seed: int=0,
+    viz_show_all_footprints: bool=True,
 ):
     """
     Tool to run end-to-end suite2p pipeline on Inscopix isxd or Bruker Ultima 2P movies.
