@@ -1,6 +1,6 @@
 {
     "raw_movie_files": [
-        "data/sample_300x512x512_movie.isxd"
+        "data/sample_128x128x1000_movie.isxd"
     ],
     "tau": 1.0,
     "frames_include": -1,
