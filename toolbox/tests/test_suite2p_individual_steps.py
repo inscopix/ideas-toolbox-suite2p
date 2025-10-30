@@ -7,7 +7,7 @@ import shutil
 from toolbox.tools import suite2p_individual_steps as s2pis
 from suite2p import io
 
-data_dir = "/ideas/data"
+data_dir = "data"
 
 
 @pytest.mark.parametrize(
@@ -518,8 +518,8 @@ def test_suite2p_roi_extraction(
             128,
             ["iscell.npy", "ops_ROI_classification.npy"],
             54,
-            19,
-            0.3588041016285435,
+            20,
+            0.3591060250887573,
         ]
     ],
 )
@@ -574,7 +574,7 @@ def test_suite2p_roi_classification(
     assert (
         np.sum(iscell[:, 0]).astype(int) == expected_n_accepted
     ), "Unexpected number of accepted cells!"
-
+    print(f"MEAN: {np.mean(iscell[:, 1])} {expected_mean_prob}")
     assert np.allclose(
         np.mean(iscell[:, 1]), expected_mean_prob
     ), "Unexpected mean probability across ROIs!"

@@ -17,3 +17,9 @@ ignore-nested-classes = true
 ignore-setters = false
 ignore-regex = ["^get$", "^mock_.*", ".*BaseClass.*"]
 color = true
+
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]

@@ -1,34 +1,15 @@
-# toolbox variables
+.PHONY:  clean build test
+
 IMAGE_NAME=suite2p
-# VERSION=$(shell git describe --tags --always --dirty)
-# Label may be specified in codebuild pipeline
-# Locally, use default "latest"
 ifndef LABEL
-	LABEL=latest
+	LABEL=0.0.1
 endif
-
-
 IMAGE_TAG=${IMAGE_NAME}:${LABEL}
 FULL_NAME=${IMAGE_NAME}
 PLATFORM=linux/amd64
-
-# jupyter-lab configurations
-ifndef JUPYTERLAB_PORT
-	JUPYTERLAB_PORT=8889
+ifndef TARGET
+	TARGET=base
 endif
-
-define run_command
-    bash -c 'mkdir -p "/ideas/outputs/$1" \
-        && cd "/ideas/outputs/$1" \
-        && cp "/ideas/inputs/$1.json" "/ideas/outputs/$1/inputs.json" \
-        && "/ideas/commands/$1.sh" \
-	    && rm "/ideas/outputs/$1/inputs.json"'
-endef
-
-
-
-.PHONY: help build jupyter test clean
-
 
 .DEFAULT_GOAL := build
 
@@ -37,48 +18,16 @@ clean:
 	-docker rm $(CONTAINER_NAME)
 	-docker images | grep $(FULL_NAME) | awk '{print $$1 ":" $$2}' | grep -v $(VERSION) | xargs docker rmi
 
-
-
 build: 
-	PACKAGE_REQS=$$(if [ -f ../dev_requirements.txt ]; then cat ../dev_requirements.txt | grep -v "#" | tr '\n' ' '; else echo "ideas-public-python-utils@git+https://@github.com/inscopix/ideas-public-python-utils.git@0.0.17 isx==2.0.0"; fi) && \
-	DOCKER_BUILDKIT=1 docker build . -t $(IMAGE_TAG) \
+	docker build . -t $(IMAGE_TAG) \
 		--platform ${PLATFORM} \
-		--build-arg PACKAGE_REQS="$$PACKAGE_REQS" \
-		--target base; \
+		--target ${TARGET}
 
-
-jupyter: clean
-	@echo "Launching container with Jupyter lab..."
-	PACKAGE_REQS=$$(if [ -f ../dev_requirements.txt ]; then cat ../dev_requirements.txt | grep -v "#" | tr '\n' ' '; else echo "ideas-public-python-utils@git+https://@github.com/inscopix/ideas-public-python-utils.git@0.0.17  isx==2.0.0"; fi) && \
-	DOCKER_BUILDKIT=1 docker build . -t $(IMAGE_TAG)-jupyter \
-		--platform ${PLATFORM} \
-		--target jupyter \
-		--build-arg PACKAGE_REQS="$$PACKAGE_REQS" \
-	docker run -ti \
-			-v $(PWD)/commands:/ideas/commands \
-			-v $(PWD)/data:/ideas/data \
-			-v $(PWD)/inputs:/ideas/inputs \
-			-v $(PWD)/notebooks:/ideas/notebooks \
-			-v $(PWD)/outputs:/ideas/outputs \
-			-v $(PWD)/toolbox:/ideas/toolbox \
-			-p ${JUPYTERLAB_PORT}:${JUPYTERLAB_PORT} \
-			-e JUPYTERLAB_PORT=$(JUPYTERLAB_PORT) \
-			--name $(CONTAINER_NAME) \
-	    $(IMAGE_TAG)-jupyter \
-	    jupyter-lab --ip 0.0.0.0 --port $(JUPYTERLAB_PORT) --no-browser --allow-root --NotebookApp.token="" \
-	&& docker rm $(CONTAINER_NAME)
-
-test: build clean 
-	@echo "Running toolbox tests..."
-	-mkdir -p $(PWD)/outputs
+test: TARGET=test
+test: build 
+	@echo "Running tests..."
 	docker run \
 		--platform ${PLATFORM} \
-		-v $(PWD)/data:/ideas/data \
-		-v $(PWD)/inputs:/ideas/inputs \
-		-v $(PWD)/commands:/ideas/commands \
-		-w /ideas \
-		-e CODEBUILD_BUILD_ID=${CODEBUILD_BUILD_ID} \
-		--name $(CONTAINER_NAME) \
+		--rm \
 		${IMAGE_TAG} \
-		pytest $(TEST_ARGS) 
-	
+		pytest ${TEST_ARGS}

@@ -8,4 +8,4 @@ suite2p@git+https://@github.com/inscopix/isxSuite2p.git@v0.0.3
 imageio==2.19.0
 imageio-ffmpeg==0.4.7
 pytest==7.4.2
-isx==2.1.0
+isx==2.0.0
