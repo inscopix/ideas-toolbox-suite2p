@@ -4,7 +4,7 @@
     "schema_version": "3.0.0",
     "container_image": {
         "repository": "suite2p",
-        "label": "platform/0.0.1"
+        "label": "0.0.1"
     },
     "command": {
         "file_path": "toolbox/tools/suite2p_wrapper.py",
