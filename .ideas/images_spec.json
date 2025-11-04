@@ -8,21 +8,7 @@
     "readme_path": "container.md",
     "description": "Suite 2p Inscopix container image",
     "tags": [
-	"numpy",
-	"pandas",
-	"scipy",
-	"scikit-learn",
-	"scikit-image",
-	"pingouin",
-	"opencv-python", 
-	"statsmodels",
-	"matplotlib",
-	"plotly",
-	"seaborn",
-	"bokeh",
-	"isx",
-	"pynwb",
-	"pynapple"
+	"suite2p"
     ]
   }
 ]
