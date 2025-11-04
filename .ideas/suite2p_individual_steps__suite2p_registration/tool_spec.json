@@ -1,6 +1,6 @@
 {
     "key": "suite2p_individual_steps__suite2p_registration",
-    "name": "suite2p_individual_steps__suite2p_registration",
+    "name": "suite2p registration",
     "schema_version": "3.0.0",
     "container_image": {
         "repository": "platform/suite2p",
@@ -14,322 +14,382 @@
     "params": [
         {
             "key": "raw_binary_file",
-            "name": "raw_binary_file",
-            "required": false,
-            "description": "raw_binary_file",
+            "name": "Raw Binary Movie",
+            "required": true,
+            "description": "Input raw suite2p binary movie [<data_raw>.bin]",
             "type": {
                 "param_type": "ToolPathParam",
-                "multiple": true
-            }
+                "multiple": true,
+                "file_formats": [
+                    "bin"
+                ]
+            },
+            "group": "Input Data"
         },
         {
             "key": "ops_file",
-            "name": "ops_file",
-            "required": false,
-            "description": "ops_file",
+            "name": "Parameters file",
+            "required": true,
+            "description": "Input suite2p parameters file, as outputted by the binary conversion tool [<ops_binary_conversion>.npy]",
             "type": {
                 "param_type": "ToolPathParam",
-                "multiple": true
-            }
+                "multiple": true,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
         },
         {
             "key": "frames_include",
-            "name": "frames_include",
+            "name": "Frames to Include",
             "required": false,
-            "description": "frames_include",
+            "description": "[from suite2p docs for <frames_include>] \"If greater than zero, only [the first] <frames_include> frames are processed. Useful for testing parameters on a subset of data.\" Note that suite2p will not run on less than 50 frames, and might have unpredictable behavior on less than 200 frames [int, -1 or >=50]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": -1
-            }
+                "default": -1,
+                "min": -1
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "align_by_chan",
-            "name": "align_by_chan",
+            "name": "Align By Channel",
             "required": false,
-            "description": "align_by_chan",
+            "description": "[from suite2p docs for <align_by_chan>] \"Which channel to use for alignment (1-based, so 1 means 1st channel and 2 means 2nd channel). If you have a non-functional channel with something like td-Tomato expression, you may want to use this channel for alignment rather than the functional channel.\" [int, [1 <nchannels>]]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": 1
-            }
+                "default": 1,
+                "min": 1
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "nimg_init",
-            "name": "nimg_init",
+            "name": "Number of Frames for Initialization",
             "required": false,
-            "description": "nimg_init",
+            "description": "[from suite2p docs for <nimg_init>] \"How many frames to use to compute reference image for registration.\" [int, >=1]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": 300
-            }
+                "default": 300,
+                "min": 1
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "batch_size",
-            "name": "batch_size",
+            "name": "Batch Size",
             "required": false,
-            "description": "batch_size",
+            "description": "[from suite2p docs for <batch_size>] \"How many frames to register simultaneously in each batch. This depends on memory constraints - it will be faster to run if the batch is larger, but it will require more RAM.\" [int, >=1]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": 500
-            }
+                "default": 500,
+                "min": 1
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "maxregshift",
-            "name": "maxregshift",
+            "name": "Maximum Registration Shift",
             "required": false,
-            "description": "maxregshift",
+            "description": "[from suite2p docs for <maxregshift>] \"The maximum shift as a fraction of the frame size. If the frame is Ly pixels x Lx pixels, then the maximum pixel shift in pixels will be max(Ly,Lx) * ops['maxregshift'].\" [float, [0.01 1]]",
             "type": {
                 "param_type": "ToolFloatRangeParam",
-                "default": 0.1
-            }
+                "default": 0.1,
+                "min": 0.01,
+                "max": 1
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "smooth_sigma",
-            "name": "smooth_sigma",
+            "name": "Smooth Sigma",
             "required": false,
-            "description": "smooth_sigma",
+            "description": "[from suite2p docs for <smooth_sigma>] \"Standard deviation in pixels of the gaussian used to smooth the phase correlation between the reference image and the frame which is being registered. A value of >4 is recommended for one-photon recordings (with a 512x512 pixel FOV).\" [float, >=0.01]",
             "type": {
                 "param_type": "ToolFloatRangeParam",
-                "default": 1.15
-            }
+                "default": 1.15,
+                "min": 0.01
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "smooth_sigma_time",
-            "name": "smooth_sigma_time",
+            "name": "Smooth Sigma Time",
             "required": false,
-            "description": "smooth_sigma_time",
+            "description": "[from suite2p docs for <smooth_sigma_time>] \"Standard deviation in time frames of the gaussian used to smooth the data before phase correlation is computed. Might need this to be set to 1 or 2 for low SNR data.\" [float, >=0]",
             "type": {
-                "param_type": "ToolIntRangeParam",
-                "default": 0
-            }
+                "param_type": "ToolFloatRangeParam",
+                "default": 0,
+                "min": 0
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "two_step_registration",
-            "name": "two_step_registration",
+            "name": "Two-Step Registration",
             "required": false,
-            "description": "two_step_registration",
+            "description": "[from suite2p docs for <two_step_registration>] \"Whether or not to run registration twice (for low SNR data). `keep_movie_raw` must be True for this to work.\" [bool]",
             "type": {
                 "param_type": "ToolBooleanParam",
                 "default": false
-            }
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "subpixel",
-            "name": "subpixel",
+            "name": "Subpixel",
             "required": false,
-            "description": "subpixel",
+            "description": "[from suite2p docs for <subpixel>] \"Precision of Subpixel Registration (1/subpixel steps).\" [float, >=1]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": 10
-            }
+                "default": 10,
+                "min": 1
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "th_badframes",
-            "name": "th_badframes",
+            "name": "Threshold for Bad Frames",
             "required": false,
-            "description": "th_badframes",
+            "description": "[from suite2p docs for <th_badframes>] \"Involved with setting threshold for excluding frames for cropping. Set this smaller to exclude more frames.\" [float, >=0]",
             "type": {
                 "param_type": "ToolFloatRangeParam",
-                "default": 1.0
-            }
+                "default": 1.0,
+                "min": 0
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "norm_frames",
-            "name": "norm_frames",
+            "name": "Normalize Frames",
             "required": false,
-            "description": "norm_frames",
+            "description": "[from suite2p docs for <norm_frames>] \"Normalize frames when detecting shifts.\" [bool]",
             "type": {
                 "param_type": "ToolBooleanParam",
                 "default": true
-            }
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "force_refImg",
-            "name": "force_refImg",
+            "name": "Force refImg",
             "required": false,
-            "description": "force_refImg",
+            "description": "[from suite2p docs for <force_refImg>] \"Specifies whether to use refImg stored in ops. Make sure that ops['refImg'] has a valid file pathname.\" [bool]",
             "type": {
                 "param_type": "ToolBooleanParam",
                 "default": false
-            }
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "pad_fft",
-            "name": "pad_fft",
+            "name": "Pad FFT",
             "required": false,
-            "description": "pad_fft",
+            "description": "[from suite2p docs for <pad_fft>] \"Specifies whether to pad image or not during FFT portion of registration.\" [bool]",
             "type": {
                 "param_type": "ToolBooleanParam",
                 "default": false
-            }
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "one_p_reg",
-            "name": "one_p_reg",
+            "name": "1P Registration",
             "required": false,
-            "description": "one_p_reg",
+            "description": "[from suite2p docs for <1Preg>] \"Whether to perform high-pass spatial filtering and tapering (parameters set below), which help with 1P registration.\" [bool]",
             "type": {
                 "param_type": "ToolBooleanParam",
                 "default": false
-            }
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "spatial_hp_reg",
-            "name": "spatial_hp_reg",
+            "name": "Spatial HP Registration",
             "required": false,
-            "description": "spatial_hp_reg",
+            "description": "[from suite2p docs for <spatial_hp_reg>] \"Window in pixels for spatial high-pass filtering before registration.\" [int, >=1]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": 42
-            }
+                "default": 42,
+                "min": 1
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "pre_smooth",
-            "name": "pre_smooth",
+            "name": "Pre Smooth",
             "required": false,
-            "description": "pre_smooth",
+            "description": "[from suite2p docs for <pre_smooth>] \"If > 0, defines stddev of Gaussian smoothing, which is applied before spatial high-pass filtering.\" [float]",
             "type": {
-                "param_type": "ToolIntRangeParam",
+                "param_type": "ToolFloatRangeParam",
                 "default": 0
-            }
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "spatial_taper",
-            "name": "spatial_taper",
+            "name": "Spatial Taper",
             "required": false,
-            "description": "spatial_taper",
+            "description": "[from suite2p docs for <spatial_taper>] \"How many pixels to ignore on edges - they are set to zero (important for vignetted windows, for FFT padding do not set BELOW 3*ops['smooth_sigma']).\" [float, >=0]",
             "type": {
-                "param_type": "ToolIntRangeParam",
-                "default": 40
-            }
+                "param_type": "ToolFloatRangeParam",
+                "default": 40.0,
+                "min": 0
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "nonrigid",
-            "name": "nonrigid",
+            "name": "Nonrigid Registration",
             "required": false,
-            "description": "nonrigid",
+            "description": "[from suite2p docs for <nonrigid>] \"Whether or not to perform non-rigid registration, which splits the field of view into blocks and computes registration offsets in each block separately.\" [bool]",
             "type": {
                 "param_type": "ToolBooleanParam",
                 "default": true
-            }
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "block_size",
-            "name": "block_size",
+            "name": "Block Size",
             "required": false,
-            "description": "block_size",
+            "description": "[from suite2p docs for <block_size>] \"Size of blocks for non-rigid registration, in pixels. HIGHLY recommend keeping this a power of 2 and/or 3 (e.g. 128, 256, 384, etc) for efficient FFT.\" [list[int, int] with int > 1]",
             "type": {
-                "param_type": "ToolStringParam"
-            }
+                "param_type": "ToolStringParam",
+                "default": "[128, 128]"
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "snr_thresh",
-            "name": "snr_thresh",
+            "name": "SNR Threshold",
             "required": false,
-            "description": "snr_thresh",
+            "description": "[from suite2p docs for <snr_thresh>] \"How big the phase correlation peak has to be relative to the noise in the phase correlation map for the block shift to be accepted. In low SNR recordings like one-photon, I'd recommend a larger value like 1.5, so that block shifts are only accepted if there is significant SNR in the phase correlation.\" [float, >0]",
             "type": {
                 "param_type": "ToolFloatRangeParam",
-                "default": 1.2
-            }
+                "default": 1.2,
+                "min": 0.001
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "maxregshiftNR",
-            "name": "maxregshiftNR",
+            "name": "Maximum Registration Shift for Nonrigid",
             "required": false,
-            "description": "maxregshiftNR",
+            "description": "[from suite2p docs for <maxregshiftNR>] \"Maximum shift in pixels of a block relative to the rigid shift.\" [float, >=0]",
             "type": {
-                "param_type": "ToolIntRangeParam",
-                "default": 5
-            }
+                "param_type": "ToolFloatRangeParam",
+                "default": 5.0,
+                "min": 0
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "do_bidiphase",
-            "name": "do_bidiphase",
+            "name": "Compute Bidirectional Phase Offset",
             "required": false,
-            "description": "do_bidiphase",
+            "description": "[from suite2p docs for <do_bidiphase>] \"Whether or not to compute bidirectional phase offset from misaligned line scanning experiment (applies to 2P recordings only). suite2p will estimate the bidirectional phase offset from ops['nimg_init'] frames if this is set to 1 (and ops['bidiphase']=0), and then apply this computed offset to all frames.\" [bool]",
             "type": {
                 "param_type": "ToolBooleanParam",
                 "default": false
-            }
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "bidiphase",
-            "name": "bidiphase",
+            "name": "Bidirectional Phase Offset",
             "required": false,
-            "description": "bidiphase",
+            "description": "[from suite2p docs for <bidiphase>] \"Bidirectional phase offset from line scanning (set by user). If set to any value besides 0, then this offset is used and applied to all frames in the recording.\" [int, >=0]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": 0
-            }
+                "default": 0,
+                "min": 0
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "bidi_corrected",
-            "name": "bidi_corrected",
+            "name": "Bidirectional Correction",
             "required": false,
-            "description": "bidi_corrected",
+            "description": "[from suite2p docs for <bidi_corrected>] \"Specifies whether to do bidi correction.\" [bool]",
             "type": {
                 "param_type": "ToolBooleanParam",
                 "default": false
-            }
+            },
+            "group": "Registration Parameters"
         },
         {
             "key": "viz_vmin_perc",
-            "name": "viz_vmin_perc",
+            "name": "FOV vmin Percentile",
             "required": false,
-            "description": "viz_vmin_perc",
+            "description": "Minimum value for the colormap range, as percentile of the FOV fluorescence [float, [0 <FOV vmax Percentile>)]",
             "type": {
-                "param_type": "ToolIntRangeParam",
-                "default": 0
-            }
+                "param_type": "ToolFloatRangeParam",
+                "default": 0,
+                "min": 0,
+                "max": 100
+            },
+            "group": "Visualization Parameters"
         },
         {
             "key": "viz_vmax_perc",
-            "name": "viz_vmax_perc",
+            "name": "FOV vmax Percentile",
             "required": false,
-            "description": "viz_vmax_perc",
+            "description": "Maximum value for the colormap range, as percentile of the FOV fluorescence [float, (<FOV vmin Percentile> 100]]",
             "type": {
-                "param_type": "ToolIntRangeParam",
-                "default": 99
-            }
+                "param_type": "ToolFloatRangeParam",
+                "default": 99,
+                "min": 0,
+                "max": 100
+            },
+            "group": "Visualization Parameters"
         },
         {
             "key": "viz_cmap",
-            "name": "viz_cmap",
+            "name": "FOV Colormap",
             "required": false,
-            "description": "viz_cmap",
+            "description": "Colormap for plotting the FOV [str]",
             "type": {
                 "param_type": "ToolStringParam",
                 "default": "plasma"
-            }
+            },
+            "group": "Visualization Parameters"
         },
         {
             "key": "viz_show_grid",
-            "name": "viz_show_grid",
+            "name": "Show Grid on FOV",
             "required": false,
-            "description": "viz_show_grid",
+            "description": "Whether or not to show the grid on FOVs [bool]",
             "type": {
                 "param_type": "ToolBooleanParam",
                 "default": true
-            }
+            },
+            "group": "Visualization Parameters"
         },
         {
             "key": "viz_ticks_step",
-            "name": "viz_ticks_step",
+            "name": "FOV Ticks Step",
             "required": false,
-            "description": "viz_ticks_step",
+            "description": "Step for the x- and y-ticks [int, >0]",
             "type": {
-                "param_type": "ToolIntRangeParam",
-                "default": 128
-            }
+                "param_type": "ToolFloatRangeParam",
+                "default": 128,
+                "min": 1
+            },
+            "group": "Visualization Parameters"
         },
         {
             "key": "viz_display_rate",
-            "name": "viz_display_rate",
+            "name": "Movie Display Rate",
             "required": false,
-            "description": "viz_display_rate",
+            "description": "Display rate for the preview movies, in Hz [float, >=0.1]",
             "type": {
-                "param_type": "ToolIntRangeParam",
-                "default": 10
-            }
+                "param_type": "ToolFloatRangeParam",
+                "default": 10,
+                "min": 0.1
+            },
+            "group": "Visualization Parameters"
         }
     ],
     "results": [
@@ -346,5 +406,8 @@
         "cpu": 1,
         "gpu": 0,
         "memory": 1000
-    }
+    },
+    "description": "Tool to run suite2p registration on a raw suite2p binary movie",
+    "visibility": "public",
+    "version": "1.0.0"
 }

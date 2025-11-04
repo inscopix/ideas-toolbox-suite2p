@@ -1,6 +1,6 @@
 {
     "key": "suite2p_individual_steps__suite2p_roi_detection",
-    "name": "suite2p_individual_steps__suite2p_roi_detection",
+    "name": "suite2p ROI detection",
     "schema_version": "3.0.0",
     "container_image": {
         "repository": "platform/suite2p",
@@ -14,282 +14,339 @@
     "params": [
         {
             "key": "reg_binary_file",
-            "name": "reg_binary_file",
-            "required": false,
-            "description": "reg_binary_file",
+            "name": "Registered Binary Movie",
+            "required": true,
+            "description": "Input registered suite2p binary movie [<data>.bin]",
             "type": {
                 "param_type": "ToolPathParam",
-                "multiple": true
-            }
+                "multiple": true,
+                "file_formats": [
+                    "bin"
+                ]
+            },
+            "group": "Input Data"
         },
         {
             "key": "ops_file",
-            "name": "ops_file",
-            "required": false,
-            "description": "ops_file",
+            "name": "Parameters File",
+            "required": true,
+            "description": "Input suite2p parameters file, as outputted by the registration tool [<ops_registration>.npy]",
             "type": {
                 "param_type": "ToolPathParam",
-                "multiple": true
-            }
+                "multiple": true,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
         },
         {
             "key": "classifier_path",
-            "name": "classifier_path",
+            "name": "Optional Classifier File",
             "required": false,
-            "description": "classifier_path",
+            "description": "[from suite2p docs for <classifier_path>] \"Path to classifier file you want to use for cell classification.\" [.npy]",
             "type": {
-                "param_type": "ToolStringParam"
-            }
+                "param_type": "ToolPathParam",
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
         },
         {
             "key": "tau",
-            "name": "tau",
+            "name": "Tau",
             "required": false,
-            "description": "tau",
+            "description": "[from suite2p docs for <tau>] \"The timescale of the sensor (in seconds), used for deconvolution kernel. The kernel is fixed to have this decay and is not fit to the data. We recommend: 0.7 for GCaMP6f; 1.0 for GCaMP6m; 1.25-1.5 for GCaMP6s.\" [float, >=0.001]",
             "type": {
                 "param_type": "ToolFloatRangeParam",
-                "default": 1.0
-            }
+                "default": 1.0,
+                "min": 0.001
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "sparse_mode",
-            "name": "sparse_mode",
+            "name": "Sparse Mode",
             "required": false,
-            "description": "sparse_mode",
+            "description": "[from suite2p docs for <sparse_mode>] \"Whether or not to use sparse_mode cell detection.\" [bool]",
             "type": {
                 "param_type": "ToolBooleanParam",
                 "default": true
-            }
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "spatial_scale",
-            "name": "spatial_scale",
+            "name": "Spatial Scale",
             "required": false,
-            "description": "spatial_scale",
+            "description": "[from suite2p docs for <spatial_scale>] \"What the optimal scale of the recording is in pixels. if set to 0, then the algorithm determines it automatically (recommend this on the first try). If it seems off, set it yourself to the following values: 1 (=6 pixels), 2 (=12 pixels), 3 (=24 pixels), or 4 (=48 pixels).\" [int, [0 4]]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": 0
-            }
+                "default": 0,
+                "min": 0,
+                "max": 4
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "connected",
-            "name": "connected",
+            "name": "Connected",
             "required": false,
-            "description": "connected",
+            "description": "[from suite2p docs for <connected>] \"Whether or not to require ROIs to be fully connected (set to 0 for dendrites/boutons).\" [bool]",
             "type": {
                 "param_type": "ToolBooleanParam",
                 "default": true
-            }
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "threshold_scaling",
-            "name": "threshold_scaling",
+            "name": "Threshold Scaling",
             "required": false,
-            "description": "threshold_scaling",
+            "description": "[from suite2p docs for <threshold_scaling>] \"This controls the threshold at which to detect ROIs (how much the ROIs have to stand out from the noise to be detected). if you set this higher, then fewer ROIs will be detected, and if you set it lower, more ROIs will be detected.\" [float]",
             "type": {
-                "param_type": "ToolIntRangeParam",
-                "default": 1
-            }
+                "param_type": "ToolFloatRangeParam",
+                "default": 1.0
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "spatial_hp_detect",
-            "name": "spatial_hp_detect",
+            "name": "Spatial HP Detect",
             "required": false,
-            "description": "spatial_hp_detect",
+            "description": "[from suite2p docs for <spatial_hp_detect>] \"Window for spatial high-pass filtering for neuropil subtracation before ROI detection takes place.\" [int, >0]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": 25
-            }
+                "default": 25,
+                "min": 1
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "max_overlap",
-            "name": "max_overlap",
+            "name": "Max Overlap",
             "required": false,
-            "description": "max_overlap",
+            "description": "[from suite2p docs for <max_overlap>] \"We allow overlapping ROIs during cell detection. After detection, ROIs with more than ops['max_overlap'] fraction of their pixels overlapping with other ROIs will be discarded. Therefore, to throw out NO ROIs, set this to 1.0.\" [float, [0 1]]",
             "type": {
                 "param_type": "ToolFloatRangeParam",
-                "default": 0.75
-            }
+                "default": 0.75,
+                "min": 0.0,
+                "max": 1.0
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "high_pass",
-            "name": "high_pass",
+            "name": "High Pass",
             "required": false,
-            "description": "high_pass",
+            "description": "[from suite2p docs for <high_pass>] \"Running mean subtraction across time with window of size 'high_pass'. Values of less than 10 are recommended for 1P data where there are often large full-field changes in brightness.\" [int, >0]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": 100
-            }
+                "default": 100,
+                "min": 1
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "smooth_masks",
-            "name": "smooth_masks",
+            "name": "Smooth Masks",
             "required": false,
-            "description": "smooth_masks",
+            "description": "[from suite2p docs for <smooth_masks>] \"Whether to smooth masks in final pass of cell detection. This is useful especially if you are in a high noise regime.\" [bool]",
             "type": {
                 "param_type": "ToolBooleanParam",
                 "default": true
-            }
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "max_iterations",
-            "name": "max_iterations",
+            "name": "Max Iterations",
             "required": false,
-            "description": "max_iterations",
+            "description": "[from suite2p docs for <max_iterations>] \"How many iterations over which to extract cells - at most ops['max_iterations'], but usually stops before due to ops['threshold_scaling'] criterion.\" [int, >0]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": 20
-            }
+                "default": 20,
+                "min": 1
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "nbinned",
-            "name": "nbinned",
+            "name": "Number of Binned Frames",
             "required": false,
-            "description": "nbinned",
+            "description": "[from suite2p docs for <nbinned>] \"Maximum number of binned frames to use for ROI detection.\" [int, >0]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": 5000
-            }
+                "default": 5000,
+                "min": 1
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "denoise",
-            "name": "denoise",
+            "name": "Denoise",
             "required": false,
-            "description": "denoise",
+            "description": "[from suite2p docs for <denoise>] \"Whether or not binned movie should be denoised before cell detection in sparse_mode. If True, make sure to set ops['sparse_mode'] is also set to True.\" [bool]",
             "type": {
                 "param_type": "ToolBooleanParam",
                 "default": false
-            }
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "anatomical_only",
-            "name": "anatomical_only",
+            "name": "Anatomical Only",
             "required": false,
-            "description": "anatomical_only",
+            "description": "[from suite2p docs for <anatomical_only>] \"If greater than 0, specifies what to use Cellpose on.  1: Will find masks on max projection image divided by mean image.  2: Will find masks on mean image  3: Will find masks on enhanced mean image  4: Will find masks on maximum projection image.\" [int, [0 4]]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": 0
-            }
+                "default": 0,
+                "min": 0,
+                "max": 4
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "diameter",
-            "name": "diameter",
+            "name": "Diameter",
             "required": false,
-            "description": "diameter",
+            "description": "[from suite2p docs for <diameter>] \"Diameter that will be used for cellpose. If set to zero, diameter is estimated.\" [int, >=0]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": 0
-            }
+                "default": 0,
+                "min": 0
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "cellprob_threshold",
-            "name": "cellprob_threshold",
+            "name": "Cellprob Threshold",
             "required": false,
-            "description": "cellprob_threshold",
+            "description": "[from suite2p docs for <cellprob_threshold>] \"Specifies threshold for cell detection that will be used by cellpose.\" [float]",
             "type": {
                 "param_type": "ToolFloatRangeParam",
-                "default": 0.0
-            }
+                "default": 0
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "flow_threshold",
-            "name": "flow_threshold",
+            "name": "Flow Threshold",
             "required": false,
-            "description": "flow_threshold",
+            "description": "[from suite2p docs for <flow_threshold>] \"Specifies flow threshold that will be used for cellpose.\" [float]",
             "type": {
                 "param_type": "ToolFloatRangeParam",
                 "default": 1.5
-            }
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "spatial_hp_cp",
-            "name": "spatial_hp_cp",
+            "name": "Spatial HP CP",
             "required": false,
-            "description": "spatial_hp_cp",
+            "description": "[from suite2p docs for <spatial_hp_cp>] \"Window for spatial high-pass filtering of image to be used for cellpose.\" [int, >=0]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": 0
-            }
+                "default": 0,
+                "min": 0
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "pretrained_model",
-            "name": "pretrained_model",
+            "name": "Pretrained Model",
             "required": false,
-            "description": "pretrained_model",
+            "description": "[from suite2p docs for <pretrained_model>] \"Path to pretrained model or string for model type (can be user's model ).\" See cellpose docs for a list of available models, e.g., 'cyto', 'cyto2', 'cyto3', 'nuclei'. [str]",
             "type": {
                 "param_type": "ToolStringParam",
                 "default": "cyto"
-            }
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "preclassify",
-            "name": "preclassify",
+            "name": "Preclassify",
             "required": false,
-            "description": "preclassify",
+            "description": "[from suite2p docs for <preclassify>] \"Apply classifier before signal extraction with probability threshold of 'preclassify'. If this is set to 0.0, then all detected ROIs are kept and signals are computed.\" [float, >=0]",
             "type": {
                 "param_type": "ToolFloatRangeParam",
-                "default": 0.0
-            }
+                "default": 0.0,
+                "min": 0.0
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "chan2_thres",
-            "name": "chan2_thres",
+            "name": "Channel 2 Threshold",
             "required": false,
-            "description": "chan2_thres",
+            "description": "[from suite2p docs for <chan2_thres>] \"Threshold for calling an ROI \"detected\" on a second channel.\" [float, >=0]",
             "type": {
                 "param_type": "ToolFloatRangeParam",
-                "default": 0.65
-            }
+                "default": 0.65,
+                "min": 0.0
+            },
+            "group": "ROI Detection Parameters"
         },
         {
             "key": "viz_vmin_perc",
-            "name": "viz_vmin_perc",
+            "name": "FOV vmin Percentile",
             "required": false,
-            "description": "viz_vmin_perc",
+            "description": "Minimum value for the colormap range, as percentile of the FOV fluorescence [float, [0 <FOV vmax Percentile>)]",
             "type": {
-                "param_type": "ToolIntRangeParam",
-                "default": 0
-            }
+                "param_type": "ToolFloatRangeParam",
+                "default": 0,
+                "min": 0,
+                "max": 100
+            },
+            "group": "Visualization Parameters"
         },
         {
             "key": "viz_vmax_perc",
-            "name": "viz_vmax_perc",
+            "name": "FOV vmax Percentile",
             "required": false,
-            "description": "viz_vmax_perc",
+            "description": "Maximum value for the colormap range, as percentile of the FOV fluorescence [float, (<FOV vmin Percentile> 100]]",
             "type": {
-                "param_type": "ToolIntRangeParam",
-                "default": 99
-            }
+                "param_type": "ToolFloatRangeParam",
+                "default": 99,
+                "min": 0,
+                "max": 100
+            },
+            "group": "Visualization Parameters"
         },
         {
             "key": "viz_cmap",
-            "name": "viz_cmap",
+            "name": "FOV Colormap",
             "required": false,
-            "description": "viz_cmap",
+            "description": "Colormap for plotting the FOV [str]",
             "type": {
                 "param_type": "ToolStringParam",
                 "default": "plasma"
-            }
+            },
+            "group": "Visualization Parameters"
         },
         {
             "key": "viz_show_grid",
-            "name": "viz_show_grid",
+            "name": "Show Grid on FOV",
             "required": false,
-            "description": "viz_show_grid",
+            "description": "Whether or not to show the grid on FOVs [bool]",
             "type": {
                 "param_type": "ToolBooleanParam",
                 "default": true
-            }
+            },
+            "group": "Visualization Parameters"
         },
         {
             "key": "viz_ticks_step",
-            "name": "viz_ticks_step",
+            "name": "FOV Ticks Step",
             "required": false,
-            "description": "viz_ticks_step",
+            "description": "Step for the x- and y-ticks [int, >0]",
             "type": {
-                "param_type": "ToolIntRangeParam",
-                "default": 128
-            }
+                "param_type": "ToolFloatRangeParam",
+                "default": 128,
+                "min": 1
+            },
+            "group": "Visualization Parameters"
         }
     ],
     "results": [
@@ -306,5 +363,8 @@
         "cpu": 1,
         "gpu": 0,
         "memory": 1000
-    }
+    },
+    "description": "Tool to run suite2p ROI detection on a registered suite2p binary movie",
+    "visibility": "public",
+    "version": "1.0.0"
 }

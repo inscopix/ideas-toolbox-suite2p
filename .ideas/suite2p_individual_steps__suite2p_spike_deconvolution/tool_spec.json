@@ -1,6 +1,6 @@
 {
     "key": "suite2p_individual_steps__suite2p_spike_deconvolution",
-    "name": "suite2p_individual_steps__suite2p_spike_deconvolution",
+    "name": "suite2p spike deconvolution",
     "schema_version": "3.0.0",
     "container_image": {
         "repository": "platform/suite2p",
@@ -14,123 +14,151 @@
     "params": [
         {
             "key": "fluo_file",
-            "name": "fluo_file",
-            "required": false,
-            "description": "fluo_file",
+            "name": "Fluorescence Traces File",
+            "required": true,
+            "description": "Input fluorescence traces file, as outputted by the ROI extraction step [<F>.npy]",
             "type": {
                 "param_type": "ToolPathParam",
-                "multiple": true
-            }
+                "multiple": true,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
         },
         {
             "key": "neuropil_fluo_file",
-            "name": "neuropil_fluo_file",
-            "required": false,
-            "description": "neuropil_fluo_file",
+            "name": "Neuropil Fluorescence Traces File",
+            "required": true,
+            "description": "Input neuropil fluorescence traces file, as outputted by the ROI extraction step [<Fneu>.npy]",
             "type": {
                 "param_type": "ToolPathParam",
-                "multiple": true
-            }
+                "multiple": true,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
         },
         {
             "key": "ops_file",
-            "name": "ops_file",
-            "required": false,
-            "description": "ops_file",
+            "name": "Parameters File",
+            "required": true,
+            "description": "Input suite2p parameters file, as outputted by the ROI extraction tool [<ops_ROI_extraction>.npy]",
             "type": {
                 "param_type": "ToolPathParam",
-                "multiple": true
-            }
+                "multiple": true,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
         },
         {
             "key": "tau",
-            "name": "tau",
+            "name": "Tau",
             "required": false,
-            "description": "tau",
+            "description": "[from suite2p docs for <tau>] \"The timescale of the sensor (in seconds), used for deconvolution kernel. The kernel is fixed to have this decay and is not fit to the data. We recommend: 0.7 for GCaMP6f; 1.0 for GCaMP6m; 1.25-1.5 for GCaMP6s.\" [float, >=0.001]",
             "type": {
                 "param_type": "ToolFloatRangeParam",
-                "default": 1.0
-            }
+                "default": 1.0,
+                "min": 0.001
+            },
+            "group": "Spike Deconvolution Parameters"
         },
         {
             "key": "neucoeff",
-            "name": "neucoeff",
+            "name": "Neuropil Coefficient",
             "required": false,
-            "description": "neucoeff",
+            "description": "[from suite2p docs for <neucoeff>] \"Neuropil coefficient for all ROIs.\" [float, >=0]",
             "type": {
                 "param_type": "ToolFloatRangeParam",
-                "default": 0.7
-            }
+                "default": 0.7,
+                "min": 0
+            },
+            "group": "Spike Deconvolution Parameters"
         },
         {
             "key": "baseline",
-            "name": "baseline",
+            "name": "Baseline",
             "required": false,
-            "description": "baseline",
+            "description": "[from suite2p docs for <baseline>] \"How to compute the baseline of each trace. This baseline is then subtracted from each cell. 'maximin' computes a moving baseline by filtering the data with a Gaussian of width ops['sig_baseline'] * ops['fs'], and then minimum filtering with a window of ops['win_baseline'] * ops['fs'], and then maximum filtering with the same window. 'constant' computes a constant baseline by filtering with a Gaussian of width ops['sig_baseline'] * ops['fs'] and then taking the minimum value of this filtered trace. 'constant_percentile' computes a constant baseline by taking the ops['prctile_baseline'] percentile of the trace.\" [str, ['maximin', 'constant', 'constant_percentile']]",
             "type": {
                 "param_type": "ToolStringParam",
                 "default": "maximin"
-            }
+            },
+            "group": "Spike Deconvolution Parameters"
         },
         {
             "key": "win_baseline",
-            "name": "win_baseline",
+            "name": "Window Baseline",
             "required": false,
-            "description": "win_baseline",
+            "description": "[from suite2p docs for <win_baseline>] \"Window for maximin filter in seconds.\" [float, >0]",
             "type": {
                 "param_type": "ToolFloatRangeParam",
-                "default": 60.0
-            }
+                "default": 60.0,
+                "min": 0.001
+            },
+            "group": "Spike Deconvolution Parameters"
         },
         {
             "key": "sig_baseline",
-            "name": "sig_baseline",
+            "name": "Sig Baseline",
             "required": false,
-            "description": "sig_baseline",
+            "description": "[from suite2p docs for <sig_baseline>] \"Gaussian filter width in seconds, used before maximin filtering or taking the minimum value of the trace, ops['baseline'] = 'maximin' or 'constant'.\" [float, >0]",
             "type": {
                 "param_type": "ToolFloatRangeParam",
-                "default": 10.0
-            }
+                "default": 10.0,
+                "min": 0.001
+            },
+            "group": "Spike Deconvolution Parameters"
         },
         {
             "key": "prctile_baseline",
-            "name": "prctile_baseline",
+            "name": "Percentile Baseline",
             "required": false,
-            "description": "prctile_baseline",
+            "description": "[from suite2p docs for <prctile_baseline>] \"Percentile of trace to use as baseline if ops['baseline'] = 'constant_percentile'.\" [float, >0]",
             "type": {
                 "param_type": "ToolFloatRangeParam",
-                "default": 8.0
-            }
+                "default": 8.0,
+                "min": 0.001
+            },
+            "group": "Spike Deconvolution Parameters"
         },
         {
             "key": "viz_n_samp_cells",
-            "name": "viz_n_samp_cells",
+            "name": "Number of Sample Cells",
             "required": false,
-            "description": "viz_n_samp_cells",
+            "description": "Number of sample cells for the spike deconvolution preview [int, >0]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": 20
-            }
+                "default": 20,
+                "min": 1
+            },
+            "group": "Visualization Parameters"
         },
         {
             "key": "viz_random_seed",
-            "name": "viz_random_seed",
+            "name": "Random Seed",
             "required": false,
-            "description": "viz_random_seed",
+            "description": "Random seed for selecting sample cells [int, >=0]",
             "type": {
                 "param_type": "ToolIntRangeParam",
-                "default": 0
-            }
+                "default": 0,
+                "min": 0
+            },
+            "group": "Visualization Parameters"
         },
         {
             "key": "viz_show_all_footprints",
-            "name": "viz_show_all_footprints",
+            "name": "Show Non-Sample Cells' Footprints",
             "required": false,
-            "description": "viz_show_all_footprints",
+            "description": "Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed [bool]",
             "type": {
                 "param_type": "ToolBooleanParam",
                 "default": true
-            }
+            },
+            "group": "Visualization Parameters"
         }
     ],
     "results": [
@@ -147,5 +175,8 @@
         "cpu": 1,
         "gpu": 0,
         "memory": 1000
-    }
+    },
+    "description": "Tool to run suite2p spike deconvolution on the extracted fluorescence traces",
+    "visibility": "public",
+    "version": "1.0.0"
 }
