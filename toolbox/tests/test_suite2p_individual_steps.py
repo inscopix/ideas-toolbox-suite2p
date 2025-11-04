@@ -14,17 +14,17 @@ data_dir = "data"
     "raw_movie_files,nplanes,nchannels,functional_chan,bruker_bidirectional,expected_files,expected_shape,expected_range,expected_mean_first_last,expected_fs,expected_mean_img,",
     [
         [
-            ["sample_300x512x512_movie.isxd"],
+            ["sample_128x128x1000_movie.isxd"],
             1,
             1,
             1,
             False,
             ["data_raw.bin", "ops_binary_conversion.npy"],
-            (300, 512, 512),
-            (0, 8191),
-            325.29364585876465,
-            29.87393200693075,
-            34463780.0,
+            (62, 512, 512),
+            (666, 1383),
+            918.1294116973877,
+            10.0,
+            10048416.0,
         ]
     ],
 )
@@ -131,11 +131,11 @@ def test_suite2p_binary_conversion(
             128,
             10,
             ["data.bin", "ops_registration.npy"],
-            (300, 512, 512),
-            (-829, 8186),
-            324.7294921875,
-            29.87393200693075,
-            9,
+            (62, 512, 512),
+            (667, 1366),
+            919.6217651367188,
+            10.0,
+            0,
         ]
     ],
 )
@@ -292,8 +292,8 @@ def test_suite2p_registration(
             True,
             128,
             ["stat_ROI_detection.npy", "ops_ROI_detection.npy"],
-            54,
-            3251,
+            18,
+            5050,
         ]
     ],
 )
@@ -408,11 +408,11 @@ def test_suite2p_roi_detection(
             0,
             True,
             ["stat.npy", "F.npy", "Fneu.npy", "ops_ROI_extraction.npy"],
-            54,
-            3251,
-            (54, 300),
-            523.0839,
-            391.02588,
+            18,
+            5050,
+            (18, 1000),
+            913.9661,
+            927.72455,
         ]
     ],
 )
@@ -517,9 +517,9 @@ def test_suite2p_roi_extraction(
             True,
             128,
             ["iscell.npy", "ops_ROI_classification.npy"],
-            54,
-            20,
-            0.3591060250887573,
+            18,
+            4,
+            0.2297505335476366,
         ]
     ],
 )
@@ -601,8 +601,8 @@ def test_suite2p_roi_classification(
             0,
             True,
             ["spks.npy", "ops_spike_deconvolution.npy"],
-            (54, 300),
-            45205.14,
+            (18, 1000),
+            18990.904,
         ]
     ],
 )

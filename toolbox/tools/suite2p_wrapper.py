@@ -12,8 +12,6 @@ from zipfile import ZipFile
 from typing import List, Optional
 import pathlib
 
-# from toolbox.tools.process_file import process_file
-
 
 logger = logging.getLogger()
 

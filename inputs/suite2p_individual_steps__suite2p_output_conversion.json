@@ -1,21 +1,21 @@
 {
     "fluo_file": [
-        "/ideas/data/F.npy"
+        "data/F.npy"
     ],
     "neuropil_fluo_file": [
-        "/ideas/data/Fneu.npy"
+        "data/Fneu.npy"
     ],
     "spks_file": [
-        "/ideas/data/spks.npy"
+        "data/spks.npy"
     ],
     "stat_file": [
-        "/ideas/data/stat.npy"
+        "data/stat.npy"
     ],
     "ops_file": [
-        "/ideas/data/ops_ext.npy"
+        "data/ops_ROI_extraction.npy"
     ],
     "iscell_file": [
-        "/ideas/data/iscell.npy"
+        "data/iscell.npy"
     ],
     "save_npy": true,
     "save_isxd": true,

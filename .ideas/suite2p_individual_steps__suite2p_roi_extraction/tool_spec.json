@@ -1,0 +1,161 @@
+{
+    "key": "suite2p_individual_steps__suite2p_roi_extraction",
+    "name": "suite2p_individual_steps__suite2p_roi_extraction",
+    "schema_version": "3.0.0",
+    "container_image": {
+        "repository": "platform/suite2p",
+        "label": "0.0.1"
+    },
+    "command": {
+        "file_path": "toolbox/tools/suite2p_individual_steps.py",
+        "entry_point": "suite2p_roi_extraction",
+        "program_type": "PYTHON"
+    },
+    "params": [
+        {
+            "key": "reg_binary_file",
+            "name": "reg_binary_file",
+            "required": false,
+            "description": "reg_binary_file",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true
+            }
+        },
+        {
+            "key": "stat_file",
+            "name": "stat_file",
+            "required": false,
+            "description": "stat_file",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true
+            }
+        },
+        {
+            "key": "ops_file",
+            "name": "ops_file",
+            "required": false,
+            "description": "ops_file",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true
+            }
+        },
+        {
+            "key": "neuropil_extract",
+            "name": "neuropil_extract",
+            "required": false,
+            "description": "neuropil_extract",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            }
+        },
+        {
+            "key": "allow_overlap",
+            "name": "allow_overlap",
+            "required": false,
+            "description": "allow_overlap",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": false
+            }
+        },
+        {
+            "key": "min_neuropil_pixels",
+            "name": "min_neuropil_pixels",
+            "required": false,
+            "description": "min_neuropil_pixels",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 350
+            }
+        },
+        {
+            "key": "inner_neuropil_radius",
+            "name": "inner_neuropil_radius",
+            "required": false,
+            "description": "inner_neuropil_radius",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 2
+            }
+        },
+        {
+            "key": "lam_percentile",
+            "name": "lam_percentile",
+            "required": false,
+            "description": "lam_percentile",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 50
+            }
+        },
+        {
+            "key": "viz_show_grid",
+            "name": "viz_show_grid",
+            "required": false,
+            "description": "viz_show_grid",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            }
+        },
+        {
+            "key": "viz_ticks_step",
+            "name": "viz_ticks_step",
+            "required": false,
+            "description": "viz_ticks_step",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 128
+            }
+        },
+        {
+            "key": "viz_n_samp_cells",
+            "name": "viz_n_samp_cells",
+            "required": false,
+            "description": "viz_n_samp_cells",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 20
+            }
+        },
+        {
+            "key": "viz_random_seed",
+            "name": "viz_random_seed",
+            "required": false,
+            "description": "viz_random_seed",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 0
+            }
+        },
+        {
+            "key": "viz_show_all_footprints",
+            "name": "viz_show_all_footprints",
+            "required": false,
+            "description": "viz_show_all_footprints",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            }
+        }
+    ],
+    "results": [
+        {
+            "key": "tool_output_group",
+            "name": "Tool Outputs",
+            "description": "Tool outputs",
+            "file_patterns": [
+                "**/*"
+            ]
+        }
+    ],
+    "resources": {
+        "cpu": 1,
+        "gpu": 0,
+        "memory": 1000
+    }
+}

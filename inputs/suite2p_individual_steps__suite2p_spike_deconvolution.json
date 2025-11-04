@@ -1,11 +1,11 @@
 {
     "fluo_file": [
-        "/ideas/data/F.npy"
+        "data/F.npy"
     ],
     "neuropil_fluo_file": [
-        "/ideas/data/Fneu.npy"
+        "data/Fneu.npy"
     ],
     "ops_file": [
-        "/ideas/data/ops_ext.npy"
+        "data/ops_ROI_extraction.npy"
     ]
 }

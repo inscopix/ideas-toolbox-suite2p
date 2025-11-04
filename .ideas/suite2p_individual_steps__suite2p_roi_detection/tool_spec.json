@@ -1,0 +1,310 @@
+{
+    "key": "suite2p_individual_steps__suite2p_roi_detection",
+    "name": "suite2p_individual_steps__suite2p_roi_detection",
+    "schema_version": "3.0.0",
+    "container_image": {
+        "repository": "platform/suite2p",
+        "label": "0.0.1"
+    },
+    "command": {
+        "file_path": "toolbox/tools/suite2p_individual_steps.py",
+        "entry_point": "suite2p_roi_detection",
+        "program_type": "PYTHON"
+    },
+    "params": [
+        {
+            "key": "reg_binary_file",
+            "name": "reg_binary_file",
+            "required": false,
+            "description": "reg_binary_file",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true
+            }
+        },
+        {
+            "key": "ops_file",
+            "name": "ops_file",
+            "required": false,
+            "description": "ops_file",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true
+            }
+        },
+        {
+            "key": "classifier_path",
+            "name": "classifier_path",
+            "required": false,
+            "description": "classifier_path",
+            "type": {
+                "param_type": "ToolStringParam"
+            }
+        },
+        {
+            "key": "tau",
+            "name": "tau",
+            "required": false,
+            "description": "tau",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 1.0
+            }
+        },
+        {
+            "key": "sparse_mode",
+            "name": "sparse_mode",
+            "required": false,
+            "description": "sparse_mode",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            }
+        },
+        {
+            "key": "spatial_scale",
+            "name": "spatial_scale",
+            "required": false,
+            "description": "spatial_scale",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 0
+            }
+        },
+        {
+            "key": "connected",
+            "name": "connected",
+            "required": false,
+            "description": "connected",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            }
+        },
+        {
+            "key": "threshold_scaling",
+            "name": "threshold_scaling",
+            "required": false,
+            "description": "threshold_scaling",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 1
+            }
+        },
+        {
+            "key": "spatial_hp_detect",
+            "name": "spatial_hp_detect",
+            "required": false,
+            "description": "spatial_hp_detect",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 25
+            }
+        },
+        {
+            "key": "max_overlap",
+            "name": "max_overlap",
+            "required": false,
+            "description": "max_overlap",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 0.75
+            }
+        },
+        {
+            "key": "high_pass",
+            "name": "high_pass",
+            "required": false,
+            "description": "high_pass",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 100
+            }
+        },
+        {
+            "key": "smooth_masks",
+            "name": "smooth_masks",
+            "required": false,
+            "description": "smooth_masks",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            }
+        },
+        {
+            "key": "max_iterations",
+            "name": "max_iterations",
+            "required": false,
+            "description": "max_iterations",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 20
+            }
+        },
+        {
+            "key": "nbinned",
+            "name": "nbinned",
+            "required": false,
+            "description": "nbinned",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 5000
+            }
+        },
+        {
+            "key": "denoise",
+            "name": "denoise",
+            "required": false,
+            "description": "denoise",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": false
+            }
+        },
+        {
+            "key": "anatomical_only",
+            "name": "anatomical_only",
+            "required": false,
+            "description": "anatomical_only",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 0
+            }
+        },
+        {
+            "key": "diameter",
+            "name": "diameter",
+            "required": false,
+            "description": "diameter",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 0
+            }
+        },
+        {
+            "key": "cellprob_threshold",
+            "name": "cellprob_threshold",
+            "required": false,
+            "description": "cellprob_threshold",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 0.0
+            }
+        },
+        {
+            "key": "flow_threshold",
+            "name": "flow_threshold",
+            "required": false,
+            "description": "flow_threshold",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 1.5
+            }
+        },
+        {
+            "key": "spatial_hp_cp",
+            "name": "spatial_hp_cp",
+            "required": false,
+            "description": "spatial_hp_cp",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 0
+            }
+        },
+        {
+            "key": "pretrained_model",
+            "name": "pretrained_model",
+            "required": false,
+            "description": "pretrained_model",
+            "type": {
+                "param_type": "ToolStringParam",
+                "default": "cyto"
+            }
+        },
+        {
+            "key": "preclassify",
+            "name": "preclassify",
+            "required": false,
+            "description": "preclassify",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 0.0
+            }
+        },
+        {
+            "key": "chan2_thres",
+            "name": "chan2_thres",
+            "required": false,
+            "description": "chan2_thres",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 0.65
+            }
+        },
+        {
+            "key": "viz_vmin_perc",
+            "name": "viz_vmin_perc",
+            "required": false,
+            "description": "viz_vmin_perc",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 0
+            }
+        },
+        {
+            "key": "viz_vmax_perc",
+            "name": "viz_vmax_perc",
+            "required": false,
+            "description": "viz_vmax_perc",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 99
+            }
+        },
+        {
+            "key": "viz_cmap",
+            "name": "viz_cmap",
+            "required": false,
+            "description": "viz_cmap",
+            "type": {
+                "param_type": "ToolStringParam",
+                "default": "plasma"
+            }
+        },
+        {
+            "key": "viz_show_grid",
+            "name": "viz_show_grid",
+            "required": false,
+            "description": "viz_show_grid",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            }
+        },
+        {
+            "key": "viz_ticks_step",
+            "name": "viz_ticks_step",
+            "required": false,
+            "description": "viz_ticks_step",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 128
+            }
+        }
+    ],
+    "results": [
+        {
+            "key": "tool_output_group",
+            "name": "Tool Outputs",
+            "description": "Tool outputs",
+            "file_patterns": [
+                "**/*"
+            ]
+        }
+    ],
+    "resources": {
+        "cpu": 1,
+        "gpu": 0,
+        "memory": 1000
+    }
+}

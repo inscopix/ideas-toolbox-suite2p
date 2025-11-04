@@ -1,0 +1,221 @@
+{
+    "key": "suite2p_individual_steps__suite2p_output_conversion",
+    "name": "suite2p_individual_steps__suite2p_output_conversion",
+    "schema_version": "3.0.0",
+    "container_image": {
+        "repository": "platform/suite2p",
+        "label": "0.0.1"
+    },
+    "command": {
+        "file_path": "toolbox/tools/suite2p_individual_steps.py",
+        "entry_point": "suite2p_output_conversion",
+        "program_type": "PYTHON"
+    },
+    "params": [
+        {
+            "key": "fluo_file",
+            "name": "fluo_file",
+            "required": false,
+            "description": "fluo_file",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true
+            }
+        },
+        {
+            "key": "neuropil_fluo_file",
+            "name": "neuropil_fluo_file",
+            "required": false,
+            "description": "neuropil_fluo_file",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true
+            }
+        },
+        {
+            "key": "spks_file",
+            "name": "spks_file",
+            "required": false,
+            "description": "spks_file",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true
+            }
+        },
+        {
+            "key": "stat_file",
+            "name": "stat_file",
+            "required": false,
+            "description": "stat_file",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true
+            }
+        },
+        {
+            "key": "ops_file",
+            "name": "ops_file",
+            "required": false,
+            "description": "ops_file",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true
+            }
+        },
+        {
+            "key": "iscell_file",
+            "name": "iscell_file",
+            "required": false,
+            "description": "iscell_file",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true
+            }
+        },
+        {
+            "key": "save_npy",
+            "name": "save_npy",
+            "required": false,
+            "description": "save_npy",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            }
+        },
+        {
+            "key": "save_isxd",
+            "name": "save_isxd",
+            "required": false,
+            "description": "save_isxd",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            }
+        },
+        {
+            "key": "save_NWB",
+            "name": "save_NWB",
+            "required": false,
+            "description": "save_NWB",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": false
+            }
+        },
+        {
+            "key": "save_mat",
+            "name": "save_mat",
+            "required": false,
+            "description": "save_mat",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": false
+            }
+        },
+        {
+            "key": "thresh_spks_perc",
+            "name": "thresh_spks_perc",
+            "required": false,
+            "description": "thresh_spks_perc",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 99.7
+            }
+        },
+        {
+            "key": "viz_vmin_perc",
+            "name": "viz_vmin_perc",
+            "required": false,
+            "description": "viz_vmin_perc",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 0
+            }
+        },
+        {
+            "key": "viz_vmax_perc",
+            "name": "viz_vmax_perc",
+            "required": false,
+            "description": "viz_vmax_perc",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 99
+            }
+        },
+        {
+            "key": "viz_cmap",
+            "name": "viz_cmap",
+            "required": false,
+            "description": "viz_cmap",
+            "type": {
+                "param_type": "ToolStringParam",
+                "default": "plasma"
+            }
+        },
+        {
+            "key": "viz_show_grid",
+            "name": "viz_show_grid",
+            "required": false,
+            "description": "viz_show_grid",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            }
+        },
+        {
+            "key": "viz_ticks_step",
+            "name": "viz_ticks_step",
+            "required": false,
+            "description": "viz_ticks_step",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 128
+            }
+        },
+        {
+            "key": "viz_n_samp_cells",
+            "name": "viz_n_samp_cells",
+            "required": false,
+            "description": "viz_n_samp_cells",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 20
+            }
+        },
+        {
+            "key": "viz_random_seed",
+            "name": "viz_random_seed",
+            "required": false,
+            "description": "viz_random_seed",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 0
+            }
+        },
+        {
+            "key": "viz_show_all_footprints",
+            "name": "viz_show_all_footprints",
+            "required": false,
+            "description": "viz_show_all_footprints",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            }
+        }
+    ],
+    "results": [
+        {
+            "key": "tool_output_group",
+            "name": "Tool Outputs",
+            "description": "Tool outputs",
+            "file_patterns": [
+                "**/*"
+            ]
+        }
+    ],
+    "resources": {
+        "cpu": 1,
+        "gpu": 0,
+        "memory": 1000
+    }
+}

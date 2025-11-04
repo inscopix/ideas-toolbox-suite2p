@@ -1,0 +1,90 @@
+{
+    "key": "suite2p_individual_steps__suite2p_binary_conversion",
+    "name": "suite2p_individual_steps__suite2p_binary_conversion",
+    "schema_version": "3.0.0",
+    "container_image": {
+        "repository": "platform/suite2p",
+        "label": "0.0.1"
+    },
+    "command": {
+        "file_path": "toolbox/tools/suite2p_individual_steps.py",
+        "entry_point": "suite2p_binary_conversion",
+        "program_type": "PYTHON"
+    },
+    "params": [
+        {
+            "key": "raw_movie_files",
+            "name": "raw_movie_files",
+            "required": false,
+            "description": "raw_movie_files",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true
+            }
+        },
+        {
+            "key": "nplanes",
+            "name": "nplanes",
+            "required": false,
+            "description": "nplanes",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 1
+            }
+        },
+        {
+            "key": "nchannels",
+            "name": "nchannels",
+            "required": false,
+            "description": "nchannels",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 1
+            }
+        },
+        {
+            "key": "functional_chan",
+            "name": "functional_chan",
+            "required": false,
+            "description": "functional_chan",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 1
+            }
+        },
+        {
+            "key": "fs",
+            "name": "fs",
+            "required": false,
+            "description": "fs",
+            "type": {
+                "param_type": "ToolFloatRangeParam"
+            }
+        },
+        {
+            "key": "bruker_bidirectional",
+            "name": "bruker_bidirectional",
+            "required": false,
+            "description": "bruker_bidirectional",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": false
+            }
+        }
+    ],
+    "results": [
+        {
+            "key": "tool_output_group",
+            "name": "Tool Outputs",
+            "description": "Tool outputs",
+            "file_patterns": [
+                "**/*"
+            ]
+        }
+    ],
+    "resources": {
+        "cpu": 1,
+        "gpu": 0,
+        "memory": 1000
+    }
+}

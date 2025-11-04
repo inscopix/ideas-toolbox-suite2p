@@ -1,6 +1,35 @@
+
+[project]
+name = "ideas-toolbox-suite2p"
+description = "IDEAS Suite2p Toolkit"
+requires-python = "==3.9.5"
+classifiers = [
+    "Programming Language :: Python :: 3"
+]
+dependencies = [
+    "pynwb==2.8.1",
+    "hdmf==3.14.0",
+    "dandi==0.63.0",
+    "numpy==1.26.4",
+    "scikit-learn==1.4.2",
+    "scipy==1.13.0",
+    "suite2p@git+https://@github.com/inscopix/isxSuite2p.git@v0.0.3",
+    "imageio==2.19.0",
+    "imageio-ffmpeg==0.4.7",
+    "pytest==7.4.2",
+    "isx==2.0.0",
+    "ideas-public-python-utils@git+https://github.com/inscopix/ideas-public-python-utils.git@ID-4920"
+]
+
+dynamic = ["version"]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
+
 [tool.black]
 line-length = 79
-
 
 [tool.interrogate]
 fail-under = 100
@@ -17,9 +46,3 @@ ignore-nested-classes = true
 ignore-setters = false
 ignore-regex = ["^get$", "^mock_.*", ".*BaseClass.*"]
 color = true
-
-
-[tool.pytest.ini_options]
-pythonpath = [
-  "."
-]

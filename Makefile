@@ -1,11 +1,11 @@
 .PHONY:  clean build test
 
+IMAGE_REPO=platform
 IMAGE_NAME=suite2p
 ifndef LABEL
 	LABEL=0.0.1
 endif
-IMAGE_TAG=${IMAGE_NAME}:${LABEL}
-FULL_NAME=${IMAGE_NAME}
+IMAGE_TAG=${IMAGE_REPO}/${IMAGE_NAME}:${LABEL}
 PLATFORM=linux/amd64
 ifndef TARGET
 	TARGET=base
@@ -15,8 +15,7 @@ endif
 
 clean:
 	@echo "Cleaning up"
-	-docker rm $(CONTAINER_NAME)
-	-docker images | grep $(FULL_NAME) | awk '{print $$1 ":" $$2}' | grep -v $(VERSION) | xargs docker rmi
+	-docker rmi ${IMAGE_TAG}
 
 build: 
 	docker build . -t $(IMAGE_TAG) \
@@ -24,7 +23,8 @@ build:
 		--target ${TARGET}
 
 test: TARGET=test
-test: build 
+test: IMAGE_TAG=${IMAGE_NAME}:${LABEL}-test
+test: clean build 
 	@echo "Running tests..."
 	docker run \
 		--platform ${PLATFORM} \
