@@ -21,21 +21,29 @@ RUN addgroup ideas \
 # Create ideas home dir
 WORKDIR /ideas
 
-# Install apt packages here
-RUN apt update && apt upgrade -y \
-    && apt install -y software-properties-common \
-    && apt install -y gcc python3-dev \
-    && apt install -y libgl1-mesa-glx libglib2.0-0 \
-    && apt install -y python3.9 python3.9-venv python3-pip git ffmpeg
-
 # Copy python project settings
 COPY pyproject.toml ./
 
-# Create a venv to install python dependencies
-# This can be done globally, but using venv is best practice
-RUN apt install -y  && ${PYTHON} -m venv ${VENV} \
-    && ${PYTHON_VENV} -m pip install --upgrade pip \
-    && ${PYTHON_VENV} -m pip install .
+# Install apt packages here
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends \
+        software-properties-common \
+        gcc \
+        python3-dev \
+        libgl1-mesa-glx \
+        libglib2.0-0 \
+        python3.9 \
+        python3.9-venv \
+        python3-pip \
+        git \
+        ffmpeg\
+    && rm -rf /var/lib/apt/lists/* \
+    # Create a venv to install python dependencies
+    # This can be done globally, but using venv is best practice
+    && ${PYTHON} -m venv ${VENV} \
+    && ${PYTHON_VENV} -m pip install --no-cache --upgrade pip \
+    && ${PYTHON_VENV} -m pip install --no-cache .
 
 # Add venv bin to path
 ENV PATH="/ideas/${VENV}/bin:${PATH}"
