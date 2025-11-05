@@ -403,9 +403,9 @@
         }
     ],
     "resources": {
-        "cpu": 1,
+        "cpu": 8,
         "gpu": 0,
-        "memory": 1000
+        "memory": 64000
     },
     "description": "Tool to run suite2p registration on a raw suite2p binary movie",
     "visibility": "public",

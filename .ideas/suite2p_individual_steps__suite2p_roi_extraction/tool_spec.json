@@ -183,9 +183,9 @@
         }
     ],
     "resources": {
-        "cpu": 1,
+        "cpu": 8,
         "gpu": 0,
-        "memory": 1000
+        "memory": 4000
     },
     "description": "Tool to run suite2p ROI extraction on a registered suite2p binary movie, using the previously detected ROIs",
     "visibility": "public",

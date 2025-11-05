@@ -136,9 +136,9 @@
         }
     ],
     "resources": {
-        "cpu": 1,
+        "cpu": 4,
         "gpu": 0,
-        "memory": 1000
+        "memory": 2000
     },
     "description": "Tool to run suite2p ROI classification on the extracted ROIs",
     "visibility": "public",

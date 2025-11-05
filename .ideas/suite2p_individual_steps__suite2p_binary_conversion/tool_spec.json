@@ -99,9 +99,9 @@
         }
     ],
     "resources": {
-        "cpu": 1,
+        "cpu": 8,
         "gpu": 0,
-        "memory": 1000
+        "memory": 4000
     },
     "description": "Tool to convert raw 2p input movie(s) into a suite2p binary file",
     "visibility": "public",

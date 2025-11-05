@@ -328,9 +328,9 @@
         }
     ],
     "resources": {
-        "cpu": 1,
+        "cpu": 8,
         "gpu": 0,
-        "memory": 1000
+        "memory": 32000
     },
     "description": "Tool to run suite2p end-to-end on any format of 2p movie",
     "visibility": "public",

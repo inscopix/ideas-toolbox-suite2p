@@ -172,9 +172,9 @@
         }
     ],
     "resources": {
-        "cpu": 1,
+        "cpu": 4,
         "gpu": 0,
-        "memory": 1000
+        "memory": 4000
     },
     "description": "Tool to run suite2p spike deconvolution on the extracted fluorescence traces",
     "visibility": "public",

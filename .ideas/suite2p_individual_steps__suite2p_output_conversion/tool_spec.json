@@ -260,9 +260,9 @@
         }
     ],
     "resources": {
-        "cpu": 1,
+        "cpu": 4,
         "gpu": 0,
-        "memory": 1000
+        "memory": 4000
     },
     "description": "Tool to output suite2p results in specific formats",
     "visibility": "public",
