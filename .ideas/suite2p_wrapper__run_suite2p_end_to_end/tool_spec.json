@@ -3,7 +3,7 @@
     "name": "Run suite2p pipeline",
     "schema_version": "3.0.0",
     "container_image": {
-        "repository": "suite2p",
+        "repository": "platform/suite2p",
         "label": "0.0.1"
     },
     "command": {
