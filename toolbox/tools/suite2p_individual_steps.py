@@ -2,6 +2,8 @@ from glob import glob
 import isx
 import logging
 from natsort import natsorted
+import pathlib
+from typing import Optional, List
 import numpy as np
 import os
 import shutil
@@ -25,7 +27,7 @@ logger = logging.getLogger()
 
 
 def suite2p_binary_conversion(
-    raw_movie_files,
+    raw_movie_files: List[pathlib.Path],
     nplanes=1,
     nchannels=1,
     functional_chan=1,
@@ -195,8 +197,8 @@ def suite2p_binary_conversion(
 
 
 def suite2p_registration(
-    raw_binary_file,
-    ops_file,
+    raw_binary_file: List[pathlib.Path],
+    ops_file: List[pathlib.Path],
     frames_include=-1,
     align_by_chan=1,
     nimg_init=300,
@@ -390,8 +392,8 @@ def suite2p_registration(
 
 
 def suite2p_roi_detection(
-    reg_binary_file,
-    ops_file,
+    reg_binary_file: List[pathlib.Path],
+    ops_file: List[pathlib.Path],
     classifier_path=None,
     tau=1.0,
     sparse_mode=True,
@@ -512,9 +514,9 @@ def suite2p_roi_detection(
 
 
 def suite2p_roi_extraction(
-    reg_binary_file,
-    stat_file,
-    ops_file,
+    reg_binary_file: List[pathlib.Path],
+    stat_file: List[pathlib.Path],
+    ops_file: List[pathlib.Path],
     neuropil_extract=True,
     allow_overlap=False,
     min_neuropil_pixels=350,
@@ -586,8 +588,8 @@ def suite2p_roi_extraction(
 
 
 def suite2p_roi_classification(
-    stat_file,
-    ops_file,
+    stat_file: List[pathlib.Path],
+    ops_file: List[pathlib.Path],
     classifier_path=None,
     soma_crop=60,
     viz_vmin_perc=0,
@@ -648,6 +650,13 @@ def suite2p_roi_classification(
         steps="roi_classification",
     )
 
+    # If running standalone tool, temporarily copy input stat file
+    # to output dir for preview generation
+    tmp_file = False
+    if not os.path.exists(f"{ideas_output_dir}/stat.npy"):
+        tmp_file = True
+        shutil.copy(stat_file[0], f"{ideas_output_dir}/stat.npy")
+    
     # output previews
     preview.create_output_previews(
         ops=ops,
@@ -659,13 +668,16 @@ def suite2p_roi_classification(
         ticks_step=int(viz_ticks_step),
     )
 
+    if tmp_file:
+        os.remove(f"{ideas_output_dir}/stat.npy")
+
     print("ALL DONE!")
 
 
 def suite2p_spike_deconvolution(
-    fluo_file,
-    neuropil_fluo_file,
-    ops_file,
+    fluo_file: List[pathlib.Path],
+    neuropil_fluo_file: List[pathlib.Path],
+    ops_file: List[pathlib.Path],
     tau=1.0,
     neucoeff=0.7,
     baseline="maximin",
@@ -726,6 +738,13 @@ def suite2p_spike_deconvolution(
         steps="spike_deconvolution",
     )
 
+    # If running standalone tool, temporarily copy input files
+    # to output dir for preview generation
+    tmp_files = False
+    if not all([os.path.exists(f"{ideas_output_dir}/{f}") for f in ["F.npy", "Fneu.npy"]]):
+        tmp_files = True
+        [shutil.copy(fluo_file[0], f"{ideas_output_dir}/{f}") for f in ["F.npy", "Fneu.npy"]]
+    
     # output previews
     preview.create_output_previews(
         ops=ops,
@@ -735,16 +754,18 @@ def suite2p_spike_deconvolution(
         show_all_footprints=viz_show_all_footprints,
     )
 
+    if tmp_files:
+        [os.remove(f"{ideas_output_dir}/{f}") for f in ["F.npy", "Fneu.npy"]]
     print("ALL DONE!")
 
 
 def suite2p_output_conversion(
-    fluo_file,
-    neuropil_fluo_file,
-    spks_file,
-    stat_file,
-    ops_file,
-    iscell_file,
+    fluo_file: List[pathlib.Path],
+    neuropil_fluo_file: List[pathlib.Path],
+    spks_file: List[pathlib.Path],
+    stat_file: List[pathlib.Path],
+    ops_file: List[pathlib.Path],
+    iscell_file: List[pathlib.Path],
     save_npy=True,
     save_isxd=True,
     save_NWB=False,

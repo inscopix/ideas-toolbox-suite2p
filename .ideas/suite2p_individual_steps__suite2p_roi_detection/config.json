@@ -1,0 +1,7 @@
+{
+    "container": "platform/suite2p:0.0.1",
+    "executor_type": "PYTHON",
+    "file": "toolbox/tools/suite2p_individual_steps.py",
+    "function": "suite2p_roi_detection",
+    "schema_version": "1.0.0"
+}

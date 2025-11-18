@@ -5,14 +5,13 @@ import pytest
 import shutil
 from toolbox.tools.suite2p_wrapper import run_suite2p_end_to_end
 
-data_dir = "/ideas/data"
-
+data_dir = "data"
 
 @pytest.mark.parametrize(
     "raw_movie_files,ops_file,classifier_path,params_from,tau,frames_include,save_npy,save_isxd,save_NWB,save_mat,maxregshift,th_badframes,nonrigid,threshold_scaling,neucoeff,thresh_spks_perc,expected_ref_image,expected_F_shape,expected_F_mean,expected_spks_sum,expected_accepted_cells,",
     [
         [
-            ["sample_300x512x512_movie.isxd"],
+            ["sample_128x128x1000_movie.isxd"],
             None,
             None,
             "table",
@@ -28,11 +27,11 @@ data_dir = "/ideas/data"
             1.0,
             0.7,
             99.7,
-            68771274,
-            (54, 300),
-            523.0839,
-            45205.14,
-            19,
+            15031974,
+            (18, 1000),
+            913.9661,
+            18990.904,
+            4,
         ]
     ],
 )
@@ -62,6 +61,7 @@ def test_run_suite2p_end_to_end(
     """
     Test that run_suite2p_end_to_end() runs properly and outputs the expected files.
     """
+    np.random.seed(0)
     raw_movie_files = [f"{data_dir}/{x}" for x in raw_movie_files]
 
     for idx, f in enumerate(raw_movie_files):

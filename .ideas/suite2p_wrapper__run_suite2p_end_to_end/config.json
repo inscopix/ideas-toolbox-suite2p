@@ -1,0 +1,7 @@
+{
+    "container": "platform/suite2p:0.0.1",
+    "executor_type": "PYTHON",
+    "file": "toolbox/tools/suite2p_wrapper.py",
+    "function": "run_suite2p_end_to_end",
+    "schema_version": "1.0.0"
+}

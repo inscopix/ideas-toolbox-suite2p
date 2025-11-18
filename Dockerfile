@@ -1,10 +1,6 @@
+# Create base image to run analysis in
+# Change the base image based on your use case
 FROM public.ecr.aws/lts/ubuntu:20.04 AS base
-
-# Accept PACKAGE_REQS as a build argument
-ARG PACKAGE_REQS
-
-# Set it as an environment variable for use during runtime if needed
-ENV PACKAGE_REQS=$PACKAGE_REQS
 
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
@@ -12,59 +8,53 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONFAULTHANDLER=1
 ENV DEBIAN_FRONTEND=noninteractive
 
-# adding this to path so that we can source python correctly. 
-# this is where the python version we install using apt will
-# live
-ENV PATH="${PATH}:/ideas/.local/bin"
-
+# Arguments for python installation
+ARG PYTHON=python3.9
+ARG VENV=venv
+ARG PYTHON_VENV=/ideas/${VENV}/bin/python
 
 # Create ideas user
+# This is no longer necessary to do, but good practice anyways
 RUN addgroup ideas \
     && adduser --disabled-password --home /ideas --ingroup ideas ideas
 
+# Create ideas home dir
 WORKDIR /ideas
 
+# Copy python project settings
+COPY pyproject.toml ./
 
-RUN apt update && apt upgrade -y \
-    && apt install -y software-properties-common \
-    && apt install -y gcc python3-dev \
-    && apt install -y libgl1-mesa-glx libglib2.0-0 \
-    && apt install -y python3.9 git python3-pip ffmpeg \
-    && python3.9 -m pip install --upgrade pip \
-    && python3.9 -m pip install --no-cache-dir awscli boto3 click requests
+# Install apt packages here
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends \
+        software-properties-common \
+        gcc \
+        python3-dev \
+        libgl1-mesa-glx \
+        libglib2.0-0 \
+        python3.9 \
+        python3.9-venv \
+        python3-pip \
+        git \
+        ffmpeg\
+    && rm -rf /var/lib/apt/lists/* \
+    # Create a venv to install python dependencies
+    # This can be done globally, but using venv is best practice
+    && ${PYTHON} -m venv ${VENV} \
+    && ${PYTHON_VENV} -m pip install --no-cache --upgrade pip \
+    && ${PYTHON_VENV} -m pip install --no-cache .
 
-# link python to the version of python BE needs
-RUN ln -s /usr/bin/python3.9 /usr/bin/python
-
-# copy code and things we need
-COPY setup.py function_caller.py user_deps.txt install_imported_code.sh ./
-
-# install dependencies
-RUN python3.9 -m pip install -e .
-
-# install user code from git repo if needed
-RUN /bin/bash install_imported_code.sh
-
-COPY --chown=ideas toolbox /ideas/toolbox
-
-# this is after installing the code because we don't want to
-# reinstall everything if we update a command
-COPY --chown=ideas commands /ideas/commands
-
-# Mark commands as executable
-# the reason we always return 0 is because we want this to succeed
-# even if there are no commands in /ideas/commands/
-# (which can happen in initial stages of tool dev)
-RUN chmod +x /ideas/commands/* ; return 0
-
-
-# copy JSON files in info
-# this includes the toolbox_info.json, and annotation files
-# that are used to generate output manifests
-COPY --chown=ideas info /ideas/info
+# Add venv bin to path
+ENV PATH="/ideas/${VENV}/bin:${PATH}"
 
 USER ideas
 CMD ["/bin/bash"]
 
-FROM base AS jupyter
-RUN python3.9 -m pip install jupyter
+# Create image for testing which copies tool code and test data to
+# docker image in order to facilitate unit testing in an isolated environment.
+# This can also be acheived with volume mounts, but that can clutter up
+# your local folder with files generated during testing.
+FROM base AS test
+
+COPY --chown=ideas ./ /ideas

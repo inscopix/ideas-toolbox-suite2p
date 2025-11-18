@@ -1,0 +1,270 @@
+{
+    "key": "suite2p_individual_steps__suite2p_output_conversion",
+    "name": "suite2p output conversion",
+    "schema_version": "3.0.0",
+    "container_image": {
+        "repository": "platform/suite2p",
+        "label": "0.0.1"
+    },
+    "command": {
+        "file_path": "toolbox/tools/suite2p_individual_steps.py",
+        "entry_point": "suite2p_output_conversion",
+        "program_type": "PYTHON"
+    },
+    "params": [
+        {
+            "key": "fluo_file",
+            "name": "Fluorescence Traces File",
+            "required": true,
+            "description": "Input fluorescence traces file, as outputted by the ROI extraction step [<F>.npy]",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
+        },
+        {
+            "key": "neuropil_fluo_file",
+            "name": "Neuropil Fluo File",
+            "required": true,
+            "description": "Input neuropil fluorescence traces file, as outputted by the ROI extraction step [<Fneu>.npy]",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
+        },
+        {
+            "key": "spks_file",
+            "name": "Deconvolved Spikes File",
+            "required": true,
+            "description": "Input deconvolved spikes file, as outputted by the spike deconvolution step [<spks>.npy]",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
+        },
+        {
+            "key": "stat_file",
+            "name": "Extraction Statistics File",
+            "required": true,
+            "description": "Input extraction statistics file, as outputted by the ROI extraction step [<stat>.npy]",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
+        },
+        {
+            "key": "ops_file",
+            "name": "Parameters File",
+            "required": true,
+            "description": "Input parameters file, as outputted by the spike deconvolution step [<ops_spike_deconvolution>.npy]",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
+        },
+        {
+            "key": "iscell_file",
+            "name": "Classification Labels File",
+            "required": true,
+            "description": "Input classification labels file, as outputted by the ROI classification step [<iscell>.npy]",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
+        },
+        {
+            "key": "save_npy",
+            "name": "Save NPY",
+            "required": false,
+            "description": "If true, save suite2p NPY output (as a ZIP file) [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            },
+            "group": "Output Format"
+        },
+        {
+            "key": "save_isxd",
+            "name": "Save ISXD",
+            "required": false,
+            "description": "If true, save suite2p output as ISXD files [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            },
+            "group": "Output Format"
+        },
+        {
+            "key": "save_NWB",
+            "name": "Save NWB",
+            "required": false,
+            "description": "[from suite2p docs for <save_NWB>] \"Whether to save output as NWB file.\" [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": false
+            },
+            "group": "Output Format"
+        },
+        {
+            "key": "save_mat",
+            "name": "Save MAT",
+            "required": false,
+            "description": "[from suite2p docs for <save_mat>] \"Whether to save the results in matlab format in file \"Fall.mat\".\" [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": false
+            },
+            "group": "Output Format"
+        },
+        {
+            "key": "thresh_spks_perc",
+            "name": "Spikes Percentile Threshold",
+            "required": false,
+            "description": "Threshold for denoising the deconvolved spike trains, in percentile. Any value in the ROIs-by-time-point deconvolved spike matrix that is below the matrix's xth percentile value is set to 0. Note that the same threshold is applied to all ROIs, and that this thresholding step does not binarize the deconvolved spike trains but simply filters out the low-amplitude spike events [float, [0 100)]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 99.7,
+                "min": 0,
+                "max": 100
+            },
+            "group": "Extra Parameters"
+        },
+        {
+            "key": "viz_vmin_perc",
+            "name": "FOV vmin Percentile",
+            "required": false,
+            "description": "Minimum value for the colormap range, as percentile of the FOV fluorescence [float, [0 <FOV vmax Percentile>)]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 0,
+                "min": 0,
+                "max": 100
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_vmax_perc",
+            "name": "FOV vmax Percentile",
+            "required": false,
+            "description": "Maximum value for the colormap range, as percentile of the FOV fluorescence [float, (<FOV vmin Percentile> 100]]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 99,
+                "min": 0,
+                "max": 100
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_cmap",
+            "name": "FOV Colormap",
+            "required": false,
+            "description": "Colormap for plotting the FOV [str]",
+            "type": {
+                "param_type": "ToolStringParam",
+                "default": "plasma"
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_show_grid",
+            "name": "Show Grid on FOV",
+            "required": false,
+            "description": "Whether or not to show the grid on FOVs [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_ticks_step",
+            "name": "FOV Ticks Step",
+            "required": false,
+            "description": "Step for the x- and y-ticks [int, >0]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 128,
+                "min": 1
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_n_samp_cells",
+            "name": "Number of Sample Cells",
+            "required": false,
+            "description": "Number of sample cells for the cell extraction preview [int, >0]",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 20,
+                "min": 1
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_random_seed",
+            "name": "Random Seed",
+            "required": false,
+            "description": "Random seed for selecting sample cells [int, >=0]",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 0,
+                "min": 0
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_show_all_footprints",
+            "name": "Show Non-Sample Cells' Footprints",
+            "required": false,
+            "description": "Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            },
+            "group": "Visualization Parameters"
+        }
+    ],
+    "results": [
+        {
+            "key": "tool_output_group",
+            "name": "Tool Outputs",
+            "description": "Tool outputs",
+            "file_patterns": [
+                "**/*"
+            ]
+        }
+    ],
+    "resources": {
+        "cpu": 4,
+        "gpu": 0,
+        "memory": 4000
+    },
+    "description": "Tool to output suite2p results in specific formats",
+    "visibility": "public",
+    "version": "1.0.0"
+}

@@ -1,0 +1,193 @@
+{
+    "key": "suite2p_individual_steps__suite2p_roi_extraction",
+    "name": "suite2p ROI extraction",
+    "schema_version": "3.0.0",
+    "container_image": {
+        "repository": "platform/suite2p",
+        "label": "0.0.1"
+    },
+    "command": {
+        "file_path": "toolbox/tools/suite2p_individual_steps.py",
+        "entry_point": "suite2p_roi_extraction",
+        "program_type": "PYTHON"
+    },
+    "params": [
+        {
+            "key": "reg_binary_file",
+            "name": "Registered Binary Movie",
+            "required": true,
+            "description": "Input registered suite2p binary movie [<data>.bin]",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true,
+                "file_formats": [
+                    "bin"
+                ]
+            },
+            "group": "Input Data"
+        },
+        {
+            "key": "stat_file",
+            "name": "Detection Statistics File",
+            "required": true,
+            "description": "Input cell statistics file, as outputted by the ROI detection step [<stat_ROI_detection>.npy]",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
+        },
+        {
+            "key": "ops_file",
+            "name": "Parameters File",
+            "required": true,
+            "description": "Input suite2p parameters file, as outputted by the ROI detection tool [<ops_ROI_detection>.npy]",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
+        },
+        {
+            "key": "neuropil_extract",
+            "name": "Neuropil Extraction",
+            "required": false,
+            "description": "[from suite2p docs for <neuropil_extract>] \"Whether or not to extract signal from neuropil. If False, Fneu is set to zero.\" [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            },
+            "group": "ROI Extraction Parameters"
+        },
+        {
+            "key": "allow_overlap",
+            "name": "Allow Overlap",
+            "required": false,
+            "description": "[from suite2p docs for <allow_overlap>] \"Whether or not to extract signals from pixels which belong to two ROIs. By default, any pixels which belong to two ROIs (overlapping pixels) are excluded from the computation of the ROI trace.\" [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": false
+            },
+            "group": "ROI Extraction Parameters"
+        },
+        {
+            "key": "min_neuropil_pixels",
+            "name": "Minimum Neuropil Pixels",
+            "required": false,
+            "description": "[from suite2p docs for <min_neuropil_pixels>] \"Minimum number of pixels used to compute neuropil for each cell.\" [int, >0]",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 350,
+                "min": 1
+            },
+            "group": "ROI Extraction Parameters"
+        },
+        {
+            "key": "inner_neuropil_radius",
+            "name": "Inner Neuropil Radius",
+            "required": false,
+            "description": "[from suite2p docs for <inner_neuropil_radius>] \"Number of pixels to keep between ROI and neuropil donut.\" [int, >=0]",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 2,
+                "min": 0
+            },
+            "group": "ROI Extraction Parameters"
+        },
+        {
+            "key": "lam_percentile",
+            "name": "Lambda Percentile",
+            "required": false,
+            "description": "[from suite2p docs for <lam_percentile>] \"Percentile of Lambda within area to ignore when excluding cell pixels for neuropil extraction.\" [int, [0 100]]",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 50,
+                "min": 0,
+                "max": 100
+            },
+            "group": "ROI Extraction Parameters"
+        },
+        {
+            "key": "viz_show_grid",
+            "name": "Show Grid on FOV",
+            "required": false,
+            "description": "Whether or not to show the grid on FOVs [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_ticks_step",
+            "name": "FOV Ticks Step",
+            "required": false,
+            "description": "Step for the x- and y-ticks [int, >0]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 128,
+                "min": 1
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_n_samp_cells",
+            "name": "Number of Sample Cells",
+            "required": false,
+            "description": "Number of sample cells for the cell extraction preview [int, >0]",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 20,
+                "min": 1
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_random_seed",
+            "name": "Random Seed",
+            "required": false,
+            "description": "Random seed for selecting sample cells [int, >=0]",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 0,
+                "min": 0
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_show_all_footprints",
+            "name": "Show Non-Sample Cells' Footprints",
+            "required": false,
+            "description": "Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            },
+            "group": "Visualization Parameters"
+        }
+    ],
+    "results": [
+        {
+            "key": "tool_output_group",
+            "name": "Tool Outputs",
+            "description": "Tool outputs",
+            "file_patterns": [
+                "**/*"
+            ]
+        }
+    ],
+    "resources": {
+        "cpu": 8,
+        "gpu": 0,
+        "memory": 4000
+    },
+    "description": "Tool to run suite2p ROI extraction on a registered suite2p binary movie, using the previously detected ROIs",
+    "visibility": "public",
+    "version": "1.0.0"
+}

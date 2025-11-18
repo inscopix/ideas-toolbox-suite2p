@@ -1,0 +1,109 @@
+{
+    "key": "suite2p_individual_steps__suite2p_binary_conversion",
+    "name": "suite2p binary conversion",
+    "schema_version": "3.0.0",
+    "container_image": {
+        "repository": "platform/suite2p",
+        "label": "0.0.1"
+    },
+    "command": {
+        "file_path": "toolbox/tools/suite2p_individual_steps.py",
+        "entry_point": "suite2p_binary_conversion",
+        "program_type": "PYTHON"
+    },
+    "params": [
+        {
+            "key": "raw_movie_files",
+            "name": "Raw Movie Files",
+            "required": true,
+            "description": "Input 2P movie(s) [.isxd, .zip, .tif/.tiff, .ome.tif/.ome.tiff]",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true,
+                "file_formats": [
+                    "isxd",
+                    "zip",
+                    "tif",
+                    "tiff"
+                ]
+            },
+            "group": "Input Data"
+        },
+        {
+            "key": "nplanes",
+            "name": "Number of Planes",
+            "required": false,
+            "description": "[from suite2p docs for <nplanes>] \"Each tiff has this many planes in sequence.\" [int, >=1]",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 1,
+                "min": 1
+            },
+            "group": "Binary Conversion Parameters"
+        },
+        {
+            "key": "nchannels",
+            "name": "Number of Channels",
+            "required": false,
+            "description": "[from suite2p docs for <nchannels>] \"Each tiff has this many channels per plane.\" [int, >=1]",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 1,
+                "min": 1
+            },
+            "group": "Binary Conversion Parameters"
+        },
+        {
+            "key": "functional_chan",
+            "name": "Functional Channel",
+            "required": false,
+            "description": "[from suite2p docs for <functional_chan>] \"This channel is used to extract functional ROIs (1-based, so 1 means first channel, and 2 means second channel).\" [int, >=1]",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 1,
+                "min": 1
+            },
+            "group": "Binary Conversion Parameters"
+        },
+        {
+            "key": "fs",
+            "name": "Sampling Rate",
+            "required": false,
+            "description": "[from suite2p docs for <fs>] \"Sampling rate (per plane). For instance, if you have a 10 plane recording acquired at 30Hz, then the sampling rate per plane is 3Hz, so set ops['fs'] = 3.\" If None (default), fs is automatically detected for Inscopix .isxd and Bruker 2P .zip files, and set to 10 Hz (suite2p default) for .tiff files. [float, >0]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "min": 0.001
+            },
+            "group": "Binary Conversion Parameters"
+        },
+        {
+            "key": "bruker_bidirectional",
+            "name": "Bruker Bidirectional",
+            "required": false,
+            "description": "[from suite2p docs for <bruker_bidirectional>] \"Specifies whether BRUKER files are bidirectional multiplane recordings. The True setting corresponds to the following plane order (first plane is indexed as zero): [0,1,2,2,1,0]. False corresponds to [0,1,2,0,1,2].\" [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": false
+            },
+            "group": "Binary Conversion Parameters"
+        }
+    ],
+    "results": [
+        {
+            "key": "tool_output_group",
+            "name": "Tool Outputs",
+            "description": "Tool outputs",
+            "file_patterns": [
+                "**/*"
+            ]
+        }
+    ],
+    "resources": {
+        "cpu": 8,
+        "gpu": 0,
+        "memory": 4000
+    },
+    "description": "Tool to convert raw 2p input movie(s) into a suite2p binary file",
+    "visibility": "public",
+    "version": "1.0.0"
+}

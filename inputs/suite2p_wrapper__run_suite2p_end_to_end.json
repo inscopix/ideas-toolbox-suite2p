@@ -1,8 +1,7 @@
 {
     "raw_movie_files": [
-        "/ideas/data/sample_300x512x512_movie.isxd"
+        "data/sample_128x128x1000_movie.isxd"
     ],
-    "params_from": false,
     "tau": 1.0,
     "frames_include": -1,
     "save_npy": true,

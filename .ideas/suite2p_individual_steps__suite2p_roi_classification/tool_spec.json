@@ -1,0 +1,146 @@
+{
+    "key": "suite2p_individual_steps__suite2p_roi_classification",
+    "name": "suite2p ROI classification",
+    "schema_version": "3.0.0",
+    "container_image": {
+        "repository": "platform/suite2p",
+        "label": "0.0.1"
+    },
+    "command": {
+        "file_path": "toolbox/tools/suite2p_individual_steps.py",
+        "entry_point": "suite2p_roi_classification",
+        "program_type": "PYTHON"
+    },
+    "params": [
+        {
+            "key": "stat_file",
+            "name": "Extraction Statistics File",
+            "required": true,
+            "description": "Input cell statistics file, as outputted by the ROI extraction step [<stat>.npy]",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
+        },
+        {
+            "key": "ops_file",
+            "name": "Parameters File",
+            "required": true,
+            "description": "Input suite2p parameters file, as outputted by the ROI extraction tool [<ops_ROI_extraction>.npy]",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
+        },
+        {
+            "key": "classifier_path",
+            "name": "Optional Classifier File",
+            "required": false,
+            "description": "[from suite2p docs for <classifier_path>] \"Path to classifier file you want to use for cell classification.\" [.npy]",
+            "type": {
+                "param_type": "ToolPathParam",
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
+        },
+        {
+            "key": "soma_crop",
+            "name": "Soma Crop",
+            "required": false,
+            "description": "[from suite2p docs for <soma_crop>] \"Specifies whether to crop dendrites for cell classification stats (e.g., compactness).\" [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            },
+            "group": "ROI Classification Parameters"
+        },
+        {
+            "key": "viz_vmin_perc",
+            "name": "FOV vmin Percentile",
+            "required": false,
+            "description": "Minimum value for the colormap range, as percentile of the FOV fluorescence [float, [0 <FOV vmax Percentile>)]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 0,
+                "min": 0,
+                "max": 100
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_vmax_perc",
+            "name": "FOV vmax Percentile",
+            "required": false,
+            "description": "Maximum value for the colormap range, as percentile of the FOV fluorescence [float, (<FOV vmin Percentile> 100]]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 99,
+                "min": 0,
+                "max": 100
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_cmap",
+            "name": "FOV Colormap",
+            "required": false,
+            "description": "Colormap for plotting the FOV [str]",
+            "type": {
+                "param_type": "ToolStringParam",
+                "default": "plasma"
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_show_grid",
+            "name": "Show Grid on FOV",
+            "required": false,
+            "description": "Whether or not to show the grid on FOVs [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_ticks_step",
+            "name": "FOV Ticks Step",
+            "required": false,
+            "description": "Step for the x- and y-ticks [int, >0]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 128,
+                "min": 1
+            },
+            "group": "Visualization Parameters"
+        }
+    ],
+    "results": [
+        {
+            "key": "tool_output_group",
+            "name": "Tool Outputs",
+            "description": "Tool outputs",
+            "file_patterns": [
+                "**/*"
+            ]
+        }
+    ],
+    "resources": {
+        "cpu": 4,
+        "gpu": 0,
+        "memory": 2000
+    },
+    "description": "Tool to run suite2p ROI classification on the extracted ROIs",
+    "visibility": "public",
+    "version": "1.0.0"
+}

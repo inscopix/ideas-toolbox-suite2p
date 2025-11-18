@@ -1,0 +1,338 @@
+{
+    "key": "suite2p_wrapper__run_suite2p_end_to_end",
+    "name": "Run suite2p pipeline",
+    "schema_version": "3.0.0",
+    "container_image": {
+        "repository": "platform/suite2p",
+        "label": "0.0.1"
+    },
+    "command": {
+        "file_path": "toolbox/tools/suite2p_wrapper.py",
+        "entry_point": "run_suite2p_end_to_end",
+        "program_type": "PYTHON"
+    },
+    "params": [
+        {
+            "key": "raw_movie_files",
+            "name": "Raw Movie Files",
+            "required": true,
+            "description": "Input 2P movie(s) [.isxd, .zip, .tif/.tiff, .ome.tif/.ome.tiff]",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": true,
+                "file_formats": [
+                    "isxd",
+                    "zip",
+                    "tif",
+                    "tiff"
+                ]
+            },
+            "group": "Input Data"
+        },
+        {
+            "key": "ops_file",
+            "name": "Optional Parameters File",
+            "required": false,
+            "description": "Optional parameters file that allows for more granular control of all available suite2p parameters. See documentation for more details [.npy]",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": false,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
+        },
+        {
+            "key": "classifier_path",
+            "name": "Optional Classifier File",
+            "required": false,
+            "description": "[from suite2p docs for <classifier_path>] \"Path to classifier file you want to use for cell classification.\" [.npy]",
+            "type": {
+                "param_type": "ToolPathParam",
+                "multiple": false,
+                "file_formats": [
+                    "npy"
+                ]
+            },
+            "group": "Input Data"
+        },
+        {
+            "key": "params_from",
+            "name": "Overwrite Analysis Table Parameters",
+            "required": true,
+            "description": "When a parameters file is provided as input, whether the parameters from the analysis table columns should be overwritten by the values from the file. Only effective when an optional parameters file is provided. Defaults to False. [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": false
+            },
+            "group": "Main Settings"
+        },
+        {
+            "key": "tau",
+            "name": "Tau",
+            "required": false,
+            "description": "[from suite2p docs for <tau>] \"The timescale of the sensor (in seconds), used for deconvolution kernel. The kernel is fixed to have this decay and is not fit to the data. We recommend: 0.7 for GCaMP6f; 1.0 for GCaMP6m; 1.25-1.5 for GCaMP6s.\" [float, >=0.001]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 1.0,
+                "min": 0.001
+            },
+            "group": "Main Settings"
+        },
+        {
+            "key": "frames_include",
+            "name": "Frames to Include",
+            "required": false,
+            "description": "[from suite2p docs for <frames_include>] \"If greater than zero, only [the first] <frames_include> frames are processed. Useful for testing parameters on a subset of data.\" Note that suite2p will not run on less than 50 frames, and might have unpredictable behavior on less than 200 frames [int, -1 or >=50]",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": -1,
+                "min": -1
+            },
+            "group": "Main Settings"
+        },
+        {
+            "key": "save_npy",
+            "name": "Save NPY",
+            "required": false,
+            "description": "If true, save suite2p NPY output (as a ZIP file) [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            },
+            "group": "Output Format"
+        },
+        {
+            "key": "save_isxd",
+            "name": "Save ISXD",
+            "required": false,
+            "description": "If true, save suite2p output as ISXD files [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            },
+            "group": "Output Format"
+        },
+        {
+            "key": "save_NWB",
+            "name": "Save NWB",
+            "required": false,
+            "description": "[from suite2p docs for <save_NWB>] \"Whether to save output as NWB file.\" [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": false
+            },
+            "group": "Output Format"
+        },
+        {
+            "key": "save_mat",
+            "name": "Save MAT",
+            "required": false,
+            "description": "[from suite2p docs for <save_mat>] \"Whether to save the results in matlab format in file \"Fall.mat\".\" [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": false
+            },
+            "group": "Output Format"
+        },
+        {
+            "key": "maxregshift",
+            "name": "Maximum Registration Shift",
+            "required": false,
+            "description": "[from suite2p docs for <maxregshift>] \"The maximum shift as a fraction of the frame size. If the frame is Ly pixels x Lx pixels, then the maximum pixel shift in pixels will be max(Ly,Lx) * ops['maxregshift'].\" [float, [0.01 1]]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 0.1,
+                "min": 0.01,
+                "max": 1
+            },
+            "group": "Registration"
+        },
+        {
+            "key": "th_badframes",
+            "name": "Threshold for Bad Frames",
+            "required": false,
+            "description": "[from suite2p docs for <th_badframes>] \"Involved with setting threshold for excluding frames for cropping. Set this smaller to exclude more frames.\" [float, >=0]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 1.0,
+                "min": 0
+            },
+            "group": "Registration"
+        },
+        {
+            "key": "nonrigid",
+            "name": "Nonrigid Registration",
+            "required": false,
+            "description": "[from suite2p docs for <nonrigid>] \"Whether or not to perform non-rigid registration, which splits the field of view into blocks and computes registration offsets in each block separately.\" [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            },
+            "group": "Registration"
+        },
+        {
+            "key": "threshold_scaling",
+            "name": "ROI Threshold Scaling",
+            "required": false,
+            "description": "[from suite2p docs for <threshold_scaling>] \"This controls the threshold at which to detect ROIs (how much the ROIs have to stand out from the noise to be detected). If you set this higher, then fewer ROIs will be detected, and if you set it lower, more ROIs will be detected.\" [float, >=0]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 1.0,
+                "min": 0
+            },
+            "group": "ROI Detection"
+        },
+        {
+            "key": "neucoeff",
+            "name": "Neuropil Coefficient",
+            "required": false,
+            "description": "[from suite2p docs for <neucoeff>] \"Neuropil coefficient for all ROIs.\" [float, >=0]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 0.7,
+                "min": 0
+            },
+            "group": "Spike Deconvolution"
+        },
+        {
+            "key": "thresh_spks_perc",
+            "name": "Spikes Percentile Threshold",
+            "required": false,
+            "description": "Threshold for denoising the deconvolved spike trains, in percentile. Any value in the ROIs-by-time-point deconvolved spike matrix that is below the matrix's xth percentile value is set to 0. Note that the same threshold is applied to all ROIs, and that this thresholding step does not binarize the deconvolved spike trains but simply filters out the low-amplitude spike events [float, [0 100)]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "default": 99.7,
+                "min": 0,
+                "max": 100
+            },
+            "group": "Spike Deconvolution"
+        },
+        {
+            "key": "viz_vmin_perc",
+            "name": "FOV vmin Percentile",
+            "required": false,
+            "description": "Minimum value for the colormap range, as percentile of the FOV fluorescence [float, [0 <FOV vmax Percentile>)]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "min": 0,
+                "max": 100,
+                "default": 0
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_vmax_perc",
+            "name": "FOV vmax Percentile",
+            "required": false,
+            "description": "Maximum value for the colormap range, as percentile of the FOV fluorescence [float, (<FOV vmin Percentile> 100]]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "min": 0,
+                "max": 100,
+                "default": 99
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_cmap",
+            "name": "FOV Colormap",
+            "required": false,
+            "description": "Colormap for plotting the FOV [str]",
+            "type": {
+                "param_type": "ToolStringParam",
+                "default": "plasma"
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_show_grid",
+            "name": "Show Grid on FOV",
+            "required": false,
+            "description": "Whether or not to show the grid on FOVs [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_ticks_step",
+            "name": "FOV Ticks Step",
+            "required": false,
+            "description": "Step for the x- and y-ticks [int, >0]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "min": 1,
+                "default": 128
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_display_rate",
+            "name": "Movie Display Rate",
+            "required": false,
+            "description": "Display rate for the preview movies, in Hz [float, >=0.1]",
+            "type": {
+                "param_type": "ToolFloatRangeParam",
+                "min": 0.1,
+                "default": 10
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_n_samp_cells",
+            "name": "Number of Sample Cells",
+            "required": false,
+            "description": "Number of sample cells for the cell extraction preview [int, >0]",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 20,
+                "min": 1
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_random_seed",
+            "name": "Random Seed",
+            "required": false,
+            "description": "Random seed for selecting sample cells [int, >=0]",
+            "type": {
+                "param_type": "ToolIntRangeParam",
+                "default": 0,
+                "min": 0
+            },
+            "group": "Visualization Parameters"
+        },
+        {
+            "key": "viz_show_all_footprints",
+            "name": "Show Non-Sample Cells' Footprints",
+            "required": false,
+            "description": "Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed [bool]",
+            "type": {
+                "param_type": "ToolBooleanParam",
+                "default": true
+            },
+            "group": "Visualization Parameters"
+        }
+    ],
+    "results": [
+        {
+            "key": "tool_output_group",
+            "name": "Tool Outputs",
+            "description": "Tool outputs",
+            "file_patterns": [
+                "**/*"
+            ]
+        }
+    ],
+    "resources": {
+        "cpu": 8,
+        "gpu": 0,
+        "memory": 32000
+    },
+    "description": "Tool to run suite2p end-to-end on any format of 2p movie",
+    "visibility": "public",
+    "version": "1.0.0"
+}

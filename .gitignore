@@ -3,9 +3,6 @@ resources/
 outputs/
 inputs.sh
 inputs.json
-data/sample_300x512x512_movie.isxd
-data/data_raw.bin
-data/data.bin
 
 # Credentials
 .*-token
