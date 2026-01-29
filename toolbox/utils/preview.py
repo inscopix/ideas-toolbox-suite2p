@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 from suite2p.io import BinaryFile
+from tifffile import tifffile
 from toolbox.utils.duplicates import generate_movie_preview
 
 
@@ -22,8 +23,12 @@ def preview_binary_movie(
     fname = "movie_preview.mp4"
 
     L = ops["nframes"]
-    if ops["frames_include"] != -1 and ops["frames_include"] != L:
+    if ops["frames_include"] != -1 and ops["frames_include"] < L:
         L = ops["frames_include"]
+    elif ops["frames_include"] > L:
+        logger.warning(
+            f"[Preview Binary Movie] Requested to include {ops['frames_include']} frames, but this dataset only has {L} frames."
+        )
     fs = ops["fs"]
 
     bin_info_dict = {
@@ -91,7 +96,7 @@ def preview_registration_fovs(
         ax.set_xlim((-0.5, Lx - 0.5))
         ax.set_ylim((Ly - 0.5, -0.5))
     fig.tight_layout()
-    plt.savefig("registration_fovs.png")
+    plt.savefig("registration_fovs.svg", transparent=True)
 
 
 def preview_registration_offsets(ops):
@@ -112,8 +117,12 @@ def preview_registration_offsets(ops):
         arr_dict.pop("yoff1")
 
     L = len(ops["xoff"])
-    if ops["frames_include"] != -1 and ops["frames_include"] != L:
+    if ops["frames_include"] != -1 and ops["frames_include"] < L:
         L = ops["frames_include"]
+    elif ops["frames_include"] > L:
+        logger.warning(
+            f"[Preview Registration Offsets] Requested to include {ops['frames_include']} frames, but this dataset only has {L} frames."
+        )
     tb = np.arange(L) / ops["fs"]
 
     n_subplots = len(arr_dict)
@@ -132,7 +141,7 @@ def preview_registration_offsets(ops):
             ax.set_xlabel("time (s)")
             ax.set_ylabel("amplitude (A.U.)")
     fig.tight_layout()
-    plt.savefig("registration_offsets.png")
+    plt.savefig("registration_offsets.svg", transparent=True)
 
 
 def preview_registration_movies(
@@ -156,8 +165,12 @@ def preview_registration_movies(
     yticks = np.arange(0, Ly + ticks_step, ticks_step)
 
     L = ops["nframes"]
-    if ops["frames_include"] != -1 and ops["frames_include"] != L:
+    if ops["frames_include"] != -1 and ops["frames_include"] < L:
         L = ops["frames_include"]
+    elif ops["frames_include"] > L:
+        logger.warning(
+            f"[Preview Registration Movies] Requested to include {ops['frames_include']} frames, but this dataset only has {L} frames."
+        )
     fs = ops["fs"]
     arr_frames = np.arange(0, L, display_rate)
 
@@ -240,7 +253,7 @@ def preview_detection_footprints(
 
         iscell = iscell[:, 0]
         im_idx = -1
-        standalone_figure_name = "detection_footprints_accepted.png"
+        standalone_figure_name = "detection_footprints_accepted.svg"
     else:
         has_iscell = False
 
@@ -250,7 +263,7 @@ def preview_detection_footprints(
 
         iscell = np.ones((N,))
         im_idx = 2
-        standalone_figure_name = "detection_footprints_detected.png"
+        standalone_figure_name = "detection_footprints_detected.svg"
 
     hsvs = np.zeros((2, Ly, Lx, 3), dtype=np.float32)
     for idx in range(N):
@@ -316,7 +329,7 @@ def preview_detection_footprints(
         ax.set_xlim((-0.5, Lx - 0.5))
         ax.set_ylim((Ly - 0.5, -0.5))
     fig.tight_layout()
-    plt.savefig("detection_footprints_all.png")
+    plt.savefig("detection_footprints_all.svg", transparent=True)
 
     fig, ax = plt.subplots(1, 1, figsize=(6, 6 * Ly / Lx))
     im, title_str = im_list[im_idx]
@@ -331,7 +344,7 @@ def preview_detection_footprints(
     ax.set_xlim((-0.5, Lx - 0.5))
     ax.set_ylim((Ly - 0.5, -0.5))
     fig.tight_layout()
-    plt.savefig(standalone_figure_name)
+    plt.savefig(standalone_figure_name, transparent=True)
 
 
 def preview_extraction_traces(
@@ -371,13 +384,27 @@ def preview_extraction_traces(
     else:
         has_iscell = False
 
+    # if allow_overlap is False, then fluorescence traces of overlapping footprints are set to all zeros; the code below removes data from overlapping ROIs from preview figures
+    if not ops["allow_overlap"]:
+        idx_ok = np.where([len(np.unique(f)) > 1 for f in F])[0]
+        F = F[idx_ok, :]
+        Fneu = Fneu[idx_ok, :]
+        if has_spks:
+            spks = spks[idx_ok, :]
+        if has_iscell:
+            iscell = iscell[idx_ok]
+
     N, L = F.shape
-    if ops["frames_include"] != -1 and ops["frames_include"] != L:
+    if ops["frames_include"] != -1 and ops["frames_include"] < L:
         L = ops["frames_include"]
         F = F[:, :L]
         Fneu = Fneu[:, :L]
         if has_spks:
             spks = spks[:, :L]
+    elif ops["frames_include"] > L:
+        logger.warning(
+            f"[Preview Extraction Traces] Requested to include {ops['frames_include']} frames, but this dataset only has {L} frames."
+        )
     fs = ops["fs"]
     tb = np.arange(L) / fs
     Ly, Lx = ops["Ly"], ops["Lx"]
@@ -388,8 +415,8 @@ def preview_extraction_traces(
     else:
         idx_iscell = np.arange(N)
     if n_samp_cells > len(idx_iscell):
-        logger.info(
-            f"`Number of Sample Cells`={n_samp_cells} exceeds the number of accepted cells={len(idx_iscell)}. Reducing it to {len(idx_iscell)}.`"
+        logger.warning(
+            f"[Preview Extraction Traces] `Number of Sample Cells`={n_samp_cells} exceeds the number of accepted cells={len(idx_iscell)}. Reducing it to {len(idx_iscell)}.`"
         )
         n_samp_cells = len(idx_iscell)
     idx_cells = np.sort(
@@ -418,7 +445,9 @@ def preview_extraction_traces(
         ax.spines[["right", "top"]].set_visible(False)
         ax.tick_params(axis="both")  # , labelsize=tick_label_size)
         fig.tight_layout()
-        plt.savefig("extracted_sample_sources_traces_spikes.png")
+        plt.savefig(
+            "extracted_sample_sources_traces_spikes.svg", transparent=True
+        )
         line_colors = [x.get_color() for x in ax.lines[::-1]]
 
     # our style - traces only for cellset_raw
@@ -435,7 +464,7 @@ def preview_extraction_traces(
     ax.spines[["right", "top"]].set_visible(False)
     ax.tick_params(axis="both")  # , labelsize=tick_label_size)
     fig.tight_layout()
-    plt.savefig("extracted_sample_sources_traces_only.png")
+    plt.savefig("extracted_sample_sources_traces_only.svg", transparent=True)
     line_colors = [x.get_color() for x in ax.lines[::-1]]
 
     # FOV with colored footprints from sample traces
@@ -478,7 +507,9 @@ def preview_extraction_traces(
         ax.set_xlim((-0.5, Lx - 0.5))
         ax.set_ylim((Ly - 0.5, -0.5))
         fig.tight_layout()
-        plt.savefig("extracted_sample_sources_footprints.png")
+        plt.savefig(
+            "extracted_sample_sources_footprints.svg", transparent=True
+        )
 
     # suite2p style
     if has_spks:
@@ -509,7 +540,9 @@ def preview_extraction_traces(
             else:
                 ax.set_xlabel("frame")
         fig.tight_layout()
-        plt.savefig("extracted_sample_sources_traces_suite2p.png")
+        plt.savefig(
+            "extracted_sample_sources_traces_suite2p.svg", transparent=True
+        )
 
     # raster plot
     if has_spks:
@@ -527,7 +560,7 @@ def preview_extraction_traces(
         ax.set_xlabel("time (s)")
         ax.set_ylabel("cell (index)")
         fig.tight_layout()
-        plt.savefig("raster_deconvolved_spikes.png")
+        plt.savefig("raster_deconvolved_spikes.svg", transparent=True)
 
 
 def create_output_previews(
@@ -619,6 +652,20 @@ def create_output_previews(
             show_grid=show_grid,
             ticks_step=ticks_step,
         )
+
+
+def preview_template_image(img_path):
+    """
+    Create preview figure showing the template image
+    """
+    img = tifffile.imread(img_path)
+    fig, ax = plt.subplots(1, 1)
+    ax.imshow(img, cmap="gray")
+    ax.axis("off")
+    fig.tight_layout()
+    plt.savefig(
+        "local_corr_img_preview.png", bbox_inches="tight", pad_inches=0.1
+    )
 
 
 def hex_to_rgb(hex):

@@ -7,24 +7,24 @@ import shutil
 from toolbox.tools import suite2p_individual_steps as s2pis
 from suite2p import io
 
-data_dir = "data"
+data_dir = "/ideas/data"
 
 
 @pytest.mark.parametrize(
     "raw_movie_files,nplanes,nchannels,functional_chan,bruker_bidirectional,expected_files,expected_shape,expected_range,expected_mean_first_last,expected_fs,expected_mean_img,",
     [
         [
-            ["sample_128x128x1000_movie.isxd"],
+            ["sample_300x512x512_movie.isxd"],
             1,
             1,
             1,
             False,
             ["data_raw.bin", "ops_binary_conversion.npy"],
-            (62, 512, 512),
-            (666, 1383),
-            918.1294116973877,
-            10.0,
-            10048416.0,
+            (300, 512, 512),
+            (0, 8191),
+            325.29364585876465,
+            29.87393200693075,
+            34463780.0,
         ]
     ],
 )
@@ -131,11 +131,11 @@ def test_suite2p_binary_conversion(
             128,
             10,
             ["data.bin", "ops_registration.npy"],
-            (62, 512, 512),
-            (667, 1366),
-            919.6217651367188,
-            10.0,
-            0,
+            (300, 512, 512),
+            (-829, 8186),
+            324.7294921875,
+            29.87393200693075,
+            9,
         ]
     ],
 )
@@ -292,8 +292,8 @@ def test_suite2p_registration(
             True,
             128,
             ["stat_ROI_detection.npy", "ops_ROI_detection.npy"],
-            18,
-            5050,
+            54,
+            3251,
         ]
     ],
 )
@@ -408,11 +408,11 @@ def test_suite2p_roi_detection(
             0,
             True,
             ["stat.npy", "F.npy", "Fneu.npy", "ops_ROI_extraction.npy"],
-            18,
-            5050,
-            (18, 1000),
-            913.9661,
-            927.72455,
+            54,
+            3251,
+            (54, 300),
+            523.0839,
+            391.02588,
         ]
     ],
 )
@@ -517,9 +517,9 @@ def test_suite2p_roi_extraction(
             True,
             128,
             ["iscell.npy", "ops_ROI_classification.npy"],
-            18,
-            4,
-            0.22963083703229645,
+            54,
+            19,
+            0.3588041016285435,
         ]
     ],
 )
@@ -576,7 +576,7 @@ def test_suite2p_roi_classification(
     ), "Unexpected number of accepted cells!"
 
     assert np.allclose(
-        np.mean(iscell[:, 1]), expected_mean_prob, rtol=1e-3
+        np.mean(iscell[:, 1]), expected_mean_prob
     ), "Unexpected mean probability across ROIs!"
 
     # clean up
@@ -601,8 +601,8 @@ def test_suite2p_roi_classification(
             0,
             True,
             ["spks.npy", "ops_spike_deconvolution.npy"],
-            (18, 1000),
-            18990.904,
+            (54, 300),
+            45205.14,
         ]
     ],
 )
