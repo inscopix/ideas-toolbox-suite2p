@@ -6,14 +6,13 @@ import pytest
 import shutil
 from toolbox.tools.suite2p_wrapper import run_suite2p_end_to_end
 
-data_dir = "/ideas/data"
-
+data_dir = "data"
 
 @pytest.mark.parametrize(
     "raw_movie_files,ops_file,classifier_path,params_from,tau,frames_include,save_npy,save_isxd,save_NWB,save_mat,save_img,maxregshift,th_badframes,nonrigid,threshold_scaling,neucoeff,thresh_spks_perc,expected_start_time,expected_ref_image,expected_F_shape,expected_F_mean,expected_spks_sum,expected_accepted_cells,",
     [
         [
-            ["sample_300x512x512_movie.isxd"],
+            ["sample_200x256x256_movie.isxd"],
             None,
             None,
             "table",
@@ -31,10 +30,10 @@ data_dir = "/ideas/data"
             0.7,
             99.7,
             "2024-09-20 13:22:01",
-            68771274,
-            (54, 300),
-            523.0839,
-            45205.14,
+            12430782,
+            (28, 200),
+            433.3202,
+            8853.195,
             19,
         ]
     ],

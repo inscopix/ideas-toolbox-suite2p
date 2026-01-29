@@ -1,6 +1,6 @@
 # Create base image to run analysis in
 # Change the base image based on your use case
-FROM public.ecr.aws/lts/ubuntu:20.04 AS base
+FROM public.ecr.aws/lts/ubuntu:22.04 AS base
 
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
@@ -9,7 +9,7 @@ ENV PYTHONFAULTHANDLER=1
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Arguments for python installation
-ARG PYTHON=python3.9
+ARG PYTHON=python3.10
 ARG VENV=venv
 ARG PYTHON_VENV=/ideas/${VENV}/bin/python
 
@@ -33,8 +33,8 @@ RUN apt-get update \
         python3-dev \
         libgl1-mesa-glx \
         libglib2.0-0 \
-        python3.9 \
-        python3.9-venv \
+        python3.10 \
+        python3.10-venv \
         python3-pip \
         git \
         ffmpeg\

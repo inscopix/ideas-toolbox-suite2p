@@ -2,11 +2,12 @@
 [project]
 name = "ideas-toolbox-suite2p"
 description = "IDEAS Suite2p Toolkit"
-requires-python = "==3.9.5"
+requires-python = "==3.10.12"
 classifiers = [
     "Programming Language :: Python :: 3"
 ]
 dependencies = [
+    "ideas-python[analysis]==1.1.1",
     "pynwb==2.8.1",
     "hdmf==3.14.0",
     "dandi==0.63.0",
@@ -14,11 +15,10 @@ dependencies = [
     "scikit-learn==1.4.2",
     "scipy==1.13.0",
     "suite2p@git+https://@github.com/inscopix/isxSuite2p.git@v0.0.3",
-    "imageio==2.19.0",
+    "imageio==2.33.0",
     "imageio-ffmpeg==0.4.7",
     "pytest==7.4.2",
-    "isx==2.0.0",
-    "ideas-public-python-utils@git+https://github.com/inscopix/ideas-public-python-utils.git@ID-4920"
+    "isx==2.1.0",
 ]
 
 dynamic = ["version"]

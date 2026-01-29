@@ -1,5 +1,5 @@
 import os
-from ideas.metadata import get_efocus
+from ideas.analysis.metadata import get_efocus
 
 
 def set_hardcoded_parameters(ops):
