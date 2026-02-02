@@ -31,3 +31,11 @@ test: clean build
 		--rm \
 		${IMAGE_TAG} \
 		pytest ${TEST_ARGS}
+
+# Run a tool in the repo
+# Specify the tool key to run
+run: build
+	ideas tools run $(tool) -s -c -n
+
+run-all: build
+	@$(foreach f, $(shell ls -d .ideas/*/), ideas tools run -s -c -n $(shell basename $(f));)

@@ -8,7 +8,7 @@
     },
     "command": {
         "file_path": "toolbox/tools/suite2p_individual_steps.py",
-        "entry_point": "suite2p_spike_deconvolution",
+        "entry_point": "suite2p_spike_deconvolution_ideas_wrapper",
         "program_type": "PYTHON"
     },
     "params": [
@@ -163,11 +163,19 @@
     ],
     "results": [
         {
-            "key": "tool_output_group",
-            "name": "Tool Outputs",
-            "description": "Tool outputs",
+            "key": "spks",
+            "name": "Deconvolved Spikes",
+            "description": "suite2p deconvolved spikes file",
             "file_patterns": [
-                "**/*"
+                "spks**"
+            ]
+        },
+        {
+            "key": "ops_spike_deconvolution",
+            "name": "Spike Deconvolution Output Parameters File",
+            "description": "Parameters file outputted by the spike deconvolution tool",
+            "file_patterns": [
+                "ops_spike_deconvolution**"
             ]
         }
     ],

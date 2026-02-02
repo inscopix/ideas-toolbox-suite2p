@@ -8,7 +8,7 @@
     },
     "command": {
         "file_path": "toolbox/tools/suite2p_individual_steps.py",
-        "entry_point": "suite2p_binary_conversion",
+        "entry_point": "suite2p_binary_conversion_ideas_wrapper",
         "program_type": "PYTHON"
     },
     "params": [
@@ -90,11 +90,19 @@
     ],
     "results": [
         {
-            "key": "tool_output_group",
-            "name": "Tool Outputs",
-            "description": "Tool outputs",
+            "key": "data_raw",
+            "name": "Raw Binary Movie",
+            "description": "Raw suite2p binary movie",
             "file_patterns": [
-                "**/*"
+                "data_raw**"
+            ]
+        },
+        {
+            "key": "ops_binary_conversion",
+            "name": "Binary Conversion Output Parameters File",
+            "description": "Parameters file outputted by the binary conversion tool",
+            "file_patterns": [
+                "ops_binary_conversion**"
             ]
         }
     ],

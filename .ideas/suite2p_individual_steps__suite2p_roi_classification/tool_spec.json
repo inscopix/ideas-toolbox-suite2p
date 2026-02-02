@@ -8,7 +8,7 @@
     },
     "command": {
         "file_path": "toolbox/tools/suite2p_individual_steps.py",
-        "entry_point": "suite2p_roi_classification",
+        "entry_point": "suite2p_roi_classification_ideas_wrapper",
         "program_type": "PYTHON"
     },
     "params": [
@@ -127,11 +127,19 @@
     ],
     "results": [
         {
-            "key": "tool_output_group",
-            "name": "Tool Outputs",
-            "description": "Tool outputs",
+            "key": "iscell",
+            "name": "Classification Labels",
+            "description": "ROI classification suite2p labels file",
             "file_patterns": [
-                "**/*"
+                "iscell**"
+            ]
+        },
+        {
+            "key": "ops_ROI_classification",
+            "name": "ROI Classification Output Parameters File",
+            "description": "Parameters file outputted by the ROI classification tool",
+            "file_patterns": [
+                "ops_ROI_classification**"
             ]
         }
     ],

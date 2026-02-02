@@ -7,8 +7,10 @@ import suite2p
 from toolbox.utils import io, metadata, preview, utilities
 from zipfile import ZipFile
 from typing import List, Optional
+from ideas.tools.types import IdeasFile
+from ideas.tools import log
 
-logger = logging.getLogger()
+logger = log.get_logger()
 
 
 def run_suite2p_end_to_end(
@@ -221,3 +223,95 @@ def run_suite2p_end_to_end(
     # clean up suite2p output folder (otherwise recognized as output by IDEAS)
     shutil.rmtree(suite2p_output_dir)
     print("ALL DONE!")
+
+
+def run_suite2p_end_to_end_ideas_wrapper(
+    *,
+    raw_movie_files: List[IdeasFile],
+    ops_file: Optional[List[IdeasFile]] = None,
+    classifier_path: Optional[List[IdeasFile]] = None,
+    params_from: bool = False,
+    tau: float = 1.0,
+    frames_include: int = -1,
+    save_npy: bool = True,
+    save_isxd: bool = True,
+    save_NWB: bool = False,
+    save_mat: bool = False,
+    save_img: bool = True,
+    align_by_chan: int = 1,
+    maxregshift: float = 0.1,
+    th_badframes: float = 1.0,
+    nonrigid: bool = True,
+    threshold_scaling: float = 1.0,
+    neucoeff: float = 0.7,
+    thresh_spks_perc: float = 99.7,
+    viz_vmin_perc: float = 0,
+    viz_vmax_perc: float = 99,
+    viz_cmap: str = "plasma",
+    viz_show_grid: bool = True,
+    viz_ticks_step: float = 128,
+    viz_display_rate: float = 10,
+    viz_n_samp_cells: int = 20,
+    viz_random_seed: int = 0,
+    viz_show_all_footprints: bool = True,
+):
+    """
+    Ideas wrapper for tool to run end-to-end suite2p pipeline on Inscopix isxd or Bruker Ultima 2P movies.
+
+    :param List[str] raw_movie_files: Input 2P movie(s).
+    :param Optional[List[str]] ops_file: Optional parameters file that allows for more granular control of all available suite2p parameters. See documentation for more details.
+    :param Optional[List[str]] classifier_path: [from suite2p docs] Path to classifier file you want to use for cell classification.
+    :param bool params_from: When a parameters file is provided as input, whether the parameters from the analysis table columns should be overwritten by the values from the file. Only effective when an optional parameters file is provided. Defaults to False.
+    :param float tau: [from suite2p docs] The timescale of the sensor (in seconds), used for deconvolution kernel. The kernel is fixed to have this decay and is not fit to the data. We recommend: 0.7 for GCaMP6f; 1.0 for GCaMP6m; 1.25-1.5 for GCaMP6s.
+    :param int frames_include: [from suite2p docs] If greater than zero, only [the first] <frames_include> frames are processed. Useful for testing parameters on a subset of data.
+    :param bool save_npy: If true, save suite2p NPY output (as a ZIP file).
+    :param bool save_isxd: If true, save suite2p output as ISXD files.
+    :param bool save_NWB: [from suite2p docs] Whether to save output as NWB file.
+    :param bool save_mat: [from suite2p docs] Whether to save the results in matlab format in file "Fall.mat".
+    :param bool save_img: Whether to save the local correlation image as a standalone .tif file, e.g., for further use as template image in Multi-Session Registration.
+    :param int align_by_chan: [from suite2p docs] Which channel to use for alignment (1-based, so 1 means 1st channel and 2 means 2nd channel). If you have a non-functional channel with something like td-Tomato expression, you may want to use this channel for alignment rather than the functional channel.
+    :param float maxregshift: [from suite2p docs] The maximum shift as a fraction of the frame size. If the frame is Ly pixels x Lx pixels, then the maximum pixel shift in pixels will be max(Ly,Lx) * ops['maxregshift'].
+    :param float th_badframes: [from suite2p docs] Involved with setting threshold for excluding frames for cropping. Set this smaller to exclude more frames.
+    :param bool nonrigid: [from suite2p docs] Whether or not to perform non-rigid registration, which splits the field of view into blocks and computes registration offsets in each block separately.
+    :param float threshold_scaling: [from suite2p docs] This controls the threshold at which to detect ROIs (how much the ROIs have to stand out from the noise to be detected). If you set this higher, then fewer ROIs will be detected, and if you set it lower, more ROIs will be detected.
+    :param float neucoeff: [from suite2p docs] Neuropil coefficient for all ROIs.
+    :param float thresh_spks_perc: Threshold for denoising the deconvolved spike trains, in percentile. Any value in the ROIs-by-time-point deconvolved spike matrix that is below the matrix's xth percentile value is set to 0. Note that the same threshold is applied to all ROIs, and that this thresholding step does not binarize the deconvolved spike trains but simply filters out the low-amplitude spike events.
+    :param float viz_vmin_perc: Minimum value for the colormap range, as percentile of the FOV fluorescence.
+    :param float viz_vmax_perc: Maximum value for the colormap range, as percentile of the FOV fluorescence.
+    :param str viz_cmap: Colormap for plotting the FOV.
+    :param bool viz_show_grid: Whether or not to show the grid on FOVs.
+    :param float viz_ticks_step: Step for the x- and y-ticks.
+    :param float viz_display_rate: Display rate for the preview movies, in Hz.
+    :param int viz_n_samp_cells: Number of sample cells for the cell extraction preview.
+    :param int viz_random_seed: Random seed for selecting sample cells.
+    :param bool viz_show_all_footprints: Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed.
+    """
+    run_suite2p_end_to_end(
+        raw_movie_files=raw_movie_files,
+        ops_file=ops_file,
+        classifier_path=classifier_path,
+        params_from=params_from,
+        tau=tau,
+        frames_include=frames_include,
+        save_npy=save_npy,
+        save_isxd=save_isxd,
+        save_NWB=save_NWB,
+        save_mat=save_mat,
+        save_img=save_img,
+        align_by_chan=align_by_chan,
+        maxregshift=maxregshift,
+        th_badframes=th_badframes,
+        nonrigid=nonrigid,
+        threshold_scaling=threshold_scaling,
+        neucoeff=neucoeff,
+        thresh_spks_perc=thresh_spks_perc,
+        viz_vmin_perc=viz_vmin_perc,
+        viz_vmax_perc=viz_vmax_perc,
+        viz_cmap=viz_cmap,
+        viz_show_grid=viz_show_grid,
+        viz_ticks_step=viz_ticks_step,
+        viz_display_rate=viz_display_rate,
+        viz_n_samp_cells=viz_n_samp_cells,
+        viz_random_seed=viz_random_seed,
+        viz_show_all_footprints=viz_show_all_footprints,
+    )

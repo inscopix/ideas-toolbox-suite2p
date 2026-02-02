@@ -8,7 +8,7 @@
     },
     "command": {
         "file_path": "toolbox/tools/suite2p_individual_steps.py",
-        "entry_point": "suite2p_roi_detection",
+        "entry_point": "suite2p_roi_detection_ideas_wrapper",
         "program_type": "PYTHON"
     },
     "params": [
@@ -351,11 +351,19 @@
     ],
     "results": [
         {
-            "key": "tool_output_group",
-            "name": "Tool Outputs",
-            "description": "Tool outputs",
+            "key": "stat_ROI_detection",
+            "name": "Detection Statistics",
+            "description": "ROI detection suite2p statistics file",
             "file_patterns": [
-                "**/*"
+                "stat_ROI_detection**"
+            ]
+        },
+        {
+            "key": "ops_ROI_detection",
+            "name": "ROI Detection Output Parameters File",
+            "description": "Parameters file outputted by the ROI detection tool",
+            "file_patterns": [
+                "ops_ROI_detection**"
             ]
         }
     ],
