@@ -729,7 +729,11 @@ def suite2p_roi_classification(
 
     # output previews
     # temporarily copy input stat file to output dir for preview generation
-    shutil.copy(stat_file[0], f"{ideas_output_dir}/stat.npy")
+    tmp_stat_file = None
+    if not os.path.exists(f"{ideas_output_dir}/stat.npy"):
+        tmp_stat_file = f"{ideas_output_dir}/stat.npy"
+        shutil.copy(stat_file[0], tmp_stat_file)
+    
     preview.create_output_previews(
         ops=ops,
         steps="roi_classification",
@@ -739,7 +743,9 @@ def suite2p_roi_classification(
         show_grid=viz_show_grid,
         ticks_step=int(viz_ticks_step),
     )
-    os.remove(f"{ideas_output_dir}/stat.npy")
+    
+    if tmp_stat_file:
+        os.remove(tmp_stat_file)
 
     print("ALL DONE!")
 
@@ -823,8 +829,14 @@ def suite2p_spike_deconvolution(
 
     # output previews
     # temporarily copy input fluo file to output dir for preview generation
-    shutil.copy(fluo_file[0], f"{ideas_output_dir}/F.npy")
-    shutil.copy(neuropil_fluo_file[0], f"{ideas_output_dir}/Fneu.npy")
+    tmp_fluo_file, tmp_neuropli_file = None, None
+    if not os.path.exists(f"{ideas_output_dir}/F.npy"):
+        tmp_fluo_file = f"{ideas_output_dir}/F.npy"
+        shutil.copy(fluo_file[0], tmp_fluo_file)
+    if not os.path.exists(f"{ideas_output_dir}/Fneu.npy"):
+        tmp_neuropli_file = f"{ideas_output_dir}/Fneu.npy"
+        shutil.copy(neuropil_fluo_file[0], tmp_neuropli_file)
+    
     preview.create_output_previews(
         ops=ops,
         steps="spike_deconvolution",
@@ -832,8 +844,11 @@ def suite2p_spike_deconvolution(
         random_seed=int(viz_random_seed),
         show_all_footprints=viz_show_all_footprints,
     )
-    os.remove(f"{ideas_output_dir}/F.npy")
-    os.remove(f"{ideas_output_dir}/Fneu.npy")
+
+    if tmp_fluo_file:
+        os.remove(tmp_fluo_file)
+    if tmp_neuropli_file:
+        os.remove(tmp_neuropli_file)
 
     print("ALL DONE!")
 
