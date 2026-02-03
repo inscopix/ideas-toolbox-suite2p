@@ -1,8 +1,9 @@
+import logging
 import os
-from pynwb import NWBHDF5IO
+
 from dandi.validate import validate
 from dandi.validate_types import Severity
-import logging
+from pynwb import NWBHDF5IO
 
 logger = logging.getLogger()
 
@@ -24,9 +25,7 @@ def is_dandi_compliant(input_nwb_filename):
                     )
                     dandi_compliant = False
     except Exception:
-        logger.warning(
-            "Could not determine if the nwb file is DANDI compliant"
-        )
+        logger.warning("Could not determine if the nwb file is DANDI compliant")
         dandi_compliant = None
 
     # validate external file references
@@ -41,9 +40,7 @@ def is_dandi_compliant(input_nwb_filename):
     with NWBHDF5IO(input_nwb_filename, mode="r") as io:
         nwb = io.read()
         if "ImageSeries" in nwb.acquisition:
-            external_files = (
-                nwb.acquisition["ImageSeries"].external_file[:].tolist()
-            )
+            external_files = nwb.acquisition["ImageSeries"].external_file[:].tolist()
             for f in external_files:
                 ext = f.lower().split(".")[-1]
                 if ext not in supported_video_file_extensions:

@@ -1,13 +1,14 @@
-from colorsys import hsv_to_rgb, rgb_to_hsv
 import logging
-from matplotlib import animation
+import os
+from colorsys import hsv_to_rgb, rgb_to_hsv
+
 import matplotlib.pyplot as plt
 import numpy as np
-import os
+from matplotlib import animation
 from suite2p.io import BinaryFile
 from tifffile import tifffile
-from toolbox.utils.duplicates import generate_movie_preview
 
+from toolbox.utils.duplicates import generate_movie_preview
 
 logger = logging.getLogger()
 
@@ -67,9 +68,7 @@ def preview_registration_fovs(
     xticks = np.arange(0, Lx + ticks_step, ticks_step)
     yticks = np.arange(0, Ly + ticks_step, ticks_step)
 
-    fig, axes = plt.subplots(
-        2, 2, figsize=(8, 8 * Ly / Lx), sharex=True, sharey=True
-    )
+    fig, axes = plt.subplots(2, 2, figsize=(8, 8 * Ly / Lx), sharex=True, sharey=True)
     for idx, (ax, key) in enumerate(zip(axes.ravel(), list(im_dict.keys()))):
         vmin = np.percentile(ops[key], vmin_perc)
         vmax = np.percentile(ops[key], vmax_perc)
@@ -221,9 +220,7 @@ def preview_registration_movies(
     )
 
     plt.rcParams["animation.ffmpeg_path"] = "/usr/bin/ffmpeg"
-    writer = animation.FFMpegWriter(
-        fps=int(fs), extra_args=["-vcodec", "libx264"]
-    )
+    writer = animation.FFMpegWriter(fps=int(fs), extra_args=["-vcodec", "libx264"])
     a.save(fname, writer=writer)
 
 
@@ -295,9 +292,7 @@ def preview_detection_footprints(
     xticks = np.arange(0, Lx + ticks_step, ticks_step)
     yticks = np.arange(0, Ly + ticks_step, ticks_step)
 
-    fig, axes = plt.subplots(
-        2, 2, figsize=(8, 8 * Ly / Lx), sharex=True, sharey=True
-    )
+    fig, axes = plt.subplots(2, 2, figsize=(8, 8 * Ly / Lx), sharex=True, sharey=True)
     for idx, (ax, (im, title_str)) in enumerate(zip(axes.ravel(), im_list)):
         if im is None:
             ax.remove()
@@ -419,9 +414,7 @@ def preview_extraction_traces(
             f"[Preview Extraction Traces] `Number of Sample Cells`={n_samp_cells} exceeds the number of accepted cells={len(idx_iscell)}. Reducing it to {len(idx_iscell)}.`"
         )
         n_samp_cells = len(idx_iscell)
-    idx_cells = np.sort(
-        np.random.choice(idx_iscell, n_samp_cells, replace=False)
-    )
+    idx_cells = np.sort(np.random.choice(idx_iscell, n_samp_cells, replace=False))
 
     # our style
     if has_spks:
@@ -445,9 +438,7 @@ def preview_extraction_traces(
         ax.spines[["right", "top"]].set_visible(False)
         ax.tick_params(axis="both")  # , labelsize=tick_label_size)
         fig.tight_layout()
-        plt.savefig(
-            "extracted_sample_sources_traces_spikes.svg", transparent=True
-        )
+        plt.savefig("extracted_sample_sources_traces_spikes.svg", transparent=True)
         line_colors = [x.get_color() for x in ax.lines[::-1]]
 
     # our style - traces only for cellset_raw
@@ -489,9 +480,9 @@ def preview_extraction_traces(
             hsvs[ypix, xpix, 0] = color_hsv[0]
             hsvs[ypix, xpix, 1] = color_hsv[1]
             hsvs[ypix, xpix, 2] = coefs  # color_hsv[2]/255
-        im = np.array(
-            [hsv_to_rgb(*hsv) for hsv in hsvs.reshape(-1, 3)]
-        ).reshape(hsvs.shape)
+        im = np.array([hsv_to_rgb(*hsv) for hsv in hsvs.reshape(-1, 3)]).reshape(
+            hsvs.shape
+        )
         xticks = np.arange(0, Lx + ticks_step, ticks_step)
         yticks = np.arange(0, Ly + ticks_step, ticks_step)
         fig, ax = plt.subplots(1, 1, figsize=(6, 6 * Ly / Lx))
@@ -507,9 +498,7 @@ def preview_extraction_traces(
         ax.set_xlim((-0.5, Lx - 0.5))
         ax.set_ylim((Ly - 0.5, -0.5))
         fig.tight_layout()
-        plt.savefig(
-            "extracted_sample_sources_footprints.svg", transparent=True
-        )
+        plt.savefig("extracted_sample_sources_footprints.svg", transparent=True)
 
     # suite2p style
     if has_spks:
@@ -540,9 +529,7 @@ def preview_extraction_traces(
             else:
                 ax.set_xlabel("frame")
         fig.tight_layout()
-        plt.savefig(
-            "extracted_sample_sources_traces_suite2p.svg", transparent=True
-        )
+        plt.savefig("extracted_sample_sources_traces_suite2p.svg", transparent=True)
 
     # raster plot
     if has_spks:
@@ -663,16 +650,14 @@ def preview_template_image(img_path):
     ax.imshow(img, cmap="gray")
     ax.axis("off")
     fig.tight_layout()
-    plt.savefig(
-        "local_corr_img_preview.png", bbox_inches="tight", pad_inches=0.1
-    )
+    plt.savefig("local_corr_img_preview.png", bbox_inches="tight", pad_inches=0.1)
 
 
-def hex_to_rgb(hex):
+def hex_to_rgb(value):
     """
     Convert HEX color to RGB color
     """
-    return tuple(int(hex[idx : idx + 2], 16) for idx in (0, 2, 4))
+    return tuple(int(value[idx : idx + 2], 16) for idx in (0, 2, 4))
 
 
 def curate_visualization_parameters(ops, vmin_perc, vmax_perc, ticks_step):

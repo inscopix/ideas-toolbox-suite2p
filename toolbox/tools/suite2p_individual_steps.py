@@ -1,25 +1,26 @@
-from glob import glob
-import isx
-import logging
-from natsort import natsorted
-import numpy as np
 import os
 import shutil
+import time
+from glob import glob
+from typing import List, Optional
+from zipfile import ZipFile
+
+import isx
+import numpy as np
+from ideas.tools import log
+from ideas.tools.types import IdeasFile
+from natsort import natsorted
 from suite2p import (
+    classification,
     default_ops,
+    detection,
+    extraction,
     io,
     registration,
-    detection,
-    classification,
-    extraction,
 )
-import time
+
 from toolbox.utils import io as tlbxio
 from toolbox.utils import metadata, preview, utilities
-from zipfile import ZipFile
-from typing import List, Optional
-from ideas.tools.types import IdeasFile
-from ideas.tools import log
 
 logger = log.get_logger()
 
@@ -82,9 +83,7 @@ def suite2p_binary_conversion(
     )
 
     # detect file type
-    file_ext = "." + ".".join(
-        os.path.basename(raw_movie_files[0]).split(".")[1:]
-    )
+    file_ext = "." + ".".join(os.path.basename(raw_movie_files[0]).split(".")[1:])
     if file_ext == ".isxd":
         ops["input_format"] = "isxd"
         movie = isx.Movie.read(raw_movie_files[0])
@@ -106,9 +105,7 @@ def suite2p_binary_conversion(
         ops["input_format"] = "tif"
         ops["force_sktiff"] = True
         tif_list = glob(f"{data_dir}/*tif")
-        channel_list = [
-            int(os.path.basename(x).split("_")[2][-1]) for x in tif_list
-        ]
+        channel_list = [int(os.path.basename(x).split("_")[2][-1]) for x in tif_list]
         ops["functional_chan"] = channel_list[0]
     elif file_ext in [".tif", ".tiff", ".ome.tif", ".ome.tiff"]:
         ops["input_format"] = "tif"
@@ -177,9 +174,7 @@ def suite2p_binary_conversion(
     # move output files into output folder
     ideas_output_dir = os.getcwd()
     shutil.move(ops0["raw_file"], f"{ideas_output_dir}/data_raw.bin")
-    shutil.move(
-        ops0["ops_path"], f"{ideas_output_dir}/ops_binary_conversion.npy"
-    )
+    shutil.move(ops0["ops_path"], f"{ideas_output_dir}/ops_binary_conversion.npy")
     if os.path.exists(f"{ideas_output_dir}/suite2p/"):
         shutil.rmtree(f"{ideas_output_dir}/suite2p/")
     print("ALL DONE!")
@@ -308,9 +303,7 @@ def suite2p_registration(
     plane_times = {}
     print("----------- REGISTRATION")
     refImg = (
-        ops["refImg"]
-        if "refImg" in ops and ops.get("force_refImg", False)
-        else None
+        ops["refImg"] if "refImg" in ops and ops.get("force_refImg", False) else None
     )
 
     align_by_chan2 = ops["functional_chan"] != ops["align_by_chan"]
@@ -325,9 +318,7 @@ def suite2p_registration(
         ops=ops,
     )
 
-    ops = registration.save_registration_outputs_to_ops(
-        registration_outputs, ops
-    )
+    ops = registration.save_registration_outputs_to_ops(registration_outputs, ops)
     # add enhanced mean image
     meanImgE = registration.compute_enhanced_mean_image(
         ops["meanImg"].astype(np.float32), ops
@@ -364,18 +355,13 @@ def suite2p_registration(
         if ops.get("ops_path"):
             np.save(ops["ops_path"], ops)
         plane_times["two_step_registration"] = time.time() - t11
-        print(
-            "----------- Total %0.2f sec"
-            % plane_times["two_step_registration"]
-        )
+        print("----------- Total %0.2f sec" % plane_times["two_step_registration"])
 
     # compute metrics for registration
     if ops.get("do_regmetrics", True) and n_frames >= 1500:
         t0 = time.time()
         # n frames to pick from full movie
-        nsamp = min(
-            2000 if n_frames < 5000 or Ly > 700 or Lx > 700 else 5000, n_frames
-        )
+        nsamp = min(2000 if n_frames < 5000 or Ly > 700 or Lx > 700 else 5000, n_frames)
         inds = np.linspace(0, n_frames - 1, nsamp).astype("int")
         mov = f_reg[inds]
         mov = mov[
@@ -385,10 +371,7 @@ def suite2p_registration(
         ]
         ops = registration.get_pc_metrics(mov, ops)
         plane_times["registration_metrics"] = time.time() - t0
-        print(
-            "Registration metrics, %0.2f sec."
-            % plane_times["registration_metrics"]
-        )
+        print("Registration metrics, %0.2f sec." % plane_times["registration_metrics"])
         if ops.get("ops_path"):
             np.save(ops["ops_path"], ops)
     # [end of suite2p code]
@@ -533,9 +516,7 @@ def suite2p_roi_detection(
     t11 = time.time()
     plane_times = {}
     print("----------- ROI DETECTION")
-    ops, stat = detection.detection_wrapper(
-        f_reg, ops=ops, classfile=classfile
-    )
+    ops, stat = detection.detection_wrapper(f_reg, ops=ops, classfile=classfile)
     plane_times["detection"] = time.time() - t11
     print("----------- Total %0.2f sec." % plane_times["detection"])
     # [end of suite2p code]
@@ -733,7 +714,7 @@ def suite2p_roi_classification(
     if not os.path.exists(f"{ideas_output_dir}/stat.npy"):
         tmp_stat_file = f"{ideas_output_dir}/stat.npy"
         shutil.copy(stat_file[0], tmp_stat_file)
-    
+
     preview.create_output_previews(
         ops=ops,
         steps="roi_classification",
@@ -743,7 +724,7 @@ def suite2p_roi_classification(
         show_grid=viz_show_grid,
         ticks_step=int(viz_ticks_step),
     )
-    
+
     if tmp_stat_file:
         os.remove(tmp_stat_file)
 
@@ -836,7 +817,7 @@ def suite2p_spike_deconvolution(
     if not os.path.exists(f"{ideas_output_dir}/Fneu.npy"):
         tmp_neuropli_file = f"{ideas_output_dir}/Fneu.npy"
         shutil.copy(neuropil_fluo_file[0], tmp_neuropli_file)
-    
+
     preview.create_output_previews(
         ops=ops,
         steps="spike_deconvolution",
@@ -964,9 +945,7 @@ def suite2p_output_conversion(
             f"{x}.npy" for x in ["F", "Fneu", "spks", "stat", "ops", "iscell"]
         ]
         for file, fixed_fname in zip(file_list, fixed_fname_list):
-            shutil.copyfile(
-                file[0], os.path.join(plane_output_dir, fixed_fname)
-            )
+            shutil.copyfile(file[0], os.path.join(plane_output_dir, fixed_fname))
         ops["save_path"] = plane_output_dir
         np.save(os.path.join(plane_output_dir, "ops.npy"), ops)
         io.save_nwb(ideas_output_dir)
@@ -994,7 +973,9 @@ def suite2p_output_conversion(
     # output metadata
     metadata.create_output_metadata(ops=ops, steps="output_conversion")
 
+
 # ================================ IDEAS Wrapper Functions ====================================
+
 
 def suite2p_binary_conversion_ideas_wrapper(
     raw_movie_files: List[IdeasFile],

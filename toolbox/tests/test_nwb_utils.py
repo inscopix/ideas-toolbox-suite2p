@@ -1,9 +1,9 @@
 import os
-from toolbox.utils.nwb_utils import (
-    is_dandi_compliant,
-    construct_nwb_file_metadata,
-)
 
+from toolbox.utils.nwb_utils import (
+    construct_nwb_file_metadata,
+    is_dandi_compliant,
+)
 
 INPUT_DIR = "/ideas/data/"
 

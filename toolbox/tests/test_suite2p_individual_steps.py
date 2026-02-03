@@ -1,11 +1,13 @@
 import os
+import shutil
+
 import numpy as np
 
 # from zipfile import ZipFile
 import pytest
-import shutil
-from toolbox.tools import suite2p_individual_steps as s2pis
 from suite2p import io
+
+from toolbox.tools import suite2p_individual_steps as s2pis
 
 data_dir = "data"
 
@@ -77,17 +79,15 @@ def test_suite2p_binary_conversion(
     assert np.allclose(mov_range, expected_range), "Unexpected movie range!"
 
     mov_mean_first_last = np.mean([mov.data[0, :, :], mov.data[-1, :, :]])
-    assert np.allclose(
-        mov_mean_first_last, expected_mean_first_last
-    ), "Unexpected movie frames!"
+    assert np.allclose(mov_mean_first_last, expected_mean_first_last), (
+        "Unexpected movie frames!"
+    )
 
     # check ops_binary_conversion.npy
     ops = np.load(expected_files[1], allow_pickle=True).item()
     assert np.allclose(ops["fs"], expected_fs), "Unexpected sampling rate!"
 
-    assert (
-        np.sum(ops["meanImg"]) == expected_mean_img
-    ), "Unexpected mean image!"
+    assert np.sum(ops["meanImg"]) == expected_mean_img, "Unexpected mean image!"
 
     # clean up
     for f in expected_files:
@@ -242,17 +242,17 @@ def test_suite2p_registration(
     assert np.allclose(mov_range, expected_range), "Unexpected movie range!"
 
     mov_mean_first_last = np.mean([mov.data[0, :, :], mov.data[-1, :, :]])
-    assert np.allclose(
-        mov_mean_first_last, expected_mean_first_last
-    ), "Unexpected movie frames!"
+    assert np.allclose(mov_mean_first_last, expected_mean_first_last), (
+        "Unexpected movie frames!"
+    )
 
     # check ops_registration.npy
     ops = np.load(expected_files[1], allow_pickle=True).item()
     assert np.allclose(ops["fs"], expected_fs), "Unexpected sampling rate!"
 
-    assert (
-        np.sum(ops["xoff"]) + np.sum(ops["yoff"]) == expected_sum_xyoff
-    ), "Unexpected sum of xoff and yoff!"
+    assert np.sum(ops["xoff"]) + np.sum(ops["yoff"]) == expected_sum_xyoff, (
+        "Unexpected sum of xoff and yoff!"
+    )
 
     # clean up
     for f in expected_files:
@@ -381,9 +381,9 @@ def test_suite2p_roi_detection(
 
     assert len(stat) == expected_n_rois, "Unexpected number of detected ROIs!"
 
-    assert (
-        sum([x["npix_soma"] for x in stat]) == expected_sum_npix_soma
-    ), "Unexpected sum of somatic areas across all ROIs!"
+    assert sum([x["npix_soma"] for x in stat]) == expected_sum_npix_soma, (
+        "Unexpected sum of somatic areas across all ROIs!"
+    )
 
     # clean up
     for f in expected_files:
@@ -440,9 +440,7 @@ def test_suite2p_roi_extraction(
     """
     Test that suite2p_roi_extraction() runs properly, outputs the expected file and performs ROI extraction as expected.
     """
-    input_files = [
-        f"{data_dir}/{x}" for x in [reg_binary_file, stat_file, ops_file]
-    ]
+    input_files = [f"{data_dir}/{x}" for x in [reg_binary_file, stat_file, ops_file]]
 
     for idx, f in enumerate(input_files):
         dest = os.path.join(os.getcwd(), os.path.basename(f))
@@ -474,29 +472,27 @@ def test_suite2p_roi_extraction(
     stat = np.load(expected_files[0], allow_pickle=True)
     assert len(stat) == expected_n_rois, "Unexpected number of extracted ROIs!"
 
-    assert (
-        sum([x["npix_soma"] for x in stat]) == expected_sum_npix_soma
-    ), "Unexpected sum of somatic areas across all ROIs!"
+    assert sum([x["npix_soma"] for x in stat]) == expected_sum_npix_soma, (
+        "Unexpected sum of somatic areas across all ROIs!"
+    )
 
     # check F.npy
     F = np.load(expected_files[1], allow_pickle=True)
-    assert (
-        F.shape == expected_mat_shape
-    ), "Unexpected shape of extracted traces matrix!"
+    assert F.shape == expected_mat_shape, "Unexpected shape of extracted traces matrix!"
 
-    assert np.allclose(
-        np.nanmean(F), expected_mean_F
-    ), "Unexpected mean value of fluorescence traces!"
+    assert np.allclose(np.nanmean(F), expected_mean_F), (
+        "Unexpected mean value of fluorescence traces!"
+    )
 
     # check Fneu.npy
     Fneu = np.load(expected_files[2], allow_pickle=True)
-    assert (
-        Fneu.shape == expected_mat_shape
-    ), "Unexpected shape of extracted traces matrix!"
+    assert Fneu.shape == expected_mat_shape, (
+        "Unexpected shape of extracted traces matrix!"
+    )
 
-    assert np.allclose(
-        np.nanmean(Fneu), expected_mean_Fneu
-    ), "Unexpected mean value of neuropil fluorescence traces!"
+    assert np.allclose(np.nanmean(Fneu), expected_mean_Fneu), (
+        "Unexpected mean value of neuropil fluorescence traces!"
+    )
 
     # clean up
     for f in expected_files:
@@ -567,17 +563,15 @@ def test_suite2p_roi_classification(
 
     # check iscell.npy
     iscell = np.load(expected_files[0], allow_pickle=True)
-    assert (
-        len(iscell) == expected_n_rois
-    ), "Unexpected number of extracted ROIs!"
+    assert len(iscell) == expected_n_rois, "Unexpected number of extracted ROIs!"
 
-    assert (
-        np.sum(iscell[:, 0]).astype(int) == expected_n_accepted
-    ), "Unexpected number of accepted cells!"
+    assert np.sum(iscell[:, 0]).astype(int) == expected_n_accepted, (
+        "Unexpected number of accepted cells!"
+    )
 
-    assert np.allclose(
-        np.mean(iscell[:, 1]), expected_mean_prob, rtol=1e-3
-    ), "Unexpected mean probability across ROIs!"
+    assert np.allclose(np.mean(iscell[:, 1]), expected_mean_prob, rtol=1e-3), (
+        "Unexpected mean probability across ROIs!"
+    )
 
     # clean up
     for f in expected_files:
@@ -626,9 +620,7 @@ def test_suite2p_spike_deconvolution(
     """
     Test that suite2p_spike_deconvolution() runs properly, outputs the expected file and performs spike deconvolution as expected.
     """
-    input_files = [
-        f"{data_dir}/{x}" for x in [fluo_file, neuropil_fluo_file, ops_file]
-    ]
+    input_files = [f"{data_dir}/{x}" for x in [fluo_file, neuropil_fluo_file, ops_file]]
 
     for idx, f in enumerate(input_files):
         dest = os.path.join(os.getcwd(), os.path.basename(f))
@@ -657,13 +649,13 @@ def test_suite2p_spike_deconvolution(
 
     # check spks.npy
     spks = np.load(expected_files[0], allow_pickle=True)
-    assert (
-        spks.shape == expected_mat_shape
-    ), "Unexpected shape of deconvolved spikes matrix!"
+    assert spks.shape == expected_mat_shape, (
+        "Unexpected shape of deconvolved spikes matrix!"
+    )
 
-    assert np.allclose(
-        np.sum(spks), expected_spks_sum
-    ), "Unexpected deconvolved spikes!"
+    assert np.allclose(np.sum(spks), expected_spks_sum), (
+        "Unexpected deconvolved spikes!"
+    )
 
     # clean up
     for f in expected_files:

@@ -24,8 +24,7 @@ jobs:
     # Create a virtual environment and install dependencies
     - name: Setup venv
       run: make venv
-    # TODO: add ruff check in separate pr which makes formatting changes
-    # - name: Check code formatting
-    #   run: make ruff-check
+    - name: Check code formatting
+      run: make ruff-check
     - name: Check unit tests
       run: make test
