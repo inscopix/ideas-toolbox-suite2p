@@ -56,8 +56,6 @@ ENV UV_NO_MANAGED_PYTHON=1 UV_PYTHON_DOWNLOADS=never
 ENV UV_FROZEN=1 UV_REQUIRE_HASHES=1 UV_VERIFY_HASHES=1
 ENV UV_CACHE_DIR=/tmp/.cache/uv
 
-ENV IMAGEIO_FFMPEG_EXE=/usr/bin/ffmpeg
-
 RUN --mount=from=ghcr.io/astral-sh/uv:0.9.16,source=/uv,target=/bin/uv \
     --mount=type=cache,target=/tmp/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
