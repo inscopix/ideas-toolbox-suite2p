@@ -193,7 +193,7 @@ def suite2p_registration(
     batch_size: int = 500,
     maxregshift: float = 0.1,
     smooth_sigma: float = 1.15,
-    smooth_sigma_time: float = 0,
+    smooth_sigma_time: float = 0.0,
     two_step_registration: bool = False,
     subpixel: int = 10,
     th_badframes: float = 1.0,
@@ -202,21 +202,21 @@ def suite2p_registration(
     pad_fft: bool = False,
     one_p_reg: bool = False,
     spatial_hp_reg: int = 42,
-    pre_smooth: float = 0,
-    spatial_taper: float = 40,
+    pre_smooth: float = 0.0,
+    spatial_taper: float = 40.0,
     nonrigid: bool = True,
     block_size: List[int] = [128, 128],
     snr_thresh: float = 1.2,
-    maxregshiftNR: float = 5,
+    maxregshiftNR: float = 5.0,
     do_bidiphase: bool = False,
     bidiphase: int = 0,
     bidi_corrected: bool = False,
-    viz_vmin_perc: float = 0,
-    viz_vmax_perc: float = 99,
+    viz_vmin_perc: float = 0.0,
+    viz_vmax_perc: float = 99.0,
     viz_cmap: str = "plasma",
     viz_show_grid: bool = True,
-    viz_ticks_step: float = 128,
-    viz_display_rate: float = 10,
+    viz_ticks_step: float = 128.0,
+    viz_display_rate: float = 10.0,
 ):
     """
     Tool to run suite2p registration on a raw suite2p binary movie. This constitutes the second step of the suite2p end-to-end pipeline.
@@ -421,7 +421,7 @@ def suite2p_roi_detection(
     sparse_mode: bool = True,
     spatial_scale: int = 0,
     connected: bool = True,
-    threshold_scaling: float = 1,
+    threshold_scaling: float = 1.0,
     spatial_hp_detect: int = 25,
     max_overlap: float = 0.75,
     high_pass: int = 100,
@@ -437,11 +437,11 @@ def suite2p_roi_detection(
     pretrained_model: str = "cyto",
     preclassify: float = 0.0,
     chan2_thres: float = 0.65,
-    viz_vmin_perc: float = 0,
-    viz_vmax_perc: float = 99,
+    viz_vmin_perc: float = 0.0,
+    viz_vmax_perc: float = 99.0,
     viz_cmap: str = "plasma",
     viz_show_grid: bool = True,
-    viz_ticks_step: float = 128,
+    viz_ticks_step: float = 128.0,
 ):
     """
     Tool to run suite2p ROI detection on a registered suite2p binary movie. This constitutes the third step of the suite2p end-to-end pipeline.
@@ -565,6 +565,7 @@ def suite2p_roi_detection(
 
 
 def suite2p_roi_extraction(
+    *,
     reg_binary_file: List[str],
     stat_file: List[str],
     ops_file: List[str],
@@ -572,9 +573,9 @@ def suite2p_roi_extraction(
     allow_overlap: bool = False,
     min_neuropil_pixels: int = 350,
     inner_neuropil_radius: int = 2,
-    lam_percentile: int = 50,
+    lam_percentile: float = 50.0,
     viz_show_grid: bool = True,
-    viz_ticks_step: float = 128,
+    viz_ticks_step: float = 128.0,
     viz_n_samp_cells: int = 20,
     viz_random_seed: int = 0,
     viz_show_all_footprints: bool = True,
@@ -653,15 +654,16 @@ def suite2p_roi_extraction(
 
 
 def suite2p_roi_classification(
+    *,
     stat_file: List[str],
     ops_file: List[str],
     classifier_path: Optional[List[str]] = None,
     soma_crop: bool = True,
-    viz_vmin_perc: float = 0,
-    viz_vmax_perc: float = 99,
+    viz_vmin_perc: float = 0.0,
+    viz_vmax_perc: float = 99.0,
     viz_cmap: str = "plasma",
     viz_show_grid: bool = True,
-    viz_ticks_step: float = 128,
+    viz_ticks_step: float = 128.0,
 ):
     """
     Tool to run suite2p ROI classification on the extracted ROIs. This constitutes the fifth step of the suite2p end-to-end pipeline.
@@ -740,6 +742,7 @@ def suite2p_roi_classification(
 
 
 def suite2p_spike_deconvolution(
+    *,
     fluo_file: List[str],
     neuropil_fluo_file: List[str],
     ops_file: List[str],
@@ -829,6 +832,7 @@ def suite2p_spike_deconvolution(
 
 
 def suite2p_output_conversion(
+    *,
     fluo_file: List[str],
     neuropil_fluo_file: List[str],
     spks_file: List[str],
@@ -840,11 +844,11 @@ def suite2p_output_conversion(
     save_NWB: bool = False,
     save_mat: bool = False,
     thresh_spks_perc: float = 99.7,
-    viz_vmin_perc: float = 0,
-    viz_vmax_perc: float = 99,
+    viz_vmin_perc: float = 0.0,
+    viz_vmax_perc: float = 99.0,
     viz_cmap: str = "plasma",
     viz_show_grid: bool = True,
-    viz_ticks_step: float = 128,
+    viz_ticks_step: float = 128.0,
     viz_n_samp_cells: int = 20,
     viz_random_seed: int = 0,
     viz_show_all_footprints: bool = True,
