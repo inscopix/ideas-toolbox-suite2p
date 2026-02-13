@@ -1,3 +1,4 @@
+import isx
 import os
 import numpy as np
 from zipfile import ZipFile
@@ -8,10 +9,10 @@ from toolbox.tools.suite2p_wrapper import run_suite2p_end_to_end
 data_dir = "data"
 
 @pytest.mark.parametrize(
-    "raw_movie_files,ops_file,classifier_path,params_from,tau,frames_include,save_npy,save_isxd,save_NWB,save_mat,maxregshift,th_badframes,nonrigid,threshold_scaling,neucoeff,thresh_spks_perc,expected_ref_image,expected_F_shape,expected_F_mean,expected_spks_sum,expected_accepted_cells,",
+    "raw_movie_files,ops_file,classifier_path,params_from,tau,frames_include,save_npy,save_isxd,save_NWB,save_mat,save_img,maxregshift,th_badframes,nonrigid,threshold_scaling,neucoeff,thresh_spks_perc,expected_start_time,expected_ref_image,expected_F_shape,expected_F_mean,expected_spks_sum,expected_accepted_cells,",
     [
         [
-            ["sample_128x128x1000_movie.isxd"],
+            ["sample_100x128x128_movie.isxd"],
             None,
             None,
             "table",
@@ -19,19 +20,21 @@ data_dir = "data"
             -1,
             True,
             True,
-            False,
-            False,
+            True,
+            True,
+            True,
             0.1,
             1.0,
             True,
             1.0,
             0.7,
             99.7,
-            15031974,
-            (18, 1000),
-            913.9661,
-            18990.904,
-            4,
+            "2024-09-20 13:22:01",
+            2967169,
+            (36, 100),
+            176.27736,
+            4244.0254,
+            5,
         ]
     ],
 )
@@ -46,12 +49,14 @@ def test_run_suite2p_end_to_end(
     save_isxd,
     save_NWB,
     save_mat,
+    save_img,
     maxregshift,
     th_badframes,
     nonrigid,
     threshold_scaling,
     neucoeff,
     thresh_spks_perc,
+    expected_start_time,
     expected_ref_image,
     expected_F_shape,
     expected_F_mean,
@@ -61,7 +66,6 @@ def test_run_suite2p_end_to_end(
     """
     Test that run_suite2p_end_to_end() runs properly and outputs the expected files.
     """
-    np.random.seed(0)
     raw_movie_files = [f"{data_dir}/{x}" for x in raw_movie_files]
 
     for idx, f in enumerate(raw_movie_files):
@@ -80,6 +84,7 @@ def test_run_suite2p_end_to_end(
         save_isxd=save_isxd,
         save_NWB=save_NWB,
         save_mat=save_mat,
+        save_img=save_img,
         maxregshift=maxregshift,
         th_badframes=th_badframes,
         nonrigid=nonrigid,
@@ -104,6 +109,16 @@ def test_run_suite2p_end_to_end(
     assert all(
         [f"{x}.npy" in dir_list for x in output_file_list]
     ), "Not all files are present!"
+
+    # ensure template image has been created
+    assert (
+        "local_corr_img_preview.png" in dir_list
+    ), "local_corr_img_preview.png not in current working directory!"
+
+    # check .isxd output cellset's start time
+    cs = isx.CellSet.read("cellset_raw.isxd")
+    start_time = cs.timing.start.to_datetime()
+    assert str(start_time) == expected_start_time, "test"
 
     # check registration
     ops = np.load("ops.npy", allow_pickle=True).item()

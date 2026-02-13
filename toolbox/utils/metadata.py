@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger()
 
 
-def create_output_metadata(ops, steps):
+def create_output_metadata(ops, steps, efocus_vals=None):
     """
     Creates metadata for output files of the suite2p pipeline and individual steps tools
     """
@@ -28,26 +28,30 @@ def create_output_metadata(ops, steps):
     npy_dir = ops["save_path"]
     if steps in ["all", "output_conversion"]:
         npy_output_name = "suite2p_output.zip"
-        nwb_output_name = "ophys.nwb"
-        mat_output_name = "Fall.mat"
         cs_output_name = "cellset_raw.isxd"
         es_output_name = "eventset.isxd"
+
+        npy_output_key = Path(npy_output_name).stem
+        cs_output_key = Path(cs_output_name).stem
+        es_output_key = Path(es_output_name).stem
 
         F = np.load(f"{npy_dir}/F.npy", allow_pickle=True)
         spks = np.load(f"{npy_dir}/spks.npy", allow_pickle=True)
         stat = np.load(f"{npy_dir}/stat.npy", allow_pickle=True)
         iscell = np.load(f"{npy_dir}/iscell.npy", allow_pickle=True)
 
+        # if allow_overlap is False, then fluorescence traces of overlapping footprints are set to all zeros; the code below removes data from overlapping ROIs from preview figures
+        if not ops["allow_overlap"]:
+            idx_ok = np.where([len(np.unique(f)) > 1 for f in F])[0]
+            F = F[idx_ok, :]
+            spks = spks[idx_ok, :]
+            stat = stat[idx_ok]
+            iscell = iscell[idx_ok]
+
         F = F[:, :L]
         spks = spks[:, :L]
 
         avg_spk_rates = np.mean((spks[iscell[:, 0] == 1, :] > 1), axis=1)
-
-        npy_output_key = Path(npy_output_name).stem
-        nwb_output_key = Path(nwb_output_name).stem
-        mat_output_key = Path(mat_output_name).stem
-        cs_output_key = Path(cs_output_name).stem
-        es_output_key = Path(es_output_name).stem
 
         extra_dict = {
             "Number of Extracted ROIs": len(iscell),
@@ -82,6 +86,7 @@ def create_output_metadata(ops, steps):
         metadata_cs_output_dict = {
             key: metadata_output_dict.get(key, "") for key in cs_keys_list
         }
+        metadata_cs_output_dict["microscope"] = {"focus": efocus_vals}
 
         es_keys_list = [
             "Cell Extraction Method",
@@ -95,34 +100,45 @@ def create_output_metadata(ops, steps):
         metadata_es_output_dict = {
             key: metadata_output_dict.get(key, "") for key in es_keys_list
         }
-
-        try:
-            nwb_file_metadata = construct_nwb_file_metadata(nwb_output_name)
-            nwb_file_metadata.update(metadata_output_dict)
-        except Exception as e:
-            logger.warning(f"Could not construct NWB file metadata: {str(e)}")
-            nwb_file_metadata = metadata_output_dict
+        metadata_es_output_dict["microscope"] = {"focus": efocus_vals}
 
         metadata = {
             npy_output_key: metadata_output_dict,
-            nwb_output_key: nwb_file_metadata,
-            mat_output_key: metadata_output_dict,
             cs_output_key: metadata_cs_output_dict,
             es_output_key: metadata_es_output_dict,
         }
-    elif steps in ["output_conversion"]:
-        nwb_output_name = "ophys.nwb"
-        nwb_output_key = Path(nwb_output_name).stem
-        nwb_file_metadata = None
 
-        try:
-            nwb_file_metadata = construct_nwb_file_metadata(nwb_output_name)
-        except Exception as e:
-            logger.warning(f"Could not construct NWB file metadata: {str(e)}")
+        if ops["save_NWB"]:
+            nwb_output_name = "ophys.nwb"
+            nwb_output_key = Path(nwb_output_name).stem
+            try:
+                nwb_file_metadata = construct_nwb_file_metadata(
+                    nwb_output_name
+                )
+                nwb_file_metadata.update(metadata_output_dict)
+            except Exception as e:
+                logger.warning(
+                    f"Could not construct NWB file metadata: {str(e)}"
+                )
+                nwb_file_metadata = metadata_output_dict
+            metadata.update({nwb_output_key: nwb_file_metadata})
 
-        metadata = {
-            nwb_output_key: nwb_file_metadata,
-        }
+        if ops["save_mat"]:
+            mat_output_name = "Fall.mat"
+            mat_output_key = Path(mat_output_name).stem
+            metadata.update({mat_output_key: metadata_output_dict})
+
+        if steps == "all":
+            img_output_name = "local_corr_img.tif"
+            img_output_key = Path(img_output_name).stem
+            img_keys_list = [
+                "Frame Width (px)",
+                "Frame Height (px)",
+            ]
+            metadata_img_output_dict = {
+                key: metadata_output_dict.get(key, "") for key in img_keys_list
+            }
+            metadata.update({img_output_key: metadata_img_output_dict})
 
     elif steps in ["binary_conversion", "registration"]:
         if steps == "binary_conversion":

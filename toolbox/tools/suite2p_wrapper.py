@@ -1,53 +1,79 @@
-from glob import glob
 import isx
 import logging
 import numpy as np
 import os
 import shutil
 import suite2p
-from tarfile import TarFile
 from toolbox.utils import io, metadata, preview, utilities
-import xml.etree.ElementTree as ET
 from zipfile import ZipFile
 from typing import List, Optional
-import pathlib
-
 
 logger = logging.getLogger()
 
 
 def run_suite2p_end_to_end(
-    raw_movie_files: List[pathlib.Path],
-    ops_file: Optional[pathlib.Path]=None,
-    classifier_path: Optional[pathlib.Path]=None,
-    params_from: str="table",
-    tau: float=1.0,
-    frames_include: int=-1,
-    save_npy: bool=True,
-    save_isxd: bool=True,
-    save_NWB: bool=False,
-    save_mat: bool=False,
-    maxregshift: float=0.1,
-    th_badframes: float=1.0,
-    nonrigid: bool=True,
-    threshold_scaling: float=1.0,
-    neucoeff: float=0.7,
-    thresh_spks_perc: float=99.7,
-    viz_vmin_perc: float=0,
-    viz_vmax_perc: float=99,
-    viz_cmap: str="plasma",
-    viz_show_grid: bool=True,
-    viz_ticks_step: float=128,
-    viz_display_rate: float=10,
-    viz_n_samp_cells: int=20,
-    viz_random_seed: int=0,
-    viz_show_all_footprints: bool=True,
+    *,
+    raw_movie_files: List[str],
+    ops_file: Optional[List[str]] = None,
+    classifier_path: Optional[List[str]] = None,
+    params_from: bool = False,
+    tau: float = 1.0,
+    frames_include: int = -1,
+    save_npy: bool = True,
+    save_isxd: bool = True,
+    save_NWB: bool = False,
+    save_mat: bool = False,
+    save_img: bool = True,
+    align_by_chan: int = 1,
+    maxregshift: float = 0.1,
+    th_badframes: float = 1.0,
+    nonrigid: bool = True,
+    threshold_scaling: float = 1.0,
+    neucoeff: float = 0.7,
+    thresh_spks_perc: float = 99.7,
+    viz_vmin_perc: float = 0,
+    viz_vmax_perc: float = 99,
+    viz_cmap: str = "plasma",
+    viz_show_grid: bool = True,
+    viz_ticks_step: float = 128,
+    viz_display_rate: float = 10,
+    viz_n_samp_cells: int = 20,
+    viz_random_seed: int = 0,
+    viz_show_all_footprints: bool = True,
 ):
     """
     Tool to run end-to-end suite2p pipeline on Inscopix isxd or Bruker Ultima 2P movies.
+
+    :param List[str] raw_movie_files: Input 2P movie(s).
+    :param Optional[List[str]] ops_file: Optional parameters file that allows for more granular control of all available suite2p parameters. See documentation for more details.
+    :param Optional[List[str]] classifier_path: [from suite2p docs] Path to classifier file you want to use for cell classification.
+    :param bool params_from: When a parameters file is provided as input, whether the parameters from the analysis table columns should be overwritten by the values from the file. Only effective when an optional parameters file is provided. Defaults to False.
+    :param float tau: [from suite2p docs] The timescale of the sensor (in seconds), used for deconvolution kernel. The kernel is fixed to have this decay and is not fit to the data. We recommend: 0.7 for GCaMP6f; 1.0 for GCaMP6m; 1.25-1.5 for GCaMP6s.
+    :param int frames_include: [from suite2p docs] If greater than zero, only [the first] <frames_include> frames are processed. Useful for testing parameters on a subset of data.
+    :param bool save_npy: If true, save suite2p NPY output (as a ZIP file).
+    :param bool save_isxd: If true, save suite2p output as ISXD files.
+    :param bool save_NWB: [from suite2p docs] Whether to save output as NWB file.
+    :param bool save_mat: [from suite2p docs] Whether to save the results in matlab format in file "Fall.mat".
+    :param bool save_img: Whether to save the local correlation image as a standalone .tif file, e.g., for further use as template image in Multi-Session Registration.
+    :param int align_by_chan: [from suite2p docs] Which channel to use for alignment (1-based, so 1 means 1st channel and 2 means 2nd channel). If you have a non-functional channel with something like td-Tomato expression, you may want to use this channel for alignment rather than the functional channel.
+    :param float maxregshift: [from suite2p docs] The maximum shift as a fraction of the frame size. If the frame is Ly pixels x Lx pixels, then the maximum pixel shift in pixels will be max(Ly,Lx) * ops['maxregshift'].
+    :param float th_badframes: [from suite2p docs] Involved with setting threshold for excluding frames for cropping. Set this smaller to exclude more frames.
+    :param bool nonrigid: [from suite2p docs] Whether or not to perform non-rigid registration, which splits the field of view into blocks and computes registration offsets in each block separately.
+    :param float threshold_scaling: [from suite2p docs] This controls the threshold at which to detect ROIs (how much the ROIs have to stand out from the noise to be detected). If you set this higher, then fewer ROIs will be detected, and if you set it lower, more ROIs will be detected.
+    :param float neucoeff: [from suite2p docs] Neuropil coefficient for all ROIs.
+    :param float thresh_spks_perc: Threshold for denoising the deconvolved spike trains, in percentile. Any value in the ROIs-by-time-point deconvolved spike matrix that is below the matrix's xth percentile value is set to 0. Note that the same threshold is applied to all ROIs, and that this thresholding step does not binarize the deconvolved spike trains but simply filters out the low-amplitude spike events.
+    :param float viz_vmin_perc: Minimum value for the colormap range, as percentile of the FOV fluorescence.
+    :param float viz_vmax_perc: Maximum value for the colormap range, as percentile of the FOV fluorescence.
+    :param str viz_cmap: Colormap for plotting the FOV.
+    :param bool viz_show_grid: Whether or not to show the grid on FOVs.
+    :param float viz_ticks_step: Step for the x- and y-ticks.
+    :param float viz_display_rate: Display rate for the preview movies, in Hz.
+    :param int viz_n_samp_cells: Number of sample cells for the cell extraction preview.
+    :param int viz_random_seed: Random seed for selecting sample cells.
+    :param bool viz_show_all_footprints: Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed.
     """
     # initialize suite2p parameters
-    if ops_file is None:
+    if ops_file is None or len(ops_file) == 0:
         # load default parameters (user-defined parameters are included afterwards)
         ops = suite2p.default_ops()
     else:
@@ -56,7 +82,7 @@ def run_suite2p_end_to_end(
         ops_ext = os.path.splitext(ops_file[0])[-1]
         if ops_ext == ".npy":
             ops = np.load(ops_file[0], allow_pickle=True).item()
-            if params_from == "file":
+            if params_from:
                 logger.info(
                     "`ops_file` provided: overwriting input parameters from the analysis table."
                 )
@@ -64,6 +90,7 @@ def run_suite2p_end_to_end(
                 frames_include = ops["frames_include"]
                 save_NWB = ops["save_NWB"]
                 save_mat = ops["save_mat"]
+                align_by_chan = ops["align_by_chan"]
                 maxregshift = ops["maxregshift"]
                 th_badframes = ops["th_badframes"]
                 nonrigid = ops["nonrigid"]
@@ -76,6 +103,7 @@ def run_suite2p_end_to_end(
             )
 
     # get extension of input movie and relevant metadata
+    efocus_vals = [None] * len(raw_movie_files)
     file_ext = "." + ".".join(
         os.path.basename(raw_movie_files[0]).split(".")[1:]
     )
@@ -83,65 +111,52 @@ def run_suite2p_end_to_end(
         logger.info(
             "Inscopix .isxd movie(s) detected: setting `ops['isxd']` to `True`."
         )
-        fs = 1e6 / isx.Movie.read(raw_movie_files[0]).timing.period.to_usecs()
+        movie = isx.Movie.read(raw_movie_files[0])
+        fs = 1 / movie.timing.period.secs_float
+        start_time = movie.timing.start.to_datetime()
+        # converting `start_time` to a NumPy array of dtype np.datetime64, otherwise it cannot be saved as a .mat file
+        start_time = np.array(start_time, dtype=np.datetime64)
         ops["isxd"] = True
+        efocus_vals = utilities.get_efocus_vals(raw_movie_files)
     elif file_ext in [".zip", ".tar.gz"]:
         logger.info(
-            f"Bruker Ultima 2P {file_ext} movie(s) detected: setting `ops['bruker']` to `True`."
+            f"Bruker Ultima 2P {file_ext} movie(s) detected: setting `ops['input_format']` to `'tif'`."
         )
         data_dir = "/ideas/data/tmp/"
         os.makedirs(data_dir, mode=0o777, exist_ok=True)
-        for raw_movie_file in raw_movie_files:
-            if file_ext == ".zip":
-                with ZipFile(raw_movie_file, "r") as f:
-                    for member_info in f.infolist():
-                        if member_info.is_dir():
-                            continue
-                        member_info.filename = os.path.basename(
-                            member_info.filename
-                        )
-                        f.extract(member_info, data_dir)
-            elif file_ext == ".tar.gz":
-                with TarFile.open(raw_movie_file, "r") as f:
-                    for member_info in f.getmembers():
-                        if member_info.isdir():
-                            continue
-                        member_info.name = os.path.basename(member_info.name)
-                        f.extract(member_info, data_dir)
-
-        # read XML to get version and fs
-        xml_file = glob(data_dir + "*.xml")[0]
-        tree = ET.parse(xml_file)
-        root = tree.getroot()
-        bruker_version = root.attrib.get("version")
-        fs = 1 / float(
-            root.findall('.//PVStateValue/[@key="framePeriod"]')[0].attrib.get(
-                "value"
-            )
+        fs, start_time = io.extract_bruker2p_file(
+            raw_movie_files=raw_movie_files,
+            file_ext=file_ext,
+            data_dir=data_dir,
         )
-        print(f"Processing Bruker 2p data v{bruker_version}...")
-        ops["bruker"] = True
-    elif file_ext in [".tif", ".tiff"]:
+        ops["input_format"] = "tif"
+    elif file_ext in [".tif", ".tiff", ".ome.tif", ".ome.tiff"]:
         fs = ops["fs"]
+        start_time = None
     else:
         raise ValueError(
-            f"File format {file_ext} not recognized as either Inscopix .isxd, Bruker Ultima 2P .zip or .tar.gz, or standard .tif/.tiff stack."
+            f"File format {file_ext} not recognized as either Inscopix .isxd, Bruker Ultima 2P .zip or .tar.gz, or standard .tif/.tiff/.ome.tif/.ome.tiff stack."
         )
 
     # Set user-defined parameters
     ops["fs"] = float(fs)
+    ops["start_time"] = start_time
     ops["tau"] = tau
     ops["keep_movie_raw"] = True
     ops["save_mat"] = save_mat
     ops["save_NWB"] = save_NWB
     ops["frames_include"] = frames_include
+    ops["align_by_chan"] = align_by_chan
     ops["maxregshift"] = maxregshift
     ops["th_badframes"] = th_badframes
     ops["nonrigid"] = nonrigid
     ops["threshold_scaling"] = threshold_scaling
     ops["neucoeff"] = neucoeff
     if classifier_path is not None:
-        ops["classifier_path"] = classifier_path[0]
+        if isinstance(classifier_path, List) and len(classifier_path) > 0:
+            ops["classifier_path"] = classifier_path[0]
+        else:
+            ops["classifier_path"] = classifier_path
 
     # Set hardcoded parameters
     ops = utilities.set_hardcoded_parameters(ops)
@@ -191,11 +206,16 @@ def run_suite2p_end_to_end(
     if save_mat:
         mat_output_file = f"{suite2p_output_dir}/Fall.mat"
         shutil.move(mat_output_file, ideas_output_dir)
+    if save_img:
+        img_path = io.save_local_corr_img(
+            ops=output_ops,
+            output_dir=ideas_output_dir,
+        )
+        preview.preview_template_image(img_path)
 
     # output metadata
     metadata.create_output_metadata(
-        ops=output_ops,
-        steps="all",
+        ops=output_ops, steps="all", efocus_vals=efocus_vals
     )
 
     # clean up suite2p output folder (otherwise recognized as output by IDEAS)
