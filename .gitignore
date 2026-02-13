@@ -1,11 +1,5 @@
-# data
-resources/
+# repo ignores
 outputs/
-inputs.sh
-inputs.json
-
-# Credentials
-.*-token
 
 # aws
 webhooks.json

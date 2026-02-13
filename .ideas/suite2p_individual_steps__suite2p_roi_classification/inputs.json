@@ -1,0 +1,8 @@
+{
+    "stat_file": [
+        "data/stat.npy"
+    ],
+    "ops_file": [
+        "data/ops_ROI_extraction.npy"
+    ]
+}
