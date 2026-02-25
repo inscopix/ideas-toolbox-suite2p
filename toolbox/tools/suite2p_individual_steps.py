@@ -261,6 +261,7 @@ def suite2p_registration(
     reg_binary_path = f"{ideas_output_dir}/data.bin"
     ops_path = f"{ideas_output_dir}/ops_registration.npy"
 
+    # temporarily copy the raw bin input file, since it's modified by suite2p during processing
     tmp_raw_binary_file = f"{ideas_output_dir}/tmp_data_raw.bin"
     shutil.copy2(raw_binary_file[0], tmp_raw_binary_file)
     logger.info(f"output dir: {os.listdir(ideas_output_dir)} {os.path.getsize(tmp_raw_binary_file)} {os.path.isfile(tmp_raw_binary_file)}")
@@ -415,6 +416,9 @@ def suite2p_registration(
         display_rate=int(viz_display_rate),
     )
 
+    # remove tmp files
+    os.remove(tmp_raw_binary_file)
+    
     print("ALL DONE!")
 
 
