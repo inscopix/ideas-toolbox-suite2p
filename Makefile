@@ -38,4 +38,4 @@ run: build
 	ideas tools run $(tool) -s -c -n
 
 run-all: build
-	@$(foreach f, $(shell ls -d .ideas/*/), ideas tools run -s -c -n $(shell basename $(f));)
+	@$(foreach f, $(shell ls -d .ideas/*/), ideas tools run -s -c -n $(shell basename $(f)) || exit;)
