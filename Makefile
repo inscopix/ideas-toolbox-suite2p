@@ -37,5 +37,15 @@ test: clean build
 run: build
 	ideas tools run $(tool) -s -c -n
 
+SEP="============================================================="
+
+# Run all tools in the repo consecutively
 run-all: build
-	@$(foreach f, $(shell ls -d .ideas/*/), ideas tools run -s -c -n $(shell basename $(f)) || exit;)
+	@$(foreach f,$(shell ls -d .ideas/*/), \
+		echo $(SEP); \
+		echo "Running $$(basename $(f))"; \
+		echo $(SEP); \
+		echo; \
+		ideas tools run -s -c -n $$(basename $(f)) || exit; \
+		echo ""; \
+	)
