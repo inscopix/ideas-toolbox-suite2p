@@ -263,8 +263,7 @@ def suite2p_registration(
 
     # temporarily copy the raw bin input file, since it's modified by suite2p during processing
     tmp_raw_binary_file = f"{ideas_output_dir}/tmp_data_raw.bin"
-    shutil.copy2(raw_binary_file[0], tmp_raw_binary_file)
-    logger.info(f"output dir: {os.listdir(ideas_output_dir)} {os.path.getsize(tmp_raw_binary_file)} {os.path.isfile(tmp_raw_binary_file)}")
+    shutil.copyfile(raw_binary_file[0], tmp_raw_binary_file)
 
     # load input parameter file
     ops = np.load(ops_file[0], allow_pickle=True).item()
@@ -690,7 +689,6 @@ def suite2p_roi_classification(
     """
     # load input files
     stat = np.load(stat_file[0], allow_pickle=True)
-    stat = stat.copy()
     ops = np.load(ops_file[0], allow_pickle=True).item()
     ops = utilities.set_hardcoded_parameters(ops)
 
