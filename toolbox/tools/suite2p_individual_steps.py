@@ -261,10 +261,14 @@ def suite2p_registration(
     reg_binary_path = f"{ideas_output_dir}/data.bin"
     ops_path = f"{ideas_output_dir}/ops_registration.npy"
 
+    # temporarily copy the raw bin input file, since it's modified by suite2p during processing
+    tmp_raw_binary_file = f"{ideas_output_dir}/tmp_data_raw.bin"
+    shutil.copyfile(raw_binary_file[0], tmp_raw_binary_file)
+
     # load input parameter file
     ops = np.load(ops_file[0], allow_pickle=True).item()
     ops = utilities.set_hardcoded_parameters(ops)
-    ops["raw_file"] = raw_binary_file[0]
+    ops["raw_file"] = tmp_raw_binary_file
     ops["reg_file"] = reg_binary_path
     ops["ops_path"] = ops_path
 
@@ -297,9 +301,9 @@ def suite2p_registration(
     Ly, Lx = ops["Ly"], ops["Lx"]
 
     # load input raw binary movie and create the output registered binary movie
-    f_raw = io.BinaryFile(Ly=Ly, Lx=Lx, filename=ops["raw_file"])
+    f_raw = io.BinaryFile(Ly=Ly, Lx=Lx, filename=ops["raw_file"], write=True)
     f_reg = io.BinaryFile(
-        Ly=Ly, Lx=Lx, filename=ops["reg_file"], n_frames=f_raw.shape[0]
+        Ly=Ly, Lx=Lx, filename=ops["reg_file"], n_frames=f_raw.shape[0], write=True
     )  # Set registered binary file to have same n_frames
 
     # [start of suite2p code]
@@ -411,6 +415,9 @@ def suite2p_registration(
         display_rate=int(viz_display_rate),
     )
 
+    # remove tmp files
+    os.remove(tmp_raw_binary_file)
+    
     print("ALL DONE!")
 
 

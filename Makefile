@@ -46,6 +46,6 @@ run-all: build
 		echo "Running $$(basename $(f))"; \
 		echo $(SEP); \
 		echo; \
-		ideas tools run -s -c -n $$(basename $(f)); \
+		ideas tools run -s -c -n $$(basename $(f)) || exit; \
 		echo ""; \
 	)
