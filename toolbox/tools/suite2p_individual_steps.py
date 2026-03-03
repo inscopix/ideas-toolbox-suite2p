@@ -195,7 +195,7 @@ def suite2p_registration(
     batch_size: int = 500,
     maxregshift: float = 0.1,
     smooth_sigma: float = 1.15,
-    smooth_sigma_time: float = 0,
+    smooth_sigma_time: float = 0.0,
     two_step_registration: bool = False,
     subpixel: int = 10,
     th_badframes: float = 1.0,
@@ -204,21 +204,21 @@ def suite2p_registration(
     pad_fft: bool = False,
     one_p_reg: bool = False,
     spatial_hp_reg: int = 42,
-    pre_smooth: float = 0,
-    spatial_taper: float = 40,
+    pre_smooth: float = 0.0,
+    spatial_taper: float = 40.0,
     nonrigid: bool = True,
     block_size: List[int] = [128, 128],
     snr_thresh: float = 1.2,
-    maxregshiftNR: float = 5,
+    maxregshiftNR: float = 5.0,
     do_bidiphase: bool = False,
     bidiphase: int = 0,
     bidi_corrected: bool = False,
-    viz_vmin_perc: float = 0,
-    viz_vmax_perc: float = 99,
+    viz_vmin_perc: float = 0.0,
+    viz_vmax_perc: float = 99.0,
     viz_cmap: str = "plasma",
     viz_show_grid: bool = True,
-    viz_ticks_step: float = 128,
-    viz_display_rate: float = 10,
+    viz_ticks_step: float = 128.0,
+    viz_display_rate: float = 10.0,
 ):
     """
     Tool to run suite2p registration on a raw suite2p binary movie. This constitutes the second step of the suite2p end-to-end pipeline.
@@ -261,10 +261,14 @@ def suite2p_registration(
     reg_binary_path = f"{ideas_output_dir}/data.bin"
     ops_path = f"{ideas_output_dir}/ops_registration.npy"
 
+    # temporarily copy the raw bin input file, since it's modified by suite2p during processing
+    tmp_raw_binary_file = f"{ideas_output_dir}/tmp_data_raw.bin"
+    shutil.copyfile(raw_binary_file[0], tmp_raw_binary_file)
+
     # load input parameter file
     ops = np.load(ops_file[0], allow_pickle=True).item()
     ops = utilities.set_hardcoded_parameters(ops)
-    ops["raw_file"] = raw_binary_file[0]
+    ops["raw_file"] = tmp_raw_binary_file
     ops["reg_file"] = reg_binary_path
     ops["ops_path"] = ops_path
 
@@ -297,9 +301,9 @@ def suite2p_registration(
     Ly, Lx = ops["Ly"], ops["Lx"]
 
     # load input raw binary movie and create the output registered binary movie
-    f_raw = io.BinaryFile(Ly=Ly, Lx=Lx, filename=ops["raw_file"])
+    f_raw = io.BinaryFile(Ly=Ly, Lx=Lx, filename=ops["raw_file"], write=True)
     f_reg = io.BinaryFile(
-        Ly=Ly, Lx=Lx, filename=ops["reg_file"], n_frames=f_raw.shape[0]
+        Ly=Ly, Lx=Lx, filename=ops["reg_file"], n_frames=f_raw.shape[0], write=True
     )  # Set registered binary file to have same n_frames
 
     # [start of suite2p code]
@@ -411,6 +415,9 @@ def suite2p_registration(
         display_rate=int(viz_display_rate),
     )
 
+    # remove tmp files
+    os.remove(tmp_raw_binary_file)
+    
     print("ALL DONE!")
 
 
@@ -423,7 +430,7 @@ def suite2p_roi_detection(
     sparse_mode: bool = True,
     spatial_scale: int = 0,
     connected: bool = True,
-    threshold_scaling: float = 1,
+    threshold_scaling: float = 1.0,
     spatial_hp_detect: int = 25,
     max_overlap: float = 0.75,
     high_pass: int = 100,
@@ -439,11 +446,11 @@ def suite2p_roi_detection(
     pretrained_model: str = "cyto",
     preclassify: float = 0.0,
     chan2_thres: float = 0.65,
-    viz_vmin_perc: float = 0,
-    viz_vmax_perc: float = 99,
+    viz_vmin_perc: float = 0.0,
+    viz_vmax_perc: float = 99.0,
     viz_cmap: str = "plasma",
     viz_show_grid: bool = True,
-    viz_ticks_step: float = 128,
+    viz_ticks_step: float = 128.0,
 ):
     """
     Tool to run suite2p ROI detection on a registered suite2p binary movie. This constitutes the third step of the suite2p end-to-end pipeline.
@@ -567,6 +574,7 @@ def suite2p_roi_detection(
 
 
 def suite2p_roi_extraction(
+    *,
     reg_binary_file: List[str],
     stat_file: List[str],
     ops_file: List[str],
@@ -574,9 +582,9 @@ def suite2p_roi_extraction(
     allow_overlap: bool = False,
     min_neuropil_pixels: int = 350,
     inner_neuropil_radius: int = 2,
-    lam_percentile: int = 50,
+    lam_percentile: float = 50.0,
     viz_show_grid: bool = True,
-    viz_ticks_step: float = 128,
+    viz_ticks_step: float = 128.0,
     viz_n_samp_cells: int = 20,
     viz_random_seed: int = 0,
     viz_show_all_footprints: bool = True,
@@ -655,15 +663,16 @@ def suite2p_roi_extraction(
 
 
 def suite2p_roi_classification(
+    *,
     stat_file: List[str],
     ops_file: List[str],
     classifier_path: Optional[List[str]] = None,
     soma_crop: bool = True,
-    viz_vmin_perc: float = 0,
-    viz_vmax_perc: float = 99,
+    viz_vmin_perc: float = 0.0,
+    viz_vmax_perc: float = 99.0,
     viz_cmap: str = "plasma",
     viz_show_grid: bool = True,
-    viz_ticks_step: float = 128,
+    viz_ticks_step: float = 128.0,
 ):
     """
     Tool to run suite2p ROI classification on the extracted ROIs. This constitutes the fifth step of the suite2p end-to-end pipeline.
@@ -751,6 +760,7 @@ def suite2p_roi_classification(
 
 
 def suite2p_spike_deconvolution(
+    *,
     fluo_file: List[str],
     neuropil_fluo_file: List[str],
     ops_file: List[str],
@@ -854,6 +864,7 @@ def suite2p_spike_deconvolution(
 
 
 def suite2p_output_conversion(
+    *,
     fluo_file: List[str],
     neuropil_fluo_file: List[str],
     spks_file: List[str],
@@ -865,11 +876,11 @@ def suite2p_output_conversion(
     save_NWB: bool = False,
     save_mat: bool = False,
     thresh_spks_perc: float = 99.7,
-    viz_vmin_perc: float = 0,
-    viz_vmax_perc: float = 99,
+    viz_vmin_perc: float = 0.0,
+    viz_vmax_perc: float = 99.0,
     viz_cmap: str = "plasma",
     viz_show_grid: bool = True,
-    viz_ticks_step: float = 128,
+    viz_ticks_step: float = 128.0,
     viz_n_samp_cells: int = 20,
     viz_random_seed: int = 0,
     viz_show_all_footprints: bool = True,
@@ -997,6 +1008,7 @@ def suite2p_output_conversion(
 # ================================ IDEAS Wrapper Functions ====================================
 
 def suite2p_binary_conversion_ideas_wrapper(
+    *,
     raw_movie_files: List[IdeasFile],
     nplanes: int = 1,
     nchannels: int = 1,
@@ -1026,6 +1038,7 @@ def suite2p_binary_conversion_ideas_wrapper(
 
 
 def suite2p_registration_ideas_wrapper(
+    *,
     raw_binary_file: List[IdeasFile],
     ops_file: List[IdeasFile],
     frames_include: int = -1,
@@ -1034,7 +1047,7 @@ def suite2p_registration_ideas_wrapper(
     batch_size: int = 500,
     maxregshift: float = 0.1,
     smooth_sigma: float = 1.15,
-    smooth_sigma_time: float = 0,
+    smooth_sigma_time: float = 0.0,
     two_step_registration: bool = False,
     subpixel: int = 10,
     th_badframes: float = 1.0,
@@ -1043,21 +1056,21 @@ def suite2p_registration_ideas_wrapper(
     pad_fft: bool = False,
     one_p_reg: bool = False,
     spatial_hp_reg: int = 42,
-    pre_smooth: float = 0,
-    spatial_taper: float = 40,
+    pre_smooth: float = 0.0,
+    spatial_taper: float = 40.0,
     nonrigid: bool = True,
     block_size: List[int] = [128, 128],
     snr_thresh: float = 1.2,
-    maxregshiftNR: float = 5,
+    maxregshiftNR: float = 5.0,
     do_bidiphase: bool = False,
     bidiphase: int = 0,
     bidi_corrected: bool = False,
-    viz_vmin_perc: float = 0,
-    viz_vmax_perc: float = 99,
+    viz_vmin_perc: float = 0.0,
+    viz_vmax_perc: float = 99.0,
     viz_cmap: str = "plasma",
     viz_show_grid: bool = True,
-    viz_ticks_step: float = 128,
-    viz_display_rate: float = 10,
+    viz_ticks_step: float = 128.0,
+    viz_display_rate: float = 10.0,
 ):
     """
     Ideas wrapper for tool to run suite2p registration on a raw suite2p binary movie. This constitutes the second step of the suite2p end-to-end pipeline.
@@ -1133,6 +1146,7 @@ def suite2p_registration_ideas_wrapper(
 
 
 def suite2p_roi_detection_ideas_wrapper(
+    *,
     reg_binary_file: List[IdeasFile],
     ops_file: List[IdeasFile],
     classifier_path: Optional[List[IdeasFile]] = None,
@@ -1140,7 +1154,7 @@ def suite2p_roi_detection_ideas_wrapper(
     sparse_mode: bool = True,
     spatial_scale: int = 0,
     connected: bool = True,
-    threshold_scaling: float = 1,
+    threshold_scaling: float = 1.0,
     spatial_hp_detect: int = 25,
     max_overlap: float = 0.75,
     high_pass: int = 100,
@@ -1156,11 +1170,11 @@ def suite2p_roi_detection_ideas_wrapper(
     pretrained_model: str = "cyto",
     preclassify: float = 0.0,
     chan2_thres: float = 0.65,
-    viz_vmin_perc: float = 0,
-    viz_vmax_perc: float = 99,
+    viz_vmin_perc: float = 0.0,
+    viz_vmax_perc: float = 99.0,
     viz_cmap: str = "plasma",
     viz_show_grid: bool = True,
-    viz_ticks_step: float = 128,
+    viz_ticks_step: float = 128.0,
 ):
     """
     Ideas wrapper for tool to run suite2p ROI detection on a registered suite2p binary movie. This constitutes the third step of the suite2p end-to-end pipeline.
@@ -1228,6 +1242,7 @@ def suite2p_roi_detection_ideas_wrapper(
 
 
 def suite2p_roi_extraction_ideas_wrapper(
+    *,
     reg_binary_file: List[IdeasFile],
     stat_file: List[IdeasFile],
     ops_file: List[IdeasFile],
@@ -1235,9 +1250,9 @@ def suite2p_roi_extraction_ideas_wrapper(
     allow_overlap: bool = False,
     min_neuropil_pixels: int = 350,
     inner_neuropil_radius: int = 2,
-    lam_percentile: int = 50,
+    lam_percentile: float = 50.0,
     viz_show_grid: bool = True,
-    viz_ticks_step: float = 128,
+    viz_ticks_step: float = 128.0,
     viz_n_samp_cells: int = 20,
     viz_random_seed: int = 0,
     viz_show_all_footprints: bool = True,
@@ -1277,15 +1292,16 @@ def suite2p_roi_extraction_ideas_wrapper(
 
 
 def suite2p_roi_classification_ideas_wrapper(
+    *,
     stat_file: List[IdeasFile],
     ops_file: List[IdeasFile],
     classifier_path: Optional[List[IdeasFile]] = None,
     soma_crop: bool = True,
-    viz_vmin_perc: float = 0,
-    viz_vmax_perc: float = 99,
+    viz_vmin_perc: float = 0.0,
+    viz_vmax_perc: float = 99.0,
     viz_cmap: str = "plasma",
     viz_show_grid: bool = True,
-    viz_ticks_step: float = 128,
+    viz_ticks_step: float = 128.0,
 ):
     """
     Ideas wrapper for tool to run suite2p ROI classification on the extracted ROIs. This constitutes the fifth step of the suite2p end-to-end pipeline.
@@ -1314,6 +1330,7 @@ def suite2p_roi_classification_ideas_wrapper(
 
 
 def suite2p_spike_deconvolution_ideas_wrapper(
+    *,
     fluo_file: List[IdeasFile],
     neuropil_fluo_file: List[IdeasFile],
     ops_file: List[IdeasFile],
@@ -1360,6 +1377,7 @@ def suite2p_spike_deconvolution_ideas_wrapper(
 
 
 def suite2p_output_conversion_ideas_wrapper(
+    *,
     fluo_file: List[IdeasFile],
     neuropil_fluo_file: List[IdeasFile],
     spks_file: List[IdeasFile],
@@ -1371,11 +1389,11 @@ def suite2p_output_conversion_ideas_wrapper(
     save_NWB: bool = False,
     save_mat: bool = False,
     thresh_spks_perc: float = 99.7,
-    viz_vmin_perc: float = 0,
-    viz_vmax_perc: float = 99,
+    viz_vmin_perc: float = 0.0,
+    viz_vmax_perc: float = 99.0,
     viz_cmap: str = "plasma",
     viz_show_grid: bool = True,
-    viz_ticks_step: float = 128,
+    viz_ticks_step: float = 128.0,
     viz_n_samp_cells: int = 20,
     viz_random_seed: int = 0,
     viz_show_all_footprints: bool = True,
