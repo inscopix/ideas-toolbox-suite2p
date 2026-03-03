@@ -1,8 +1,0 @@
-{
-    "reg_binary_file": [
-        "data/data.bin"
-    ],
-    "ops_file": [
-        "data/ops_registration.npy"
-    ]
-}
