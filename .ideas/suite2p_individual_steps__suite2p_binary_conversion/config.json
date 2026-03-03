@@ -2,6 +2,6 @@
     "container": "platform/suite2p:0.0.1",
     "executor_type": "PYTHON",
     "file": "toolbox/tools/suite2p_individual_steps.py",
-    "function": "suite2p_binary_conversion",
+    "function": "suite2p_binary_conversion_ideas_wrapper",
     "schema_version": "1.0.0"
 }

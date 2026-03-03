@@ -18,8 +18,10 @@ from toolbox.utils import io as tlbxio
 from toolbox.utils import metadata, preview, utilities
 from zipfile import ZipFile
 from typing import List, Optional
+from ideas.tools.types import IdeasFile
+from ideas.tools import log
 
-logger = logging.getLogger()
+logger = log.get_logger()
 
 
 def suite2p_binary_conversion(
@@ -259,10 +261,14 @@ def suite2p_registration(
     reg_binary_path = f"{ideas_output_dir}/data.bin"
     ops_path = f"{ideas_output_dir}/ops_registration.npy"
 
+    # temporarily copy the raw bin input file, since it's modified by suite2p during processing
+    tmp_raw_binary_file = f"{ideas_output_dir}/tmp_data_raw.bin"
+    shutil.copyfile(raw_binary_file[0], tmp_raw_binary_file)
+
     # load input parameter file
     ops = np.load(ops_file[0], allow_pickle=True).item()
     ops = utilities.set_hardcoded_parameters(ops)
-    ops["raw_file"] = raw_binary_file[0]
+    ops["raw_file"] = tmp_raw_binary_file
     ops["reg_file"] = reg_binary_path
     ops["ops_path"] = ops_path
 
@@ -295,9 +301,9 @@ def suite2p_registration(
     Ly, Lx = ops["Ly"], ops["Lx"]
 
     # load input raw binary movie and create the output registered binary movie
-    f_raw = io.BinaryFile(Ly=Ly, Lx=Lx, filename=ops["raw_file"])
+    f_raw = io.BinaryFile(Ly=Ly, Lx=Lx, filename=ops["raw_file"], write=True)
     f_reg = io.BinaryFile(
-        Ly=Ly, Lx=Lx, filename=ops["reg_file"], n_frames=f_raw.shape[0]
+        Ly=Ly, Lx=Lx, filename=ops["reg_file"], n_frames=f_raw.shape[0], write=True
     )  # Set registered binary file to have same n_frames
 
     # [start of suite2p code]
@@ -409,6 +415,9 @@ def suite2p_registration(
         display_rate=int(viz_display_rate),
     )
 
+    # remove tmp files
+    os.remove(tmp_raw_binary_file)
+    
     print("ALL DONE!")
 
 
@@ -728,6 +737,12 @@ def suite2p_roi_classification(
     )
 
     # output previews
+    # temporarily copy input stat file to output dir for preview generation
+    tmp_stat_file = None
+    if not os.path.exists(f"{ideas_output_dir}/stat.npy"):
+        tmp_stat_file = f"{ideas_output_dir}/stat.npy"
+        shutil.copy(stat_file[0], tmp_stat_file)
+    
     preview.create_output_previews(
         ops=ops,
         steps="roi_classification",
@@ -737,6 +752,9 @@ def suite2p_roi_classification(
         show_grid=viz_show_grid,
         ticks_step=int(viz_ticks_step),
     )
+    
+    if tmp_stat_file:
+        os.remove(tmp_stat_file)
 
     print("ALL DONE!")
 
@@ -820,6 +838,15 @@ def suite2p_spike_deconvolution(
     )
 
     # output previews
+    # temporarily copy input fluo file to output dir for preview generation
+    tmp_fluo_file, tmp_neuropli_file = None, None
+    if not os.path.exists(f"{ideas_output_dir}/F.npy"):
+        tmp_fluo_file = f"{ideas_output_dir}/F.npy"
+        shutil.copy(fluo_file[0], tmp_fluo_file)
+    if not os.path.exists(f"{ideas_output_dir}/Fneu.npy"):
+        tmp_neuropli_file = f"{ideas_output_dir}/Fneu.npy"
+        shutil.copy(neuropil_fluo_file[0], tmp_neuropli_file)
+    
     preview.create_output_previews(
         ops=ops,
         steps="spike_deconvolution",
@@ -827,6 +854,11 @@ def suite2p_spike_deconvolution(
         random_seed=int(viz_random_seed),
         show_all_footprints=viz_show_all_footprints,
     )
+
+    if tmp_fluo_file:
+        os.remove(tmp_fluo_file)
+    if tmp_neuropli_file:
+        os.remove(tmp_neuropli_file)
 
     print("ALL DONE!")
 
@@ -972,3 +1004,441 @@ def suite2p_output_conversion(
 
     # output metadata
     metadata.create_output_metadata(ops=ops, steps="output_conversion")
+
+# ================================ IDEAS Wrapper Functions ====================================
+
+def suite2p_binary_conversion_ideas_wrapper(
+    *,
+    raw_movie_files: List[IdeasFile],
+    nplanes: int = 1,
+    nchannels: int = 1,
+    functional_chan: int = 1,
+    fs: Optional[float] = None,
+    bruker_bidirectional: bool = False,
+):
+    """
+    Ideas wrapper for tool to convert raw 2P input movie(s) into a suite2p binary file. This constitutes the first step of the suite2p end-to-end pipeline.
+
+    :param List[str] raw_movie_files: Input 2P movie(s) [.isxd, .zip, .tiff].
+    :param int nplanes: [from suite2p docs] Each tiff has this many planes in sequence.
+    :param int nchannels: [from suite2p docs] Each tiff has this many channels per plane.
+    :param int functional_chan: [from suite2p docs] This channel is used to extract functional ROIs (1-based, so 1 means first channel, and 2 means second channel).
+    :param Optional[float] fs: [from suite2p docs] Sampling rate (per plane). For instance, if you have a 10 plane recording acquired at 30Hz, then the sampling rate per plane is 3Hz, so set ops['fs'] = 3.
+    :param bool bruker_bidirectional: [from suite2p docs] Specifies whether BRUKER files are bidirectional multiplane recordings. The True setting corresponds to the following plane order (first plane is indexed as zero): [0,1,2,2,1,0]. False corresponds to [0,1,2,0,1,2].
+    """
+
+    suite2p_binary_conversion(
+        raw_movie_files=raw_movie_files,
+        nplanes=nplanes,
+        nchannels=nchannels,
+        functional_chan=functional_chan,
+        fs=fs,
+        bruker_bidirectional=bruker_bidirectional,
+    )
+
+
+def suite2p_registration_ideas_wrapper(
+    *,
+    raw_binary_file: List[IdeasFile],
+    ops_file: List[IdeasFile],
+    frames_include: int = -1,
+    align_by_chan: int = 1,
+    nimg_init: int = 300,
+    batch_size: int = 500,
+    maxregshift: float = 0.1,
+    smooth_sigma: float = 1.15,
+    smooth_sigma_time: float = 0.0,
+    two_step_registration: bool = False,
+    subpixel: int = 10,
+    th_badframes: float = 1.0,
+    norm_frames: bool = True,
+    force_refImg: bool = False,
+    pad_fft: bool = False,
+    one_p_reg: bool = False,
+    spatial_hp_reg: int = 42,
+    pre_smooth: float = 0.0,
+    spatial_taper: float = 40.0,
+    nonrigid: bool = True,
+    block_size: List[int] = [128, 128],
+    snr_thresh: float = 1.2,
+    maxregshiftNR: float = 5.0,
+    do_bidiphase: bool = False,
+    bidiphase: int = 0,
+    bidi_corrected: bool = False,
+    viz_vmin_perc: float = 0.0,
+    viz_vmax_perc: float = 99.0,
+    viz_cmap: str = "plasma",
+    viz_show_grid: bool = True,
+    viz_ticks_step: float = 128.0,
+    viz_display_rate: float = 10.0,
+):
+    """
+    Ideas wrapper for tool to run suite2p registration on a raw suite2p binary movie. This constitutes the second step of the suite2p end-to-end pipeline.
+
+    :param List[str] raw_binary_file: Input raw suite2p binary movie.
+    :param List[str] ops_file: Input suite2p parameters file, as outputted by the binary conversion tool.
+    :param int frames_include: [from suite2p docs] If greater than zero, only [the first] <frames_include> frames are processed. Useful for testing parameters on a subset of data.
+    :param int align_by_chan: [from suite2p docs] Which channel to use for alignment (1-based, so 1 means 1st channel and 2 means 2nd channel). If you have a non-functional channel with something like td-Tomato expression, you may want to use this channel for alignment rather than the functional channel.
+    :param int nimg_init: [from suite2p docs] How many frames to use to compute reference image for registration.
+    :param int batch_size: [from suite2p docs] How many frames to register simultaneously in each batch. This depends on memory constraints - it will be faster to run if the batch is larger, but it will require more RAM.
+    :param float maxregshift: [from suite2p docs] The maximum shift as a fraction of the frame size. If the frame is Ly pixels x Lx pixels, then the maximum pixel shift in pixels will be max(Ly,Lx) * ops['maxregshift'].
+    :param float smooth_sigma: [from suite2p docs] Standard deviation in pixels of the gaussian used to smooth the phase correlation between the reference image and the frame which is being registered. A value of >4 is recommended for one-photon recordings (with a 512x512 pixel FOV).
+    :param float smooth_sigma_time: [from suite2p docs] Standard deviation in time frames of the gaussian used to smooth the data before phase correlation is computed. Might need this to be set to 1 or 2 for low SNR data.
+    :param bool two_step_registration: [from suite2p docs] Whether or not to run registration twice (for low SNR data). `keep_movie_raw` must be True for this to work.
+    :param int subpixel: [from suite2p docs] Precision of Subpixel Registration (1/subpixel steps).
+    :param float th_badframes: [from suite2p docs] Involved with setting threshold for excluding frames for cropping. Set this smaller to exclude more frames.
+    :param bool norm_frames: [from suite2p docs] Normalize frames when detecting shifts.
+    :param bool force_refImg: [from suite2p docs] Specifies whether to use refImg stored in ops. Make sure that ops['refImg'] has a valid file pathname.
+    :param bool pad_fft: [from suite2p docs] Specifies whether to pad image or not during FFT portion of registration.
+    :param bool one_p_reg: [from suite2p docs] Whether to perform high-pass spatial filtering and tapering (parameters set below), which help with 1P registration.
+    :param int spatial_hp_reg: [from suite2p docs] Window in pixels for spatial high-pass filtering before registration.
+    :param float pre_smooth: [from suite2p docs] If > 0, defines stddev of Gaussian smoothing, which is applied before spatial high-pass filtering.
+    :param float spatial_taper: [from suite2p docs] How many pixels to ignore on edges - they are set to zero (important for vignetted windows, for FFT padding do not set BELOW 3*ops['smooth_sigma']).
+    :param bool nonrigid: [from suite2p docs] Whether or not to perform non-rigid registration, which splits the field of view into blocks and computes registration offsets in each block separately.
+    :param List[int] block_size: [from suite2p docs] Size of blocks for non-rigid registration, in pixels. HIGHLY recommend keeping this a power of 2 and/or 3 (e.g. 128, 256, 384, etc) for efficient FFT.
+    :param float snr_thresh: [from suite2p docs] How big the phase correlation peak has to be relative to the noise in the phase correlation map for the block shift to be accepted. In low SNR recordings like one-photon, I'd recommend a larger value like 1.5, so that block shifts are only accepted if there is significant SNR in the phase correlation.
+    :param float maxregshiftNR: [from suite2p docs] Maximum shift in pixels of a block relative to the rigid shift.
+    :param bool do_bidiphase: [from suite2p docs] Whether or not to compute bidirectional phase offset from misaligned line scanning experiment (applies to 2P recordings only). suite2p will estimate the bidirectional phase offset from ops['nimg_init'] frames if this is set to 1 (and ops['bidiphase']=0), and then apply this computed offset to all frames.
+    :param int bidiphase: [from suite2p docs] Bidirectional phase offset from line scanning (set by user). If set to any value besides 0, then this offset is used and applied to all frames in the recording.
+    :param bool bidi_corrected: [from suite2p docs] Specifies whether to do bidi correction.
+    :param float viz_vmin_perc: Minimum value for the colormap range, as percentile of the FOV fluorescence.
+    :param float viz_vmax_perc: Maximum value for the colormap range, as percentile of the FOV fluorescence.
+    :param str viz_cmap: Colormap for plotting the FOV.
+    :param bool viz_show_grid: Whether or not to show the grid on FOVs.
+    :param float viz_ticks_step: Step for the x- and y-ticks.
+    :param float viz_display_rate: Display rate for the preview movies, in Hz.
+    """
+
+    suite2p_registration(
+        raw_binary_file=raw_binary_file,
+        ops_file=ops_file,
+        frames_include=frames_include,
+        align_by_chan=align_by_chan,
+        nimg_init=nimg_init,
+        batch_size=batch_size,
+        maxregshift=maxregshift,
+        smooth_sigma=smooth_sigma,
+        smooth_sigma_time=smooth_sigma_time,
+        two_step_registration=two_step_registration,
+        subpixel=subpixel,
+        th_badframes=th_badframes,
+        norm_frames=norm_frames,
+        force_refImg=force_refImg,
+        pad_fft=pad_fft,
+        one_p_reg=one_p_reg,
+        spatial_hp_reg=spatial_hp_reg,
+        pre_smooth=pre_smooth,
+        spatial_taper=spatial_taper,
+        nonrigid=nonrigid,
+        block_size=block_size,
+        snr_thresh=snr_thresh,
+        maxregshiftNR=maxregshiftNR,
+        do_bidiphase=do_bidiphase,
+        bidiphase=bidiphase,
+        bidi_corrected=bidi_corrected,
+        viz_vmin_perc=viz_vmin_perc,
+        viz_vmax_perc=viz_vmax_perc,
+        viz_cmap=viz_cmap,
+        viz_show_grid=viz_show_grid,
+        viz_ticks_step=viz_ticks_step,
+        viz_display_rate=viz_display_rate,
+    )
+
+
+def suite2p_roi_detection_ideas_wrapper(
+    *,
+    reg_binary_file: List[IdeasFile],
+    ops_file: List[IdeasFile],
+    classifier_path: Optional[List[IdeasFile]] = None,
+    tau: float = 1.0,
+    sparse_mode: bool = True,
+    spatial_scale: int = 0,
+    connected: bool = True,
+    threshold_scaling: float = 1.0,
+    spatial_hp_detect: int = 25,
+    max_overlap: float = 0.75,
+    high_pass: int = 100,
+    smooth_masks: bool = True,
+    max_iterations: int = 20,
+    nbinned: int = 5000,
+    denoise: bool = False,
+    anatomical_only: int = 0,
+    diameter: int = 0,
+    cellprob_threshold: float = 0.0,
+    flow_threshold: float = 1.5,
+    spatial_hp_cp: int = 0,
+    pretrained_model: str = "cyto",
+    preclassify: float = 0.0,
+    chan2_thres: float = 0.65,
+    viz_vmin_perc: float = 0.0,
+    viz_vmax_perc: float = 99.0,
+    viz_cmap: str = "plasma",
+    viz_show_grid: bool = True,
+    viz_ticks_step: float = 128.0,
+):
+    """
+    Ideas wrapper for tool to run suite2p ROI detection on a registered suite2p binary movie. This constitutes the third step of the suite2p end-to-end pipeline.
+
+    :param List[str] reg_binary_file: Input registered suite2p binary movie.
+    :param List[str] ops_file: Input suite2p parameters file, as outputted by the registration tool.
+    :param Optional[List[str]] classifier_path: [from suite2p docs] Path to classifier file you want to use for cell classification.
+    :param float tau: [from suite2p docs] The timescale of the sensor (in seconds), used for deconvolution kernel. The kernel is fixed to have this decay and is not fit to the data. We recommend: 0.7 for GCaMP6f; 1.0 for GCaMP6m; 1.25-1.5 for GCaMP6s.
+    :param bool sparse_mode: [from suite2p docs] Whether or not to use sparse_mode cell detection.
+    :param int spatial_scale: [from suite2p docs] What the optimal scale of the recording is in pixels. if set to 0, then the algorithm determines it automatically (recommend this on the first try). If it seems off, set it yourself to the following values: 1 (=6 pixels), 2 (=12 pixels), 3 (=24 pixels), or 4 (=48 pixels).
+    :param bool connected: [from suite2p docs] Whether or not to require ROIs to be fully connected (set to 0 for dendrites/boutons).
+    :param float threshold_scaling: [from suite2p docs] This controls the threshold at which to detect ROIs (how much the ROIs have to stand out from the noise to be detected). if you set this higher, then fewer ROIs will be detected, and if you set it lower, more ROIs will be detected.
+    :param int spatial_hp_detect: [from suite2p docs] Window for spatial high-pass filtering for neuropil subtracation before ROI detection takes place.
+    :param float max_overlap: [from suite2p docs] We allow overlapping ROIs during cell detection. After detection, ROIs with more than ops['max_overlap'] fraction of their pixels overlapping with other ROIs will be discarded. Therefore, to throw out NO ROIs, set this to 1.0.
+    :param int high_pass: [from suite2p docs] Running mean subtraction across time with window of size 'high_pass'. Values of less than 10 are recommended for 1P data where there are often large full-field changes in brightness.
+    :param bool smooth_masks: [from suite2p docs] Whether to smooth masks in final pass of cell detection. This is useful especially if you are in a high noise regime.
+    :param int max_iterations: [from suite2p docs] How many iterations over which to extract cells - at most ops['max_iterations'], but usually stops before due to ops['threshold_scaling'] criterion.
+    :param int nbinned: [from suite2p docs] Maximum number of binned frames to use for ROI detection.
+    :param bool denoise: [from suite2p docs] Whether or not binned movie should be denoised before cell detection in sparse_mode. If True, make sure to set ops['sparse_mode'] is also set to True.
+    :param int anatomical_only: [from suite2p docs] If greater than 0, specifies what to use Cellpose on.  1: Will find masks on max projection image divided by mean image.  2: Will find masks on mean image  3: Will find masks on enhanced mean image  4: Will find masks on maximum projection image.
+    :param int diameter: [from suite2p docs] Diameter that will be used for cellpose. If set to zero, diameter is estimated.
+    :param float cellprob_threshold: [from suite2p docs] Specifies threshold for cell detection that will be used by cellpose.
+    :param float flow_threshold: [from suite2p docs] Specifies flow threshold that will be used for cellpose.
+    :param int spatial_hp_cp: [from suite2p docs] Window for spatial high-pass filtering of image to be used for cellpose.
+    :param str pretrained_model: [from suite2p docs] Path to pretrained model or string for model type (can be user's model ).
+    :param float preclassify: [from suite2p docs] Apply classifier before signal extraction with probability threshold of 'preclassify'. If this is set to 0.0, then all detected ROIs are kept and signals are computed.
+    :param float chan2_thres: [from suite2p docs] Threshold for calling an ROI "detected" on a second channel.
+    :param float viz_vmin_perc: Minimum value for the colormap range, as percentile of the FOV fluorescence.
+    :param float viz_vmax_perc: Maximum value for the colormap range, as percentile of the FOV fluorescence.
+    :param str viz_cmap: Colormap for plotting the FOV.
+    :param bool viz_show_grid: Whether or not to show the grid on FOVs.
+    :param float viz_ticks_step: Step for the x- and y-ticks.
+    """
+
+    suite2p_roi_detection(
+        reg_binary_file=reg_binary_file,
+        ops_file=ops_file,
+        classifier_path=classifier_path,
+        tau=tau,
+        sparse_mode=sparse_mode,
+        spatial_scale=spatial_scale,
+        connected=connected,
+        threshold_scaling=threshold_scaling,
+        spatial_hp_detect=spatial_hp_detect,
+        max_overlap=max_overlap,
+        high_pass=high_pass,
+        smooth_masks=smooth_masks,
+        max_iterations=max_iterations,
+        nbinned=nbinned,
+        denoise=denoise,
+        anatomical_only=anatomical_only,
+        diameter=diameter,
+        cellprob_threshold=cellprob_threshold,
+        flow_threshold=flow_threshold,
+        spatial_hp_cp=spatial_hp_cp,
+        pretrained_model=pretrained_model,
+        preclassify=preclassify,
+        chan2_thres=chan2_thres,
+        viz_vmin_perc=viz_vmin_perc,
+        viz_vmax_perc=viz_vmax_perc,
+        viz_cmap=viz_cmap,
+        viz_show_grid=viz_show_grid,
+        viz_ticks_step=viz_ticks_step,
+    )
+
+
+def suite2p_roi_extraction_ideas_wrapper(
+    *,
+    reg_binary_file: List[IdeasFile],
+    stat_file: List[IdeasFile],
+    ops_file: List[IdeasFile],
+    neuropil_extract: bool = True,
+    allow_overlap: bool = False,
+    min_neuropil_pixels: int = 350,
+    inner_neuropil_radius: int = 2,
+    lam_percentile: float = 50.0,
+    viz_show_grid: bool = True,
+    viz_ticks_step: float = 128.0,
+    viz_n_samp_cells: int = 20,
+    viz_random_seed: int = 0,
+    viz_show_all_footprints: bool = True,
+):
+    """
+    Ideas wrapper for tool to run suite2p ROI extraction on a registered suite2p binary movie, using the previously detected ROIs. This constitutes the fourth step of the suite2p end-to-end pipeline.
+
+    :param List[str] reg_binary_file: Input registered suite2p binary movie.
+    :param List[str] stat_file: Input cell statistics file, as outputted by the ROI detection step.
+    :param List[str] ops_file: Input suite2p parameters file, as outputted by the ROI detection tool.
+    :param bool neuropil_extract: [from suite2p docs] Whether or not to extract signal from neuropil. If False, Fneu is set to zero.
+    :param bool allow_overlap: [from suite2p docs] Whether or not to extract signals from pixels which belong to two ROIs. By default, any pixels which belong to two ROIs (overlapping pixels) are excluded from the computation of the ROI trace.
+    :param int min_neuropil_pixels: [from suite2p docs] Minimum number of pixels used to compute neuropil for each cell.
+    :param int inner_neuropil_radius: [from suite2p docs] Number of pixels to keep between ROI and neuropil donut.
+    :param int lam_percentile: [from suite2p docs] Percentile of Lambda within area to ignore when excluding cell pixels for neuropil extraction.
+    :param bool viz_show_grid: Whether or not to show the grid on FOVs.
+    :param float viz_ticks_step: Step for the x- and y-ticks.
+    :param int viz_n_samp_cells: Number of sample cells for the cell extraction preview.
+    :param int viz_random_seed: Random seed for selecting sample cells.
+    :param bool viz_show_all_footprints: Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed.
+    """
+    suite2p_roi_extraction(
+        reg_binary_file=reg_binary_file,
+        stat_file=stat_file,
+        ops_file=ops_file,
+        neuropil_extract=neuropil_extract,
+        allow_overlap=allow_overlap,
+        min_neuropil_pixels=min_neuropil_pixels,
+        inner_neuropil_radius=inner_neuropil_radius,
+        lam_percentile=lam_percentile,
+        viz_show_grid=viz_show_grid,
+        viz_ticks_step=viz_ticks_step,
+        viz_n_samp_cells=viz_n_samp_cells,
+        viz_random_seed=viz_random_seed,
+        viz_show_all_footprints=viz_show_all_footprints,
+    )
+
+
+def suite2p_roi_classification_ideas_wrapper(
+    *,
+    stat_file: List[IdeasFile],
+    ops_file: List[IdeasFile],
+    classifier_path: Optional[List[IdeasFile]] = None,
+    soma_crop: bool = True,
+    viz_vmin_perc: float = 0.0,
+    viz_vmax_perc: float = 99.0,
+    viz_cmap: str = "plasma",
+    viz_show_grid: bool = True,
+    viz_ticks_step: float = 128.0,
+):
+    """
+    Ideas wrapper for tool to run suite2p ROI classification on the extracted ROIs. This constitutes the fifth step of the suite2p end-to-end pipeline.
+
+    :param List[str] stat_file: Input cell statistics file, as outputted by the ROI extraction step.
+    :param List[str] ops_file: Input suite2p parameters file, as outputted by the ROI extraction tool.
+    :param Optional[List[str]] classifier_path: [from suite2p docs] Path to classifier file you want to use for cell classification.
+    :param bool soma_crop: [from suite2p docs] Specifies whether to crop dendrites for cell classification stats (e.g., compactness).
+    :param float viz_vmin_perc: Minimum value for the colormap range, as percentile of the FOV fluorescence.
+    :param float viz_vmax_perc: Maximum value for the colormap range, as percentile of the FOV fluorescence.
+    :param str viz_cmap: Colormap for plotting the FOV.
+    :param bool viz_show_grid: Whether or not to show the grid on FOVs.
+    :param float viz_ticks_step: Step for the x- and y-ticks.
+    """
+    suite2p_roi_classification(
+        stat_file=stat_file,
+        ops_file=ops_file,
+        classifier_path=classifier_path,
+        soma_crop=soma_crop,
+        viz_vmin_perc=viz_vmin_perc,
+        viz_vmax_perc=viz_vmax_perc,
+        viz_cmap=viz_cmap,
+        viz_show_grid=viz_show_grid,
+        viz_ticks_step=viz_ticks_step,
+    )
+
+
+def suite2p_spike_deconvolution_ideas_wrapper(
+    *,
+    fluo_file: List[IdeasFile],
+    neuropil_fluo_file: List[IdeasFile],
+    ops_file: List[IdeasFile],
+    tau: float = 1.0,
+    neucoeff: float = 0.7,
+    baseline: str = "maximin",
+    win_baseline: float = 60.0,
+    sig_baseline: float = 10.0,
+    prctile_baseline: float = 8.0,
+    viz_n_samp_cells: int = 20,
+    viz_random_seed: int = 0,
+    viz_show_all_footprints: bool = True,
+):
+    """
+    Tool to run suite2p spike deconvolution on the extracted fluorescence traces. This constitutes the sixth step of the suite2p end-to-end pipeline.
+
+    :param List[str] fluo_file: Input fluorescence traces file, as outputted by the ROI extraction step.
+    :param List[str] neuropil_fluo_file: Input neuropil fluorescence traces file, as outputted by the ROI extraction step.
+    :param List[str] ops_file: Input suite2p parameters file, as outputted by the ROI extraction tool.
+    :param float tau: [from suite2p docs] The timescale of the sensor (in seconds), used for deconvolution kernel. The kernel is fixed to have this decay and is not fit to the data. We recommend: 0.7 for GCaMP6f; 1.0 for GCaMP6m; 1.25-1.5 for GCaMP6s.
+    :param float neucoeff: [from suite2p docs] Neuropil coefficient for all ROIs.
+    :param str baseline: [from suite2p docs] How to compute the baseline of each trace. This baseline is then subtracted from each cell. 'maximin' computes a moving baseline by filtering the data with a Gaussian of width ops['sig_baseline'] * ops['fs'], and then minimum filtering with a window of ops['win_baseline'] * ops['fs'], and then maximum filtering with the same window. 'constant' computes a constant baseline by filtering with a Gaussian of width ops['sig_baseline'] * ops['fs'] and then taking the minimum value of this filtered trace. 'constant_percentile' computes a constant baseline by taking the ops['prctile_baseline'] percentile of the trace.
+    :param float win_baseline: [from suite2p docs] Window for maximin filter in seconds.
+    :param float sig_baseline: [from suite2p docs] Gaussian filter width in seconds, used before maximin filtering or taking the minimum value of the trace, ops['baseline'] = 'maximin' or 'constant'.
+    :param float prctile_baseline: [from suite2p docs] Percentile of trace to use as baseline if ops['baseline'] = 'constant_percentile'.
+    :param int viz_n_samp_cells: Number of sample cells for the spike deconvolution preview.
+    :param int viz_random_seed: Random seed for selecting sample cells.
+    :param bool viz_show_all_footprints: Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed.
+    """
+    suite2p_spike_deconvolution(
+        fluo_file=fluo_file,
+        neuropil_fluo_file=neuropil_fluo_file,
+        ops_file=ops_file,
+        tau=tau,
+        neucoeff=neucoeff,
+        baseline=baseline,
+        win_baseline=win_baseline,
+        sig_baseline=sig_baseline,
+        prctile_baseline=prctile_baseline,
+        viz_n_samp_cells=viz_n_samp_cells,
+        viz_random_seed=viz_random_seed,
+        viz_show_all_footprints=viz_show_all_footprints,
+    )
+
+
+def suite2p_output_conversion_ideas_wrapper(
+    *,
+    fluo_file: List[IdeasFile],
+    neuropil_fluo_file: List[IdeasFile],
+    spks_file: List[IdeasFile],
+    stat_file: List[IdeasFile],
+    ops_file: List[IdeasFile],
+    iscell_file: List[IdeasFile],
+    save_npy: bool = True,
+    save_isxd: bool = True,
+    save_NWB: bool = False,
+    save_mat: bool = False,
+    thresh_spks_perc: float = 99.7,
+    viz_vmin_perc: float = 0.0,
+    viz_vmax_perc: float = 99.0,
+    viz_cmap: str = "plasma",
+    viz_show_grid: bool = True,
+    viz_ticks_step: float = 128.0,
+    viz_n_samp_cells: int = 20,
+    viz_random_seed: int = 0,
+    viz_show_all_footprints: bool = True,
+):
+    """
+    Ideas wrapper for tool to output suite2p results in specific formats. This constitutes the seventh and last step of the suite2p end-to-end pipeline.
+
+    :param List[str] fluo_file: Input fluorescence traces file, as outputted by the ROI extraction step.
+    :param List[str] neuropil_fluo_file: Input neuropil fluorescence traces file, as outputted by the ROI extraction step.
+    :param List[str] spks_file: Input deconvolved spikes file, as outputted by the spike deconvolution step.
+    :param List[str] stat_file: Input extraction statistics file, as outputted by the ROI extraction step.
+    :param List[str] ops_file: Input parameters file, as outputted by the spike deconvolution step.
+    :param List[str] iscell_file: Input classification labels file, as outputted by the ROI classification step.
+    :param bool save_npy: If true, save suite2p NPY output (as a ZIP file).
+    :param bool save_isxd: If true, save suite2p output as ISXD files.
+    :param bool save_NWB: [from suite2p docs] Whether to save output as NWB file.
+    :param bool save_mat: [from suite2p docs] Whether to save the results in matlab format in file "Fall.mat".
+    :param float thresh_spks_perc: Threshold for denoising the deconvolved spike trains, in percentile. Any value in the ROIs-by-time-point deconvolved spike matrix that is below the matrix's xth percentile value is set to 0. Note that the same threshold is applied to all ROIs, and that this thresholding step does not binarize the deconvolved spike trains but simply filters out the low-amplitude spike events.
+    :param float viz_vmin_perc: Minimum value for the colormap range, as percentile of the FOV fluorescence.
+    :param float viz_vmax_perc: Maximum value for the colormap range, as percentile of the FOV fluorescence.
+    :param str viz_cmap: Colormap for plotting the FOV.
+    :param bool viz_show_grid: Whether or not to show the grid on FOVs.
+    :param float viz_ticks_step: Step for the x- and y-ticks.
+    :param int viz_n_samp_cells: Number of sample cells for the cell extraction preview.
+    :param int viz_random_seed: Random seed for selecting sample cells.
+    :param bool viz_show_all_footprints: Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed.
+    """
+    suite2p_output_conversion(
+        fluo_file=fluo_file,
+        neuropil_fluo_file=neuropil_fluo_file,
+        spks_file=spks_file,
+        stat_file=stat_file,
+        ops_file=ops_file,
+        iscell_file=iscell_file,
+        save_npy=save_npy,
+        save_isxd=save_isxd,
+        save_NWB=save_NWB,
+        save_mat=save_mat,
+        thresh_spks_perc=thresh_spks_perc,
+        viz_vmin_perc=viz_vmin_perc,
+        viz_vmax_perc=viz_vmax_perc,
+        viz_cmap=viz_cmap,
+        viz_show_grid=viz_show_grid,
+        viz_ticks_step=viz_ticks_step,
+        viz_n_samp_cells=viz_n_samp_cells,
+        viz_random_seed=viz_random_seed,
+        viz_show_all_footprints=viz_show_all_footprints,
+    )

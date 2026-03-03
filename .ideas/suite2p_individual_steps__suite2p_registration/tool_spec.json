@@ -8,7 +8,7 @@
     },
     "command": {
         "file_path": "toolbox/tools/suite2p_individual_steps.py",
-        "entry_point": "suite2p_registration",
+        "entry_point": "suite2p_registration_ideas_wrapper",
         "program_type": "PYTHON"
     },
     "params": [
@@ -394,11 +394,19 @@
     ],
     "results": [
         {
-            "key": "tool_output_group",
-            "name": "Tool Outputs",
-            "description": "Tool outputs",
+            "key": "data",
+            "name": "Registered Binary Movie",
+            "description": "Registered suite2p binary movie",
             "file_patterns": [
-                "**/*"
+                "data**"
+            ]
+        },
+        {
+            "key": "ops_registration",
+            "name": "Registration Output Parameters File",
+            "description": "Parameters file outputted by the registration tool",
+            "file_patterns": [
+                "ops_registration**"
             ]
         }
     ],

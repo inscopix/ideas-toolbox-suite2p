@@ -8,7 +8,7 @@
     },
     "command": {
         "file_path": "toolbox/tools/suite2p_individual_steps.py",
-        "entry_point": "suite2p_roi_extraction",
+        "entry_point": "suite2p_roi_extraction_ideas_wrapper",
         "program_type": "PYTHON"
     },
     "params": [
@@ -174,11 +174,35 @@
     ],
     "results": [
         {
-            "key": "tool_output_group",
-            "name": "Tool Outputs",
-            "description": "Tool outputs",
+            "key": "stat",
+            "name": "Extraction Statistics",
+            "description": "ROI extraction suite2p statistics file",
             "file_patterns": [
-                "**/*"
+                "stat**"
+            ]
+        },
+        {
+            "key": "F",
+            "name": "Fluorescence Traces",
+            "description": "suite2p fluorescence traces file",
+            "file_patterns": [
+                "F**"
+            ]
+        },
+        {
+            "key": "Fneu",
+            "name": "Neuropil Fluorescence Traces",
+            "description": "suite2p neuropil fluorescence traces file",
+            "file_patterns": [
+                "Fneu**"
+            ]
+        },
+        {
+            "key": "ops_ROI_extraction",
+            "name": "ROI Extraction Output Parameters File",
+            "description": "Parameters file outputted by the ROI extraction tool",
+            "file_patterns": [
+                "ops_ROI_extraction**"
             ]
         }
     ],
