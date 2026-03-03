@@ -1,11 +1,12 @@
-import cv2
-from enum import Enum, unique
-import imageio.v2 as iio
-import isx
 import logging
 import math
-import numpy as np
 import os
+from enum import Enum, unique
+
+import cv2
+import imageio.v2 as iio
+import isx
+import numpy as np
 from suite2p.io import BinaryFile
 
 logger = logging.getLogger()
@@ -35,9 +36,7 @@ def _transform_movie_to_preview_shape(
     """
     # Step 1: Check if the movie frame shape is smaller than the preview frame shape.
     # If so, return the movie frame shape.
-    if np.all(
-        [movie_frame_shape[i] <= preview_frame_shape[i] for i in range(2)]
-    ):
+    if np.all([movie_frame_shape[i] <= preview_frame_shape[i] for i in range(2)]):
         return movie_frame_shape
 
     # Step 2: Determine the dimension that needs to be scaled down
@@ -55,9 +54,7 @@ def _transform_movie_to_preview_shape(
     # Step 3: Scale the movie frame shape by the scale factor
     scaled_frame_shape = np.empty(shape=(2,), dtype=int)
     for i in range(2):
-        scaled_frame_shape[i] = round(
-            float(movie_frame_shape[i]) * scale_factor
-        )
+        scaled_frame_shape[i] = round(float(movie_frame_shape[i]) * scale_factor)
 
     return tuple(scaled_frame_shape)
 
@@ -104,9 +101,7 @@ def _map_movie_to_preview_frame_ind(
     preview_frame_end_ts = preview_sampling_period * (preview_frame_ind + 1)
 
     # Step 2: Calculate the first movie frame that starts before the start of the preview frame.
-    movie_frame_ind = math.floor(
-        preview_frame_start_ts / movie_sampling_period
-    )
+    movie_frame_ind = math.floor(preview_frame_start_ts / movie_sampling_period)
 
     # Step 3: Starting from the first movie frame that starts before the start of the preview frame,
     # find all movie frames that occur during the duration of the preview frame.
@@ -143,9 +138,7 @@ def _map_movie_to_preview_frame_ind(
             movie_frame_contribution = (
                 movie_frame_end_ts - last_frame_end_ts
             ) / preview_sampling_period
-            preview_frame_map.append(
-                (movie_frame_ind, movie_frame_contribution)
-            )
+            preview_frame_map.append((movie_frame_ind, movie_frame_contribution))
 
             # Move on to next frame in the movie.
             movie_frame_ind += 1
@@ -159,9 +152,7 @@ def _map_movie_to_preview_frame_ind(
             movie_frame_contribution = (
                 preview_frame_end_ts - movie_frame_start_ts
             ) / preview_sampling_period
-            preview_frame_map.append(
-                (movie_frame_ind, movie_frame_contribution)
-            )
+            preview_frame_map.append((movie_frame_ind, movie_frame_contribution))
             break
 
     # Step 4: Check edge case where sometimes the last preview frame that occurs throughout the duration
@@ -292,7 +283,9 @@ def generate_movie_preview(
     # preview frames. In order to prevent reading the same movie frame more than
     # once, keep track of the last movie frame that was read for the previous
     # preview frame that was processed in the loop.
-    last_movie_frame_ind = None  # Index of last movie frame that was read for the previous preview frame
+    last_movie_frame_ind = (
+        None  # Index of last movie frame that was read for the previous preview frame
+    )
     last_movie_frame = None  # Frame data of the last movie frame that was read for the previous preview frame
     for preview_frame_ind in range(preview_num_frames):
         # Step 4.1: Find movie frames that occur within the current preview frame
@@ -309,9 +302,7 @@ def generate_movie_preview(
             preview_frame_map
         )  # Number of movie frames that occur within
         # the preview frame
-        for mapped_movie_frame_ind, mapped_movie_frame in enumerate(
-            preview_frame_map
-        ):
+        for mapped_movie_frame_ind, mapped_movie_frame in enumerate(preview_frame_map):
             # Step 4.2.1: Unpack data in current entry of the previw frame map.
             # Preview frame map returns a frame index, and a floating point number
             # representng the contribution that the movie frame makes to the preview frame

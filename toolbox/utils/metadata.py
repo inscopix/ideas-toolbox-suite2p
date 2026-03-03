@@ -1,8 +1,10 @@
 import json
-import numpy as np
-from pathlib import Path
-from toolbox.utils.nwb_utils import construct_nwb_file_metadata
 import logging
+from pathlib import Path
+
+import numpy as np
+
+from toolbox.utils.nwb_utils import construct_nwb_file_metadata
 
 logger = logging.getLogger()
 
@@ -112,14 +114,10 @@ def create_output_metadata(ops, steps, efocus_vals=None):
             nwb_output_name = "ophys.nwb"
             nwb_output_key = Path(nwb_output_name).stem
             try:
-                nwb_file_metadata = construct_nwb_file_metadata(
-                    nwb_output_name
-                )
+                nwb_file_metadata = construct_nwb_file_metadata(nwb_output_name)
                 nwb_file_metadata.update(metadata_output_dict)
             except Exception as e:
-                logger.warning(
-                    f"Could not construct NWB file metadata: {str(e)}"
-                )
+                logger.warning(f"Could not construct NWB file metadata: {str(e)}")
                 nwb_file_metadata = metadata_output_dict
             metadata.update({nwb_output_key: nwb_file_metadata})
 
