@@ -1,12 +1,19 @@
-
 [project]
 name = "ideas-toolbox-suite2p"
 description = "IDEAS Suite2p Toolkit"
-requires-python = "==3.10.12"
+requires-python = ">=3.10,<3.11"
 classifiers = [
     "Programming Language :: Python :: 3"
 ]
-dependencies = [
+dependencies = []
+
+dynamic = ["version"]
+
+[tool.setuptools.packages.find]
+exclude = ['data', 'outputs']
+
+[dependency-groups]
+analysis = [
     "ideas-python[analysis]==1.1.1",
     "pynwb==2.8.1",
     "hdmf==3.14.0",
@@ -15,34 +22,46 @@ dependencies = [
     "scikit-learn==1.4.2",
     "scipy==1.13.0",
     "suite2p@git+https://@github.com/inscopix/isxSuite2p.git@v0.0.4",
-    "imageio==2.33.0",
-    "imageio-ffmpeg==0.4.7",
+    "imageio[ffmpeg]==2.33.0",
     "pytest==7.4.2",
     "isx==2.1.0",
+    "setuptools",
+]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-order",
+    "pytest-watch",
+]
+dev = [
+    "pre-commit",
+    "ruff",
 ]
 
-dynamic = ["version"]
+[tool.uv]
+package = false
 
 [tool.pytest.ini_options]
 pythonpath = [
   "."
 ]
 
-[tool.black]
-line-length = 79
+[tool.ruff]
+# flake8-builtins (A)
+# pycodestyle errors (E) and warnings (W)
+# pyflakes (F)
+# isort (I)
+lint.select = ["A", "E", "W", "F", "I"]
+show-fixes = true
+line-length = 88
+# Be permissive of long lines
+lint.ignore = ["E501", "A005"]
+target-version = "py313"
+extend-exclude = ["venv", "venv_test", "venv3", ".venv"]
 
-[tool.interrogate]
-fail-under = 100
-exclude = ["setup.py", "docs", "build", "tests"]
-ignore-init-method = true
-ignore-init-module = true
-ignore-magic = true
-ignore-semiprivate = true
-ignore-private = true
-ignore-property-decorators = true
-ignore-module = true
-ignore-nested-functions = true
-ignore-nested-classes = true
-ignore-setters = false
-ignore-regex = ["^get$", "^mock_.*", ".*BaseClass.*"]
-color = true
+[tool.ruff.lint.isort]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.pydocstyle]
+add-ignore = ["D104"]  # ignore missing package docstring to reduce noise
