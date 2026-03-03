@@ -12,7 +12,7 @@ data_dir = "data"
     "raw_movie_files,ops_file,classifier_path,params_from,tau,frames_include,save_npy,save_isxd,save_NWB,save_mat,save_img,maxregshift,th_badframes,nonrigid,threshold_scaling,neucoeff,thresh_spks_perc,expected_start_time,expected_ref_image,expected_F_shape,expected_F_mean,expected_spks_sum,expected_accepted_cells,",
     [
         [
-            ["sample_200x256x256_movie.isxd"],
+            ["sample_100x128x128_movie.isxd"],
             None,
             None,
             "table",
@@ -30,11 +30,11 @@ data_dir = "data"
             0.7,
             99.7,
             "2024-09-20 13:22:01",
-            12430782,
-            (28, 200),
-            433.3202,
-            8853.195,
-            19,
+            2967169,
+            (36, 100),
+            176.27736,
+            4244.0254,
+            5,
         ]
     ],
 )

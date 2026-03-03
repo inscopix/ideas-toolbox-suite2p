@@ -1,0 +1,11 @@
+{
+    "fluo_file": [
+        "data/F.npy"
+    ],
+    "neuropil_fluo_file": [
+        "data/Fneu.npy"
+    ],
+    "ops_file": [
+        "data/ops_ROI_extraction.npy"
+    ]
+}

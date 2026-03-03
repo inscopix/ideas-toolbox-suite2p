@@ -104,12 +104,12 @@
             "key": "lam_percentile",
             "name": "Lambda Percentile",
             "required": false,
-            "description": "[from suite2p docs for <lam_percentile>] \"Percentile of Lambda within area to ignore when excluding cell pixels for neuropil extraction.\" [int, [0 100]]",
+            "description": "[from suite2p docs for <lam_percentile>] \"Percentile of Lambda within area to ignore when excluding cell pixels for neuropil extraction.\" [float, [0 100]]",
             "type": {
-                "param_type": "ToolIntRangeParam",
-                "default": 50,
-                "min": 0,
-                "max": 100
+                "param_type": "ToolFloatRangeParam",
+                "default": 50.0,
+                "min": 0.0,
+                "max": 100.0
             },
             "group": "ROI Extraction Parameters"
         },
