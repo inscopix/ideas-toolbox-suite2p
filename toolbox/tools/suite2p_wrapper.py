@@ -1,14 +1,15 @@
-import isx
-import logging
-import numpy as np
 import os
 import shutil
-import suite2p
-from toolbox.utils import io, metadata, preview, utilities
-from zipfile import ZipFile
 from typing import List, Optional
-from ideas.tools.types import IdeasFile
+from zipfile import ZipFile
+
+import isx
+import numpy as np
+import suite2p
 from ideas.tools import log
+from ideas.tools.types import IdeasFile
+
+from toolbox.utils import io, metadata, preview, utilities
 
 logger = log.get_logger()
 
@@ -106,9 +107,7 @@ def run_suite2p_end_to_end(
 
     # get extension of input movie and relevant metadata
     efocus_vals = [None] * len(raw_movie_files)
-    file_ext = "." + ".".join(
-        os.path.basename(raw_movie_files[0]).split(".")[1:]
-    )
+    file_ext = "." + ".".join(os.path.basename(raw_movie_files[0]).split(".")[1:])
     if file_ext == ".isxd":
         logger.info(
             "Inscopix .isxd movie(s) detected: setting `ops['isxd']` to `True`."

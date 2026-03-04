@@ -1,13 +1,14 @@
+import logging
+import os
+import xml.etree.ElementTree as ET
 from datetime import datetime
 from glob import glob
-import isx
-import logging
-import numpy as np
-import os
 from tarfile import TarFile
-from tifffile import tifffile
-import xml.etree.ElementTree as ET
 from zipfile import ZipFile
+
+import isx
+import numpy as np
+from tifffile import tifffile
 
 logger = logging.getLogger()
 
@@ -20,9 +21,7 @@ def npy_to_isxd(npy_dir, output_dir, thresh_spks_perc, custom_fnames=None):
     if custom_fnames is not None:
         fname_list = custom_fnames
     else:
-        fname_list = [
-            f"{x}.npy" for x in ["F", "spks", "stat", "ops", "iscell"]
-        ]
+        fname_list = [f"{x}.npy" for x in ["F", "spks", "stat", "ops", "iscell"]]
 
     # load native suite2p output files
     F = np.load(f"{npy_dir}/{fname_list[0]}", allow_pickle=True)
@@ -46,15 +45,11 @@ def npy_to_isxd(npy_dir, output_dir, thresh_spks_perc, custom_fnames=None):
     period_s = 1 / ops["fs"]
     num, den = period_s.as_integer_ratio()
     period = isx.Duration._from_num_den(num, den)
-    if "start_time" in ops.keys() and isinstance(
-        ops["start_time"], np.ndarray
-    ):
+    if "start_time" in ops.keys() and isinstance(ops["start_time"], np.ndarray):
         start = isx.Time._from_secs_since_epoch(
             isx.Duration.from_usecs(int(ops["start_time"].astype(int)))
         )
-        timing = isx.Timing(
-            num_samples=num_samples, period=period, start=start
-        )
+        timing = isx.Timing(num_samples=num_samples, period=period, start=start)
     else:
         timing = isx.Timing(num_samples=num_samples, period=period)
         logger.warning(
@@ -69,9 +64,7 @@ def npy_to_isxd(npy_dir, output_dir, thresh_spks_perc, custom_fnames=None):
 
     # write cellset file
     output_cs = f"{output_dir}/cellset_raw.isxd"
-    cs_out = isx.CellSet.write(
-        file_path=output_cs, timing=timing, spacing=spacing
-    )
+    cs_out = isx.CellSet.write(file_path=output_cs, timing=timing, spacing=spacing)
     for idx in range(num_cell):
         image = np.zeros(num_pixels, dtype="float32")
         ypix = stat[idx]["ypix"]
@@ -125,14 +118,9 @@ def extract_bruker2p_file(raw_movie_files, file_ext, data_dir):
                 for member_info in f.infolist():
                     if member_info.is_dir():
                         continue
-                    member_info.filename = os.path.basename(
-                        member_info.filename
-                    )
+                    member_info.filename = os.path.basename(member_info.filename)
                     if any(
-                        [
-                            member_info.filename.endswith(ext)
-                            for ext in auth_ext_list
-                        ]
+                        [member_info.filename.endswith(ext) for ext in auth_ext_list]
                     ):
                         f.extract(member_info, data_dir)
         elif file_ext == ".tar.gz":
@@ -142,10 +130,7 @@ def extract_bruker2p_file(raw_movie_files, file_ext, data_dir):
                         continue
                     member_info.name = os.path.basename(member_info.name)
                     if any(
-                        [
-                            member_info.filename.endswith(ext)
-                            for ext in auth_ext_list
-                        ]
+                        [member_info.filename.endswith(ext) for ext in auth_ext_list]
                     ):
                         f.extract(member_info, data_dir)
 
@@ -161,10 +146,7 @@ def extract_bruker2p_file(raw_movie_files, file_ext, data_dir):
         logger.info(f"Detected {len(xml_files)} .xml files: {xml_files}.")
         ometif_files = glob(data_dir + "*.ome.tif")
         idx_same_name = np.where(
-            [
-                any([x.split(".")[0] in y for y in ometif_files])
-                for x in xml_files
-            ]
+            [any([x.split(".")[0] in y for y in ometif_files]) for x in xml_files]
         )[0]
         if len(idx_same_name) > 0:
             xml_file = xml_files[idx_same_name[0]]
@@ -176,9 +158,7 @@ def extract_bruker2p_file(raw_movie_files, file_ext, data_dir):
     bruker_version = root.attrib.get("version")
     logger.info(f"Processing Bruker 2p data v{bruker_version}...")
     fs = 1 / float(
-        root.findall('.//PVStateValue/[@key="framePeriod"]')[0].attrib.get(
-            "value"
-        )
+        root.findall('.//PVStateValue/[@key="framePeriod"]')[0].attrib.get("value")
     )
     logger.info(f"Got sampling rate from xml: {fs} Hz")
     if "date" in root.attrib:

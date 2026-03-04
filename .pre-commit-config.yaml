@@ -2,7 +2,7 @@ default_language_version:
   python: python3.13
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.1
+    rev: v0.15.4
     hooks:
       # Run the linter.
       - id: ruff
@@ -26,11 +26,11 @@ repos:
         pass_filenames: false
         # If the tests fail, no point running the rest of the hooks
         fail_fast: true
+        verbose: true
   - repo: https://github.com/astral-sh/uv-pre-commit
     # This should yell at us if we bump deps in pyproject.toml but forget to update the lock file.
-    rev: 0.9.16
+    rev: 0.10.7
     hooks:
-      - id: uv-lock
       - id: uv-lock
         name: uv-lock-agent
         files: pyproject.toml
