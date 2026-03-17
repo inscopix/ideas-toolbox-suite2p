@@ -178,7 +178,8 @@
             "name": "Extraction Statistics",
             "description": "ROI extraction suite2p statistics file",
             "file_patterns": [
-                "stat**"
+                "*stat.npy",
+                "*.svg"
             ]
         },
         {
@@ -186,7 +187,8 @@
             "name": "Fluorescence Traces",
             "description": "suite2p fluorescence traces file",
             "file_patterns": [
-                "F**"
+                "*F.npy",
+                "*.svg"
             ]
         },
         {
@@ -194,7 +196,7 @@
             "name": "Neuropil Fluorescence Traces",
             "description": "suite2p neuropil fluorescence traces file",
             "file_patterns": [
-                "Fneu**"
+                "*Fneu.npy"
             ]
         },
         {
@@ -202,7 +204,7 @@
             "name": "ROI Extraction Output Parameters File",
             "description": "Parameters file outputted by the ROI extraction tool",
             "file_patterns": [
-                "ops_ROI_extraction**"
+                "*ops_ROI_extraction.npy"
             ]
         }
     ],

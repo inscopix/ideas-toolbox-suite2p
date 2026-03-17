@@ -255,7 +255,8 @@
             "name": "NPY Output",
             "description": "suite2p output in NPY format",
             "file_patterns": [
-                "suite2p_output**"
+                "*suite2p_output.zip",
+                "*.svg"
             ]
         },
         {
@@ -263,7 +264,8 @@
             "name": "ISXD Cellset",
             "description": "suite2p raw fluorescence output in Inscopix format",
             "file_patterns": [
-                "cellset_raw**"
+                "*cellset_raw.isxd",
+                "*.svg"
             ]
         },
         {
@@ -271,7 +273,8 @@
             "name": "ISXD Eventset",
             "description": "suite2p deconvolved spikes output in Inscopix format",
             "file_patterns": [
-                "eventset**"
+                "*eventset.isxd",
+                "*.svg"
             ]
         },
         {
@@ -279,7 +282,8 @@
             "name": "NWB Output",
             "description": "suite2p output in NWB format",
             "file_patterns": [
-                "ophys**"
+                "*ophys.nwb",
+                "*.svg"
             ]
         },
         {
@@ -287,7 +291,8 @@
             "name": "MATLAB Output",
             "description": "suite2p output in MATLAB format",
             "file_patterns": [
-                "Fall**"
+                "*Fall.mat",
+                "*.svg"
             ]
         }
     ],

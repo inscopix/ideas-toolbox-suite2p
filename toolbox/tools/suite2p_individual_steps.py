@@ -9,6 +9,7 @@ import isx
 import numpy as np
 from ideas.tools import log
 from ideas.tools.types import IdeasFile
+from ideas.tools import outputs
 from natsort import natsorted
 from suite2p import (
     classification,
@@ -153,7 +154,7 @@ def suite2p_binary_conversion(
         ]
     )
     # ops_paths = [os.path.join(f, "ops.npy") for f in plane_folders]
-    print(
+    logger.info(
         "time {:0.2f} sec. Wrote {} frames per binary for {} planes".format(
             time.time() - t0, ops0["nframes"], len(plane_folders)
         )
@@ -177,7 +178,7 @@ def suite2p_binary_conversion(
     shutil.move(ops0["ops_path"], f"{ideas_output_dir}/ops_binary_conversion.npy")
     if os.path.exists(f"{ideas_output_dir}/suite2p/"):
         shutil.rmtree(f"{ideas_output_dir}/suite2p/")
-    print("ALL DONE!")
+    logger.info("ALL DONE!")
 
 
 def suite2p_registration(
@@ -305,7 +306,7 @@ def suite2p_registration(
     # REGISTRATION
     t11 = time.time()
     plane_times = {}
-    print("----------- REGISTRATION")
+    logger.info("----------- REGISTRATION")
     refImg = (
         ops["refImg"] if "refImg" in ops and ops.get("force_refImg", False) else None
     )
@@ -335,12 +336,12 @@ def suite2p_registration(
         np.save(ops["ops_path"], ops)
 
     plane_times["registration"] = time.time() - t11
-    print("----------- Total %0.2f sec" % plane_times["registration"])
+    logger.info("----------- Total %0.2f sec" % plane_times["registration"])
     n_frames, Ly, Lx = f_reg.shape
 
     if ops["two_step_registration"] and ops["keep_movie_raw"]:
-        print("----------- REGISTRATION STEP 2")
-        print("(making mean image (excluding bad frames)")
+        logger.info("----------- REGISTRATION STEP 2")
+        logger.info("(making mean image (excluding bad frames)")
         nsamps = min(n_frames, 1000)
         inds = np.linspace(0, n_frames, 1 + nsamps).astype(np.int64)[:-1]
         if align_by_chan2:
@@ -359,7 +360,7 @@ def suite2p_registration(
         if ops.get("ops_path"):
             np.save(ops["ops_path"], ops)
         plane_times["two_step_registration"] = time.time() - t11
-        print("----------- Total %0.2f sec" % plane_times["two_step_registration"])
+        logger.info("----------- Total %0.2f sec" % plane_times["two_step_registration"])
 
     # compute metrics for registration
     if ops.get("do_regmetrics", True) and n_frames >= 1500:
@@ -375,7 +376,7 @@ def suite2p_registration(
         ]
         ops = registration.get_pc_metrics(mov, ops)
         plane_times["registration_metrics"] = time.time() - t0
-        print("Registration metrics, %0.2f sec." % plane_times["registration_metrics"])
+        logger.info("Registration metrics, %0.2f sec." % plane_times["registration_metrics"])
         if ops.get("ops_path"):
             np.save(ops["ops_path"], ops)
     # [end of suite2p code]
@@ -401,7 +402,7 @@ def suite2p_registration(
     # remove tmp files
     os.remove(tmp_raw_binary_file)
 
-    print("ALL DONE!")
+    logger.info("ALL DONE!")
 
 
 def suite2p_roi_detection(
@@ -510,22 +511,22 @@ def suite2p_roi_detection(
     builtin_classfile = classification.builtin_classfile
     user_classfile = classification.user_classfile
     if ops_classfile:
-        print(f"NOTE: applying classifier {str(ops_classfile)}")
+        logger.info(f"NOTE: applying classifier {str(ops_classfile)}")
         classfile = ops_classfile
     elif ops["use_builtin_classifier"] or not user_classfile.is_file():
-        print(f"NOTE: Applying builtin classifier at {str(builtin_classfile)}")
+        logger.info(f"NOTE: Applying builtin classifier at {str(builtin_classfile)}")
         classfile = builtin_classfile
     else:
-        print(f"NOTE: applying default {str(user_classfile)}")
+        logger.info(f"NOTE: applying default {str(user_classfile)}")
         classfile = user_classfile
 
     # CELL DETECTION
     t11 = time.time()
     plane_times = {}
-    print("----------- ROI DETECTION")
+    logger.info("----------- ROI DETECTION")
     ops, stat = detection.detection_wrapper(f_reg, ops=ops, classfile=classfile)
     plane_times["detection"] = time.time() - t11
-    print("----------- Total %0.2f sec." % plane_times["detection"])
+    logger.info("----------- Total %0.2f sec." % plane_times["detection"])
     # [end of suite2p code]
 
     # save output files into output folder
@@ -551,7 +552,7 @@ def suite2p_roi_detection(
         ticks_step=int(viz_ticks_step),
     )
 
-    print("ALL DONE!")
+    logger.info("ALL DONE!")
 
 
 def suite2p_roi_extraction(
@@ -605,14 +606,14 @@ def suite2p_roi_extraction(
     # ROI EXTRACTION
     t11 = time.time()
     plane_times = {}
-    print("----------- EXTRACTION")
+    logger.info("----------- EXTRACTION")
     f_reg_chan2 = None
     stat, F, Fneu, F_chan2, Fneu_chan2 = extraction.extraction_wrapper(
         stat, f_reg, f_reg_chan2=f_reg_chan2, ops=ops
     )
 
     plane_times["extraction"] = time.time() - t11
-    print("----------- Total %0.2f sec." % plane_times["extraction"])
+    logger.info("----------- Total %0.2f sec." % plane_times["extraction"])
     # [end of suite2p code]
 
     # save output files into output folder
@@ -640,7 +641,7 @@ def suite2p_roi_extraction(
         show_all_footprints=viz_show_all_footprints,
     )
 
-    print("ALL DONE!")
+    logger.info("ALL DONE!")
 
 
 def suite2p_roi_classification(
@@ -684,25 +685,25 @@ def suite2p_roi_classification(
     builtin_classfile = classification.builtin_classfile
     user_classfile = classification.user_classfile
     if ops_classfile:
-        print(f"NOTE: applying classifier {str(ops_classfile)}")
+        logger.info(f"NOTE: applying classifier {str(ops_classfile)}")
         classfile = ops_classfile
     elif ops["use_builtin_classifier"] or not user_classfile.is_file():
-        print(f"NOTE: Applying builtin classifier at {str(builtin_classfile)}")
+        logger.info(f"NOTE: Applying builtin classifier at {str(builtin_classfile)}")
         classfile = builtin_classfile
     else:
-        print(f"NOTE: applying default {str(user_classfile)}")
+        logger.info(f"NOTE: applying default {str(user_classfile)}")
         classfile = user_classfile
 
     # ROI CLASSIFICATION
     t11 = time.time()
     plane_times = {}
-    print("----------- CLASSIFICATION")
+    logger.info("----------- CLASSIFICATION")
     if len(stat):
         iscell = classification.classify(stat=stat, classfile=classfile)
     else:
         iscell = np.zeros((0, 2))
     plane_times["classification"] = time.time() - t11
-    print("----------- Total %0.2f sec." % plane_times["classification"])
+    logger.info("----------- Total %0.2f sec." % plane_times["classification"])
     # [end of suite2p code]
 
     # save output file into output folder
@@ -737,7 +738,7 @@ def suite2p_roi_classification(
     if tmp_stat_file:
         os.remove(tmp_stat_file)
 
-    print("ALL DONE!")
+    logger.info("ALL DONE!")
 
 
 def suite2p_spike_deconvolution(
@@ -789,7 +790,7 @@ def suite2p_spike_deconvolution(
     # SPIKE DECONVOLUTION
     t11 = time.time()
     plane_times = {}
-    print("----------- SPIKE DECONVOLUTION")
+    logger.info("----------- SPIKE DECONVOLUTION")
     dF = F.copy() - ops["neucoeff"] * Fneu
     dF = extraction.preprocess(
         F=dF,
@@ -803,7 +804,7 @@ def suite2p_spike_deconvolution(
         F=dF, batch_size=ops["batch_size"], tau=ops["tau"], fs=ops["fs"]
     )
     plane_times["deconvolution"] = time.time() - t11
-    print("----------- Total %0.2f sec." % plane_times["deconvolution"])
+    logger.info("----------- Total %0.2f sec." % plane_times["deconvolution"])
     # [end of suite2p code]
 
     # save output file into output folder
@@ -841,7 +842,7 @@ def suite2p_spike_deconvolution(
     if tmp_neuropli_file:
         os.remove(tmp_neuropli_file)
 
-    print("ALL DONE!")
+    logger.info("ALL DONE!")
 
 
 def suite2p_output_conversion(
@@ -940,7 +941,6 @@ def suite2p_output_conversion(
     if save_isxd:
         fname_list = [os.path.basename(x[0]) for x in file_list]
         del fname_list[1]
-        print()
         tlbxio.npy_to_isxd(
             npy_dir=suite2p_output_dir,
             output_dir=ideas_output_dir,
@@ -1016,6 +1016,30 @@ def suite2p_binary_conversion_ideas_wrapper(
         fs=fs,
         bruker_bidirectional=bruker_bidirectional,
     )
+
+    try:
+        logger.info("Registering output data")
+        metadata = outputs._load_and_remove_output_metadata()
+        output_prefix = outputs.input_paths_to_output_prefix(
+            raw_movie_files, max_name_len=100
+        )
+        with outputs.register(raise_missing_file=False) as output_data:
+            output_data.register_file(
+                "data_raw.bin",
+                prefix=output_prefix
+            ).register_preview(
+                "movie_preview.mp4",
+                caption="Preview raw binary movie (from data_raw.bin)"
+            ).register_metadata_dict(
+                **metadata["data_raw"]
+            )
+            output_data.register_file(
+                "ops_binary_conversion.npy",
+                prefix=output_prefix,
+            )
+        logger.info("Registered output data")
+    except Exception:
+        logger.exception("Failed to generate output data!")
 
 
 def suite2p_registration_ideas_wrapper(
@@ -1124,6 +1148,39 @@ def suite2p_registration_ideas_wrapper(
         viz_ticks_step=viz_ticks_step,
         viz_display_rate=viz_display_rate,
     )
+    
+    try:
+        logger.info("Registering output data")
+        metadata = outputs._load_and_remove_output_metadata()
+        output_prefix = outputs.input_paths_to_output_prefix(
+            raw_binary_file, max_name_len=100
+        )
+        with outputs.register(raise_missing_file=False) as output_data:
+            output_data.register_file(
+                "data.bin",
+                prefix=output_prefix,
+            ).register_preview(
+                "registration_fovs.svg",
+                caption="Various FOVs from the registration process (from ops_registration.npy)"
+            ).register_preview(
+                "registration_offsets.svg",
+                caption="x and y offsets for both rigid and non-rigid registration (from ops_registration.npy)"
+            ).register_preview(
+                "registration_movies.mp4",
+                caption="Side-by-side raw and registered movies (from ops_registration.npy, data_raw.bin, and data.bin)"
+            ).register_preview(
+                "movie_preview.mp4",
+                caption="Preview registered binary movie (from data.bin)"
+            ).register_metadata_dict(
+                **metadata["data"]
+            )
+            output_data.register_file(
+                "ops_registration.npy",
+                prefix=output_prefix,
+            )
+        logger.info("Registered output data")
+    except Exception:
+        logger.exception("Failed to generate output data!")
 
 
 def suite2p_roi_detection_ideas_wrapper(
@@ -1221,6 +1278,33 @@ def suite2p_roi_detection_ideas_wrapper(
         viz_ticks_step=viz_ticks_step,
     )
 
+    try:
+        logger.info("Registering output data")
+        metadata = outputs._load_and_remove_output_metadata()
+        output_prefix = outputs.input_paths_to_output_prefix(
+            reg_binary_file, max_name_len=100
+        )
+        with outputs.register(raise_missing_file=False) as output_data:
+            output_data.register_file(
+                "stat_ROI_detection.npy",
+                prefix=output_prefix,
+            ).register_preview(
+                "detection_footprints_all.svg",
+                caption="Various FOVs from the ROI detection process (from ops.npy and stat_ROI_detection.npy)"
+            ).register_preview(
+                "detection_footprints_detected.svg",
+                caption="FOV of the detected ROIs (from ops.npy and stat_ROI_detection.npy)"
+            ).register_metadata_dict(
+                **metadata["stat_ROI_detection"]
+            )
+            output_data.register_file(
+                "ops_ROI_detection.npy",
+                prefix=output_prefix,
+            )
+        logger.info("Registered output data")
+    except Exception:
+        logger.exception("Failed to generate output data!")
+
 
 def suite2p_roi_extraction_ideas_wrapper(
     *,
@@ -1271,6 +1355,48 @@ def suite2p_roi_extraction_ideas_wrapper(
         viz_show_all_footprints=viz_show_all_footprints,
     )
 
+    try:
+        logger.info("Registering output data")
+        metadata = outputs._load_and_remove_output_metadata()
+        output_prefix = outputs.input_paths_to_output_prefix(
+            reg_binary_file, stat_file, max_name_len=100
+        )
+        with outputs.register(raise_missing_file=False) as output_data:
+            stat_file = output_data.register_file(
+                "stat.npy",
+                prefix=output_prefix
+            ).register_metadata_dict(
+                **metadata["stat"]
+            )
+
+            f_file = output_data.register_file(
+                "F.npy",
+                prefix=output_prefix,
+            ).register_preview(
+                "extracted_sample_sources_traces_only.svg",
+                caption="Sample fluorescence traces only (from ops.npy and F.npy)",
+            )
+            
+            for f in [stat_file, f_file]:
+                f.register_preview(
+                    "extracted_sample_sources_footprints.svg",
+                    caption="Footprints of the sample sources (from ops.npy and stat.npy)",
+                    prefix=""
+                )
+
+            output_data.register_file(
+                "Fneu.npy",
+                prefix=output_prefix,
+            )
+
+            output_data.register_file(
+                "ops_ROI_extraction.npy",
+                prefix=output_prefix,
+            )
+        logger.info("Registered output data")
+    except Exception:
+        logger.exception("Failed to generate output data!")
+
 
 def suite2p_roi_classification_ideas_wrapper(
     *,
@@ -1308,6 +1434,34 @@ def suite2p_roi_classification_ideas_wrapper(
         viz_show_grid=viz_show_grid,
         viz_ticks_step=viz_ticks_step,
     )
+
+    try:
+        logger.info("Registering output data")
+        metadata = outputs._load_and_remove_output_metadata()
+        output_prefix = outputs.input_paths_to_output_prefix(
+            stat_file, max_name_len=100
+        )
+        with outputs.register(raise_missing_file=False) as output_data:
+            output_data.register_file(
+                "iscell.npy",
+                prefix=output_prefix
+            ).register_preview(
+                "detection_footprints_all.svg",
+                caption="Various FOVs from the ROI detection process (from ops.npy, stat.npy, and iscell.npy)"
+            ).register_preview(
+                "detection_footprints_accepted.svg",
+                caption="FOV of the accepted ROIs from the ROI detection process (from ops.npy, stat.npy, and iscell.npy)"
+            ).register_metadata_dict(
+                **metadata["iscell"]
+            )
+            output_data.register_file(
+                "ops_ROI_classification.npy",
+                prefix=output_prefix,
+            )
+
+        logger.info("Registered output data")
+    except Exception:
+        logger.exception("Failed to generate output data!")
 
 
 def suite2p_spike_deconvolution_ideas_wrapper(
@@ -1355,6 +1509,44 @@ def suite2p_spike_deconvolution_ideas_wrapper(
         viz_random_seed=viz_random_seed,
         viz_show_all_footprints=viz_show_all_footprints,
     )
+
+    try:
+        logger.info("Registering output data")
+        output_prefix = outputs.input_paths_to_output_prefix(
+            fluo_file, neuropil_fluo_file, ops_file, max_name_len=100
+        )
+        metadata = outputs._load_and_remove_output_metadata()
+        with outputs.register(raise_missing_file=False) as output_data:
+            output_data.register_file(
+                "spks.npy",
+                prefix=output_prefix
+            ).register_preview(
+                "extracted_sample_sources_traces_spikes.svg",
+                caption="Sample fluorescence traces and deconvolved spikes (from ops.npy, F.npy, and spks.npy)"
+            ).register_preview(
+                "raster_deconvolved_spikes.svg",
+                caption="Raster plot of the deconvolved spikes (from ops.npy, spks.npy, and iscell.npy)"
+            ).register_preview(
+                "extracted_sample_sources_traces_only.svg",
+                caption="Sample fluorescence traces only (from ops.npy, F.npy, and iscell.npy)"
+            ).register_preview(
+                "extracted_sample_sources_traces_only.svg",
+                caption="Sample fluorescence traces, neuropil traces and deconvolved spikes (from ops.npy, F.npy, Fneu.npy, spks.npy, and iscell.npy)"
+            ).register_preview(
+                "extracted_sample_sources_traces_suite2p.svg",
+                caption="Sample fluorescence traces, neuropil traces and deconvolved spikes (from ops.npy, F.npy, Fneu.npy, spks.npy, and iscell.npy)"
+            ).register_metadata_dict(
+                **metadata["spks"]
+            )
+
+            output_data.register_file(
+                "ops_spike_deconvolution.npy",
+                prefix=output_prefix,
+            )
+
+        logger.info("Registered output data")
+    except Exception:
+        logger.exception("Failed to generate output data!")
 
 
 def suite2p_output_conversion_ideas_wrapper(
@@ -1423,3 +1615,107 @@ def suite2p_output_conversion_ideas_wrapper(
         viz_random_seed=viz_random_seed,
         viz_show_all_footprints=viz_show_all_footprints,
     )
+
+    try:
+        logger.info("Registering output data")
+        output_prefix = outputs.input_paths_to_output_prefix(
+            fluo_file, neuropil_fluo_file, spks_file, stat_file, ops_file, iscell_file, max_name_len=100
+        )
+        metadata = outputs._load_and_remove_output_metadata()
+        with outputs.register(raise_missing_file=False) as output_data:
+            suite2p_output_file, cellset_raw_file, eventset_file, ophys_file, mat_file = None, None, None, None, None
+
+            if save_npy:
+                suite2p_output_file = output_data.register_file(
+                    "suite2p_output.zip",
+                    prefix=output_prefix
+                ).register_metadata_dict(
+                    **metadata["suite2p_output"]
+                )
+            
+            if save_isxd:
+                cellset_raw_file = output_data.register_file(
+                    "cellset_raw.isxd",
+                    prefix=output_prefix,
+                ).register_metadata_dict(
+                    **metadata["cellset_raw"]
+                )
+
+                eventset_file = output_data.register_file(
+                    "eventset.isxd",
+                    prefix=output_prefix,
+                ).register_metadata_dict(
+                    **metadata["eventset"]
+                )
+
+            if save_NWB:
+                ophys_file = output_data.register_file(
+                    "ophys.nwb",
+                    prefix=output_prefix,
+                ).register_metadata_dict(
+                    **metadata["ophys"]
+                )
+
+            if save_mat:
+                mat_file = output_data.register_file(
+                    "Fall.mat",
+                    prefix=output_prefix,
+                ).register_metadata_dict(
+                    **metadata["Fall"]
+                )
+
+            for f in [suite2p_output_file, ophys_file, mat_file]:
+                if not f:
+                    continue
+                f.register_preview(
+                    "registration_fovs.svg",
+                    caption="Various FOVs from the registration process (from ops.npy)",
+                    prefix=""
+                ).register_preview(
+                    "registration_offsets.svg",
+                    caption="x and y offsets for both rigid and non-rigid registration (from ops.npy)",
+                    prefix=""
+                ).register_preview(
+                    "detection_footprints_all.svg",
+                    caption="Various FOVs from the ROI detection process (from ops.npy, stat.npy, and iscell.npy)",
+                    prefix=""
+                ).register_preview(
+                    "detection_footprints_accepted.svg",
+                    caption="FOV of the accepted ROIs from the ROI detection process (from ops.npy, stat.npy, and iscell.npy)",
+                    prefix=""
+                ).register_preview(
+                    "extracted_sample_sources_traces_suite2p.svg",
+                    caption="Sample fluorescence traces, neuropil traces and deconvolved spikes (from ops.npy, F.npy, Fneu.npy, spks.npy, and iscell.npy)",
+                    prefix=""
+                )
+
+            for f in [suite2p_output_file, ophys_file, mat_file, cellset_raw_file]:
+                if not f:
+                    continue
+                f.register_preview(
+                    "extracted_sample_sources_traces_only.svg",
+                    caption="Sample fluorescence traces only (from ops.npy, F.npy, and iscell.npy)",
+                    prefix=""
+                ).register_preview(
+                    "extracted_sample_sources_footprints.svg",
+                    caption="Footprints of the sample sources (from ops.npy, stat.npy, and iscell.npy)",
+                    prefix=""
+                )
+
+            for f in [suite2p_output_file, ophys_file, mat_file, eventset_file]:
+                if not f:
+                    continue
+                f.register_preview(
+                    "extracted_sample_sources_traces_spikes.svg",
+                    caption="Sample fluorescence traces and deconvolved spikes (from ops.npy, F.npy, spks.npy, and iscell.npy)",
+                    prefix=""
+                ).register_preview(
+                    "raster_deconvolved_spikes.svg",
+                    caption="Raster plot of the deconvolved spikes (from ops.npy, spks.npy, and iscell.npy)",
+                    prefix=""
+                )
+
+        logger.info("Registered output data")
+    except Exception:
+        logger.exception("Failed to generate output data!")
+

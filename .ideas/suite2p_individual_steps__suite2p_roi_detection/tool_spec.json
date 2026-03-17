@@ -355,7 +355,8 @@
             "name": "Detection Statistics",
             "description": "ROI detection suite2p statistics file",
             "file_patterns": [
-                "stat_ROI_detection**"
+                "*stat_ROI_detection.npy",
+                "*.svg"
             ]
         },
         {
@@ -363,7 +364,7 @@
             "name": "ROI Detection Output Parameters File",
             "description": "Parameters file outputted by the ROI detection tool",
             "file_patterns": [
-                "ops_ROI_detection**"
+                "*ops_ROI_detection.npy"
             ]
         }
     ],
