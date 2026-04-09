@@ -398,9 +398,7 @@
             "name": "Registered Binary Movie",
             "description": "Registered suite2p binary movie",
             "file_patterns": [
-                "*data.bin",
-                "*.svg",
-                "*.mp4"
+                "data/**/*"
             ]
         },
         {
@@ -408,7 +406,7 @@
             "name": "Registration Output Parameters File",
             "description": "Parameters file outputted by the registration tool",
             "file_patterns": [
-                "*ops_registration.npy"
+                "ops_registration/**/*"
             ]
         }
     ],

@@ -60,6 +60,7 @@ RUN --mount=from=ghcr.io/astral-sh/uv:0.9.16,source=/uv,target=/bin/uv \
     --mount=type=cache,target=/tmp/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    --mount=type=bind,source=resources,target=resources \
     uv sync --verbose --no-install-project --group analysis
 
 USER ideas

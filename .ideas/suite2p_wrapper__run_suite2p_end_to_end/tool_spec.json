@@ -323,9 +323,7 @@
             "name": "NPY Output",
             "description": "suite2p output in NPY format",
             "file_patterns": [
-                "*suite2p_output.zip",
-                "*.svg",
-                "*.mp4"
+                "suite2p_output/**/*"
             ]
         },
         {
@@ -333,8 +331,7 @@
             "name": "ISXD Cellset",
             "description": "suite2p raw fluorescence output in Inscopix format",
             "file_patterns": [
-                "*cellset_raw.isxd",
-                "*.svg"
+                "cellset_raw/**/*"
             ]
         },
         {
@@ -342,8 +339,7 @@
             "name": "ISXD Eventset",
             "description": "suite2p deconvolved spikes output in Inscopix format",
             "file_patterns": [
-                "*eventset.isxd",
-                "*.svg"
+                "eventset/**/*"
             ]
         },
         {
@@ -351,8 +347,7 @@
             "name": "NWB Output",
             "description": "suite2p output in NWB format",
             "file_patterns": [
-                "*ophys.nwb",
-                "*.svg"
+                "ophys/**/*"
             ]
         },
         {
@@ -360,8 +355,7 @@
             "name": "MATLAB Output",
             "description": "suite2p output in MATLAB format",
             "file_patterns": [
-                "*Fall.mat",
-                "*.svg"
+                "Fall/**/*"
             ]
         },
         {
@@ -369,8 +363,7 @@
             "name": "Template Image",
             "description": "Local correlation image in TIF format",
             "file_patterns": [
-                "*local_corr_img.tif",
-                "*.png"
+                "local_corr_img/**/*"
             ]
         }
     ],
