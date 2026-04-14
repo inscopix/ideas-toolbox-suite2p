@@ -417,5 +417,5 @@
     },
     "description": "Tool to run suite2p registration on a raw suite2p binary movie",
     "visibility": "public",
-    "version": "1.0.0"
+    "version": "0.9.0"
 }

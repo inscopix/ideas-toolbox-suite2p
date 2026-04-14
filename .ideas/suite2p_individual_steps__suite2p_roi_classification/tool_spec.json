@@ -150,5 +150,5 @@
     },
     "description": "Tool to run suite2p ROI classification on the extracted ROIs",
     "visibility": "public",
-    "version": "1.0.0"
+    "version": "0.9.0"
 }

@@ -8,7 +8,7 @@
     "readme_path": "container.md",
     "description": "Suite 2p Inscopix container image",
     "tags": [
-	"suite2p"
+	    "suite2p"
     ]
   }
 ]

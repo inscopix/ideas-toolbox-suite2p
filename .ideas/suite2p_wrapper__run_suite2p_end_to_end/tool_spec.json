@@ -374,5 +374,5 @@
     },
     "description": "Tool to run suite2p end-to-end on any format of 2p movie",
     "visibility": "public",
-    "version": "1.0.0"
+    "version": "0.9.0"
 }

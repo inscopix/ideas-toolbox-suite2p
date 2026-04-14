@@ -298,5 +298,5 @@
     },
     "description": "Tool to output suite2p results in specific formats",
     "visibility": "public",
-    "version": "1.0.0"
+    "version": "0.9.0"
 }
