@@ -131,7 +131,7 @@
             "name": "Classification Labels",
             "description": "ROI classification suite2p labels file",
             "file_patterns": [
-                "iscell**"
+                "iscell/**/*"
             ]
         },
         {
@@ -139,7 +139,7 @@
             "name": "ROI Classification Output Parameters File",
             "description": "Parameters file outputted by the ROI classification tool",
             "file_patterns": [
-                "ops_ROI_classification**"
+                "ops_ROI_classification/**/*"
             ]
         }
     ],

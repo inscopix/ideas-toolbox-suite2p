@@ -94,7 +94,7 @@
             "name": "Raw Binary Movie",
             "description": "Raw suite2p binary movie",
             "file_patterns": [
-                "data_raw**"
+                "data_raw/**/*"
             ]
         },
         {
@@ -102,7 +102,7 @@
             "name": "Binary Conversion Output Parameters File",
             "description": "Parameters file outputted by the binary conversion tool",
             "file_patterns": [
-                "ops_binary_conversion**"
+                "ops_binary_conversion/**/*"
             ]
         }
     ],

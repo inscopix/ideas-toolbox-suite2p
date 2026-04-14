@@ -14,7 +14,11 @@ exclude = ['data', 'outputs']
 
 [dependency-groups]
 analysis = [
-    "ideas-python[analysis]==1.1.1",
+    # ============================================== TODO ==============================================
+    # Change back from wheel file to pip dep once ideas-python published to pypi
+    #"ideas-python[analysis]==1.1.1",
+    "ideas-python@file:///${PWD}/resources/ideas_python-1.2.1.dev10+gbeb512018-py3-none-any.whl",
+    # ============================================== TODO ==============================================
     "pynwb==2.8.1",
     "hdmf==3.14.0",
     "dandi==0.63.0",
@@ -25,6 +29,10 @@ analysis = [
     "imageio[ffmpeg]==2.33.0",
     "pytest==7.4.2",
     "isx==2.1.0",
+    "beartype",
+    "scikit-image",
+    "opencv-python",
+    "seaborn",
     "setuptools",
 ]
 test = [

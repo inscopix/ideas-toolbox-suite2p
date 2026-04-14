@@ -167,7 +167,7 @@
             "name": "Deconvolved Spikes",
             "description": "suite2p deconvolved spikes file",
             "file_patterns": [
-                "spks**"
+                "spks/**/*"
             ]
         },
         {
@@ -175,7 +175,7 @@
             "name": "Spike Deconvolution Output Parameters File",
             "description": "Parameters file outputted by the spike deconvolution tool",
             "file_patterns": [
-                "ops_spike_deconvolution**"
+                "ops_spike_deconvolution/**/*"
             ]
         }
     ],

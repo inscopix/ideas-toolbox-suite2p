@@ -6,7 +6,7 @@ from zipfile import ZipFile
 import isx
 import numpy as np
 import suite2p
-from ideas.tools import log
+from ideas.tools import log, outputs
 from ideas.tools.types import IdeasFile
 
 from toolbox.utils import io, metadata, preview, utilities
@@ -314,3 +314,99 @@ def run_suite2p_end_to_end_ideas_wrapper(
         viz_random_seed=viz_random_seed,
         viz_show_all_footprints=viz_show_all_footprints,
     )
+
+    try:
+        logger.info("Registering output data")
+        output_prefix = outputs.input_paths_to_output_prefix(
+            raw_movie_files, ops_file, classifier_path
+        )
+        metadata = outputs._load_and_remove_output_metadata()
+        with outputs.register() as output_data:
+            (
+                suite2p_output_file,
+                cellset_raw_file,
+                eventset_file,
+                ophys_file,
+                mat_file,
+            ) = None, None, None, None, None
+
+            if save_npy:
+                suite2p_output_file = output_data.register_file(
+                    "suite2p_output.zip", prefix=output_prefix, subdir="suite2p_output"
+                ).register_metadata_dict(**metadata["suite2p_output"])
+
+            if save_isxd:
+                cellset_raw_file = output_data.register_file(
+                    "cellset_raw.isxd", prefix=output_prefix, subdir="cellset_raw"
+                ).register_metadata_dict(**metadata["cellset_raw"])
+
+                eventset_file = output_data.register_file(
+                    "eventset.isxd", prefix=output_prefix, subdir="eventset"
+                ).register_metadata_dict(**metadata["eventset"])
+
+            if save_NWB:
+                ophys_file = output_data.register_file(
+                    "ophys.nwb", prefix=output_prefix, subdir="ophys"
+                ).register_metadata_dict(**metadata["ophys"])
+
+            if save_mat:
+                mat_file = output_data.register_file(
+                    "Fall.mat", prefix=output_prefix, subdir="Fall"
+                ).register_metadata_dict(**metadata["Fall"])
+
+            if save_img:
+                output_data.register_file(
+                    "local_corr_img.tif", prefix=output_prefix, subdir="local_corr_img"
+                ).register_preview(
+                    "local_corr_img_preview.png",
+                    caption="Local correlation image (from local_corr_img.tif)",
+                )
+
+            for f in [suite2p_output_file, ophys_file, mat_file]:
+                if not f:
+                    continue
+                f.register_preview(
+                    "registration_fovs.svg",
+                    caption="Various FOVs from the registration process (from ops.npy)",
+                ).register_preview(
+                    "registration_offsets.svg",
+                    caption="x and y offsets for both rigid and non-rigid registration (from ops.npy)",
+                ).register_preview(
+                    "registration_movies.mp4",
+                    caption="Side-by-side raw and registered movies (from ops.npy, data_raw.bin, and data.bin)",
+                ).register_preview(
+                    "detection_footprints_all.svg",
+                    caption="Various FOVs from the ROI detection process (from ops.npy, stat.npy, and iscell.npy)",
+                ).register_preview(
+                    "detection_footprints_accepted.svg",
+                    caption="FOV of the accepted ROIs from the ROI detection process (from ops.npy, stat.npy, and iscell.npy)",
+                ).register_preview(
+                    "extracted_sample_sources_traces_suite2p.svg",
+                    caption="Sample fluorescence traces, neuropil traces and deconvolved spikes (from ops.npy, F.npy, Fneu.npy, spks.npy, and iscell.npy)",
+                )
+
+            for f in [suite2p_output_file, ophys_file, mat_file, cellset_raw_file]:
+                if not f:
+                    continue
+                f.register_preview(
+                    "extracted_sample_sources_traces_only.svg",
+                    caption="Sample fluorescence traces only (from ops.npy, F.npy, and iscell.npy)",
+                ).register_preview(
+                    "extracted_sample_sources_footprints.svg",
+                    caption="Footprints of the sample sources (from ops.npy, stat.npy, and iscell.npy)",
+                )
+
+            for f in [suite2p_output_file, ophys_file, mat_file, eventset_file]:
+                if not f:
+                    continue
+                f.register_preview(
+                    "extracted_sample_sources_traces_spikes.svg",
+                    caption="Sample fluorescence traces and deconvolved spikes (from ops.npy, F.npy, spks.npy, and iscell.npy)",
+                ).register_preview(
+                    "raster_deconvolved_spikes.svg",
+                    caption="Raster plot of the deconvolved spikes (from ops.npy, spks.npy, and iscell.npy)",
+                )
+
+        logger.info("Registered output data")
+    except Exception:
+        logger.exception("Failed to generate output data!")
