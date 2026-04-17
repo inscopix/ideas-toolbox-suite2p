@@ -4,7 +4,7 @@
     "schema_version": "3.0.0",
     "container_image": {
         "repository": "platform/suite2p",
-        "label": "0.0.1"
+        "label": "0.0.2"
     },
     "command": {
         "file_path": "toolbox/tools/suite2p_individual_steps.py",
@@ -113,5 +113,5 @@
     },
     "description": "Tool to convert raw 2p input movie(s) into a suite2p binary file",
     "visibility": "public",
-    "version": "0.9.0"
+    "version": "0.9.1"
 }
