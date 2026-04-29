@@ -23,7 +23,7 @@ WORKDIR /ideas
 
 # ========================== Apt Dependency Installation ===========================
 RUN apt-get -y update \
-    && apt-get upgrade -y \
+    && apt-get upgrade -y --no-install-recommends \
     && apt-get install -y --no-install-recommends \
         software-properties-common \
         gcc \
@@ -56,12 +56,12 @@ ENV UV_NO_MANAGED_PYTHON=1 UV_PYTHON_DOWNLOADS=never
 ENV UV_FROZEN=1 UV_REQUIRE_HASHES=1 UV_VERIFY_HASHES=1
 ENV UV_CACHE_DIR=/tmp/.cache/uv
 
-RUN --mount=from=ghcr.io/astral-sh/uv:0.9.16,source=/uv,target=/bin/uv \
+RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
     --mount=type=cache,target=/tmp/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     --mount=type=bind,source=resources,target=resources \
-    uv sync --verbose --no-install-project --group analysis
+    uv sync --no-install-project --group analysis
 
 USER ideas
 
@@ -80,10 +80,26 @@ USER root
 
 COPY --chown=ideas ./ /ideas
 
-RUN --mount=from=ghcr.io/astral-sh/uv:0.9.16,source=/uv,target=/bin/uv \
+RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
     --mount=type=cache,target=/tmp/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     uv sync --no-install-project --group analysis --group test
 
 USER ideas
+
+# Vulnerability scanning stage using Trivy
+# Copies the runtime filesystem to a subdirectory to avoid overwrite conflicts with the trivy base image
+FROM base AS scanner
+
+USER root
+
+COPY --from=aquasec/trivy:0.69.3 /usr/local/bin/trivy /usr/local/bin/trivy
+
+RUN trivy rootfs --no-progress --ignore-unfixed --skip-files /usr/local/bin/trivy --severity CRITICAL,HIGH --exit-code 1 / \
+    && touch /scan-ok
+
+# Final stage - identical to runtime but depends on successful scan
+FROM base AS final
+
+COPY --from=scanner /scan-ok /scan-ok

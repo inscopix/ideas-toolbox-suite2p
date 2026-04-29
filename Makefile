@@ -1,4 +1,4 @@
-.PHONY:  clean clean-venv venv set-hooks setup build test ruff ruff-check run run-all
+.PHONY:  clean clean-venv venv set-hooks setup build test ruff ruff-check run run-all bundle
 
 IMAGE_REPO=platform
 IMAGE_NAME=suite2p
@@ -7,7 +7,7 @@ IMAGE_TAG=${IMAGE_REPO}/${IMAGE_NAME}:${LABEL}
 LATEST_IMAGE_TAG=${IMAGE_REPO}/${IMAGE_NAME}:latest
 PLATFORM=linux/amd64
 ifndef TARGET
-	TARGET=base
+	TARGET=final
 endif
 
 # Define envs for virtualenv
@@ -48,6 +48,11 @@ build:
 		--target ${TARGET}
 	docker tag ${LATEST_IMAGE_TAG} ${IMAGE_TAG}
 	@$(foreach f, $(TOOL_SPECS), jq --indent 4 '.container_image.label = "${LABEL}"' $(f) > tmp.json && mv tmp.json ${f};)\
+
+# Builds docker image checking security vulnerabilities
+security:
+	docker build . -t $(LATEST_IMAGE_TAG) \
+		--platform ${PLATFORM}
 
 # Runs unit tests in docker image
 # Used in automated pr checks on github
@@ -93,3 +98,6 @@ run-all: build
 		ideas tools run -s -c -n $$(basename $(f)) || exit; \
 		echo ""; \
 	)
+
+bundle:
+	ideas tools bundle $(ARGS)
