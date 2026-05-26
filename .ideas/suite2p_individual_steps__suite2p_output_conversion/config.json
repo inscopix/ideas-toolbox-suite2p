@@ -1,5 +1,5 @@
 {
-    "container": "platform/suite2p:0.0.1",
+    "container": "platform/suite2p:latest",
     "executor_type": "PYTHON",
     "file": "toolbox/tools/suite2p_individual_steps.py",
     "function": "suite2p_output_conversion_ideas_wrapper",
