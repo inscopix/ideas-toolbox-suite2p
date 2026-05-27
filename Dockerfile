@@ -34,7 +34,8 @@ RUN apt-get -y update \
         python3.10-venv \
         python3-pip \
         git \
-        ffmpeg\
+        ffmpeg \
+        linux-libc-dev=5.15.0-179.189 \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a venv with uv to install python dependencies

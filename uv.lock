@@ -781,8 +781,8 @@ wheels = [
 
 [[package]]
 name = "ideas-python"
-version = "1.2.1.dev10+gbeb512018"
-source = { path = "resources/ideas_python-1.2.1.dev10+gbeb512018-py3-none-any.whl" }
+version = "1.3.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "backports-strenum" },
     { name = "click" },
@@ -804,29 +804,7 @@ dependencies = [
     { name = "urllib3" },
 ]
 wheels = [
-    { filename = "ideas_python-1.2.1.dev10+gbeb512018-py3-none-any.whl", hash = "sha256:74458d83820374efbaac34010e0334e0c5103eaef73dc7623b11163d509d655a" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "backports-strenum", specifier = "<2.0" },
-    { name = "click", specifier = "==8.1.3" },
-    { name = "cryptography", specifier = "==46.0.5" },
-    { name = "docker", specifier = "==7.1.0" },
-    { name = "humanize", specifier = "==4.12.3" },
-    { name = "jsonschema", specifier = "==4.25.1" },
-    { name = "pathspec", specifier = ">=1.0.3" },
-    { name = "pycognito", specifier = "==2024.5.1" },
-    { name = "pyotp", specifier = "==2.9.0" },
-    { name = "pywin32", marker = "sys_platform == 'win32'", specifier = "==311" },
-    { name = "questionary", specifier = "==2.1.1" },
-    { name = "requests", specifier = "==2.32.4" },
-    { name = "rich", specifier = "==14.1.0" },
-    { name = "sentry-sdk", specifier = "==1.45.1" },
-    { name = "tree-sitter", specifier = "==0.24.0" },
-    { name = "tree-sitter-bash", specifier = "==0.23.3" },
-    { name = "tree-sitter-python", specifier = "==0.23.6" },
-    { name = "urllib3", specifier = "==2.6.3" },
+    { url = "https://files.pythonhosted.org/packages/d3/02/61912cbfedb25aaeda100227200dbb48564bcf7acd163f4568c6d8e27576/ideas_python-1.3.0-py3-none-any.whl", hash = "sha256:1eddf25818d9d68c8e86f9c82942a5bd454451613318cdc0f7a8556d8fe58b70", size = 132722, upload-time = "2026-04-28T14:39:05.565Z" },
 ]
 
 [[package]]
@@ -852,6 +830,7 @@ analysis = [
     { name = "setuptools", version = "81.0.0", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'darwin'" },
     { name = "setuptools", version = "82.0.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'darwin'" },
     { name = "suite2p" },
+    { name = "urllib3" },
 ]
 dev = [
     { name = "pre-commit" },
@@ -872,7 +851,7 @@ analysis = [
     { name = "beartype" },
     { name = "dandi", specifier = "==0.63.0" },
     { name = "hdmf", specifier = "==3.14.0" },
-    { name = "ideas-python", path = "resources/ideas_python-1.2.1.dev10+gbeb512018-py3-none-any.whl" },
+    { name = "ideas-python", extras = ["analysis"], specifier = "==1.3.0" },
     { name = "imageio", extras = ["ffmpeg"], specifier = "==2.33.0" },
     { name = "isx", specifier = "==2.1.0" },
     { name = "numpy", specifier = "==1.26.4" },
@@ -885,6 +864,7 @@ analysis = [
     { name = "seaborn" },
     { name = "setuptools" },
     { name = "suite2p", git = "https://github.com/inscopix/isxSuite2p.git?rev=v0.0.4" },
+    { name = "urllib3", specifier = "==2.7.0" },
 ]
 dev = [
     { name = "pre-commit" },
@@ -2694,11 +2674,11 @@ wheels = [
 
 [[package]]
 name = "urllib3"
-version = "2.6.3"
+version = "2.7.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/c7/24/5f1b3bdffd70275f6661c76461e25f024d5a38a46f04aaca912426a2b1d3/urllib3-2.6.3.tar.gz", hash = "sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed", size = 435556, upload-time = "2026-01-07T16:24:43.925Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/53/0c/06f8b233b8fd13b9e5ee11424ef85419ba0d8ba0b3138bf360be2ff56953/urllib3-2.7.0.tar.gz", hash = "sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c", size = 433602, upload-time = "2026-05-07T16:13:18.596Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/39/08/aaaad47bc4e9dc8c725e68f9d04865dbcb2052843ff09c97b08904852d84/urllib3-2.6.3-py3-none-any.whl", hash = "sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4", size = 131584, upload-time = "2026-01-07T16:24:42.685Z" },
+    { url = "https://files.pythonhosted.org/packages/7f/3e/5db95bcf282c52709639744ca2a8b149baccf648e39c8cc87553df9eae0c/urllib3-2.7.0-py3-none-any.whl", hash = "sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897", size = 131087, upload-time = "2026-05-07T16:13:17.151Z" },
 ]
 
 [[package]]
