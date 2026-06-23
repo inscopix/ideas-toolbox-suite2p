@@ -14,8 +14,6 @@ def create_output_metadata(ops, steps, efocus_vals=None):
     Creates metadata for output files of the suite2p pipeline and individual steps tools
     """
     L = ops["nframes"]
-    if ops["frames_include"] != -1 and ops["frames_include"] != L:
-        L = ops["frames_include"]
 
     metadata_general_dict = {
         "Number of Frames": L,
@@ -43,7 +41,7 @@ def create_output_metadata(ops, steps, efocus_vals=None):
         iscell = np.load(f"{npy_dir}/iscell.npy", allow_pickle=True)
 
         # if allow_overlap is False, then fluorescence traces of overlapping footprints are set to all zeros; the code below removes data from overlapping ROIs from preview figures
-        if not ops["allow_overlap"]:
+        if not ops["extraction"]["allow_overlap"]:
             idx_ok = np.where([len(np.unique(f)) > 1 for f in F])[0]
             F = F[idx_ok, :]
             spks = spks[idx_ok, :]
@@ -110,7 +108,7 @@ def create_output_metadata(ops, steps, efocus_vals=None):
             es_output_key: metadata_es_output_dict,
         }
 
-        if ops["save_NWB"]:
+        if ops["io"]["save_NWB"]:
             nwb_output_name = "ophys.nwb"
             nwb_output_key = Path(nwb_output_name).stem
             try:
@@ -121,7 +119,7 @@ def create_output_metadata(ops, steps, efocus_vals=None):
                 nwb_file_metadata = metadata_output_dict
             metadata.update({nwb_output_key: nwb_file_metadata})
 
-        if ops["save_mat"]:
+        if ops["io"]["save_mat"]:
             mat_output_name = "Fall.mat"
             mat_output_key = Path(mat_output_name).stem
             metadata.update({mat_output_key: metadata_output_dict})

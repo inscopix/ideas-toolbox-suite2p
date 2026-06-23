@@ -118,7 +118,7 @@ def test_suite2p_binary_conversion(
             0,
             40,
             True,
-            [128, 128],
+            [64, 64],
             1.2,
             5,
             False,
@@ -132,8 +132,8 @@ def test_suite2p_binary_conversion(
             10,
             ["data.bin", "ops_registration.npy"],
             (6, 512, 512),
-            (-52, 2316),
-            186.69898796081543,
+            (0, 2502),
+            183.22037887573242,
             14.936966003465377,
             0,
         ]
@@ -292,8 +292,8 @@ def test_suite2p_registration(
             True,
             128,
             ["stat_ROI_detection.npy", "ops_ROI_detection.npy"],
-            36,
-            2713,
+            15,
+            2361,
         ]
     ],
 )
@@ -596,7 +596,7 @@ def test_suite2p_roi_classification(
             True,
             ["spks.npy", "ops_spike_deconvolution.npy"],
             (36, 100),
-            4244.0254,
+            7153.7666,
         ]
     ],
 )

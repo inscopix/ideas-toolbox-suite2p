@@ -35,7 +35,6 @@ RUN apt-get -y update \
         python3-pip \
         git \
         ffmpeg \
-        linux-libc-dev=5.15.0-179.189 \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a venv with uv to install python dependencies
@@ -64,6 +63,10 @@ RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
     --mount=type=bind,source=resources,target=resources \
     uv sync --no-install-project --group analysis
 
+# Copy cellpose model that is usually downloaded by the cellpose package for ROI detection
+# Saving the model in the image prevents download issues when running the tool in a sandbox environment
+COPY --chown=ideas resources/models /ideas/.cellpose/models
+
 USER ideas
 
 # Add venv bin to path
@@ -79,13 +82,13 @@ FROM base AS test
 
 USER root
 
-COPY --chown=ideas ./ /ideas
-
 RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
-    --mount=type=cache,target=/tmp/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --no-install-project --group analysis --group test
+--mount=type=cache,target=/tmp/.cache/uv \
+--mount=type=bind,source=uv.lock,target=uv.lock \
+--mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+uv sync --no-install-project --group analysis --group test
+
+COPY --chown=ideas ./ /ideas
 
 USER ideas
 

@@ -43,6 +43,7 @@ def run_suite2p_end_to_end(
     viz_n_samp_cells: int = 20,
     viz_random_seed: int = 0,
     viz_show_all_footprints: bool = True,
+    block_size: Optional[List[int]] = None,
 ):
     """
     Tool to run end-to-end suite2p pipeline on Inscopix isxd or Bruker Ultima 2P movies.
@@ -74,17 +75,21 @@ def run_suite2p_end_to_end(
     :param int viz_n_samp_cells: Number of sample cells for the cell extraction preview.
     :param int viz_random_seed: Random seed for selecting sample cells.
     :param bool viz_show_all_footprints: Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed.
+    :param List[int] block_size: [from suite2p docs] Size of blocks for non-rigid registration, in pixels. HIGHLY recommend keeping this a power of 2 and/or 3 (e.g. 128, 256, 384, etc) for efficient FFT.
     """
     # initialize suite2p parameters
     if ops_file is None or len(ops_file) == 0:
         # load default parameters (user-defined parameters are included afterwards)
-        ops = suite2p.default_ops()
+        ops = suite2p.default_settings()
     else:
         # load custom parameters (overwrite those of the Analysis table provided to this function as input arguments)
         logger.info(f"Loading custom parameter file {ops_file}.")
         ops_ext = os.path.splitext(ops_file[0])[-1]
         if ops_ext == ".npy":
-            ops = np.load(ops_file[0], allow_pickle=True).item()
+            ops = (
+                suite2p.default_settings()
+                | np.load(ops_file[0], allow_pickle=True).item()
+            )
             if params_from:
                 logger.info(
                     "`ops_file` provided: overwriting input parameters from the analysis table."
@@ -117,7 +122,7 @@ def run_suite2p_end_to_end(
         start_time = movie.timing.start.to_datetime()
         # converting `start_time` to a NumPy array of dtype np.datetime64, otherwise it cannot be saved as a .mat file
         start_time = np.array(start_time, dtype=np.datetime64)
-        ops["isxd"] = True
+        ops["input_format"] = "isxd"
         efocus_vals = utilities.get_efocus_vals(raw_movie_files)
     elif file_ext in [".zip", ".tar.gz"]:
         logger.info(
@@ -134,6 +139,7 @@ def run_suite2p_end_to_end(
     elif file_ext in [".tif", ".tiff", ".ome.tif", ".ome.tiff"]:
         fs = ops["fs"]
         start_time = None
+        ops["input_format"] = "tif"
     else:
         raise ValueError(
             f"File format {file_ext} not recognized as either Inscopix .isxd, Bruker Ultima 2P .zip or .tar.gz, or standard .tif/.tiff/.ome.tif/.ome.tiff stack."
@@ -141,7 +147,6 @@ def run_suite2p_end_to_end(
 
     # Set user-defined parameters
     ops["fs"] = float(fs)
-    ops["start_time"] = start_time
     ops["tau"] = tau
     ops["keep_movie_raw"] = True
     ops["save_mat"] = save_mat
@@ -158,6 +163,8 @@ def run_suite2p_end_to_end(
             ops["classifier_path"] = classifier_path[0]
         else:
             ops["classifier_path"] = classifier_path
+    if block_size:
+        ops["block_size"] = block_size
 
     # Set hardcoded parameters
     ops = utilities.set_hardcoded_parameters(ops)
@@ -166,13 +173,15 @@ def run_suite2p_end_to_end(
     # define directory containing the input movie(s)
     if "data_dir" not in locals():
         data_dir = os.path.dirname(raw_movie_files[0])
-    db = {
-        "data_path": [data_dir],
-    }
+
+    db, settings, _ = suite2p.parameters.convert_settings_orig(ops)
+    db["data_path"] = [data_dir]
 
     # run pipeline
-    output_ops = suite2p.run_s2p(ops=ops, db=db)
-    suite2p_output_dir = os.path.dirname(output_ops["ops_path"])
+    db_new = suite2p.run_s2p(settings=settings, db=db)
+    suite2p_output_dir = os.path.dirname(db_new[0])
+
+    output_ops = np.load(f"{suite2p_output_dir}/ops.npy", allow_pickle=True).item()
 
     # output preview(s)
     preview.create_output_previews(
@@ -203,6 +212,7 @@ def run_suite2p_end_to_end(
             npy_dir=suite2p_output_dir,
             output_dir=ideas_output_dir,
             thresh_spks_perc=thresh_spks_perc,
+            start_time=start_time,
         )
     if save_mat:
         mat_output_file = f"{suite2p_output_dir}/Fall.mat"
