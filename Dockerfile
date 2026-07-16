@@ -35,6 +35,7 @@ RUN apt-get -y update \
         python3-pip \
         git \
         ffmpeg \
+        wget \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a venv with uv to install python dependencies
@@ -63,9 +64,12 @@ RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
     --mount=type=bind,source=resources,target=resources \
     uv sync --no-install-project --group analysis
 
-# Copy cellpose model that is usually downloaded by the cellpose package for ROI detection
-# Saving the model in the image prevents download issues when running the tool in a sandbox environment
-COPY --chown=ideas resources/models /ideas/.cellpose/models
+# # Copy cellpose model that is usually downloaded by the cellpose package for ROI detection
+# # Saving the model in the image prevents download issues when running the tool in a sandbox environment
+# COPY --chown=ideas resources/models /ideas/.cellpose/models
+RUN mkdir -p /ideas/.cellpose/models \
+    && wget -O /ideas/.cellpose/models/cpsam https://huggingface.co/mouseland/cellpose-sam/resolve/main/cpsam?download=true \
+    && echo "e1440429eb384f95afe32bcba6510f90d518eaedc917ede549bed6804004abe2 /ideas/.cellpose/models/cpsam" | sha256sum --check
 
 USER ideas
 
