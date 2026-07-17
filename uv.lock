@@ -996,7 +996,7 @@ analysis = [
     { name = "scipy", specifier = "==1.13.0" },
     { name = "seaborn" },
     { name = "setuptools" },
-    { name = "suite2p", git = "https://github.com/inscopix/isxSuite2p.git?rev=955260df36f7beb532742cfe4801fe2edc9a16ae" },
+    { name = "suite2p", git = "https://github.com/inscopix/isxSuite2p.git?rev=1334de6a838f05ef8bcc1a2453a27d73c01d8482" },
     { name = "urllib3", specifier = "==2.7.0" },
 ]
 dev = [
@@ -2550,8 +2550,8 @@ wheels = [
 
 [[package]]
 name = "suite2p"
-version = "0.0.5.dev243+g955260df3"
-source = { git = "https://github.com/inscopix/isxSuite2p.git?rev=955260df36f7beb532742cfe4801fe2edc9a16ae#955260df36f7beb532742cfe4801fe2edc9a16ae" }
+version = "0.0.5.dev247+g1334de6a8"
+source = { git = "https://github.com/inscopix/isxSuite2p.git?rev=1334de6a838f05ef8bcc1a2453a27d73c01d8482#1334de6a838f05ef8bcc1a2453a27d73c01d8482" }
 dependencies = [
     { name = "cellpose" },
     { name = "importlib-metadata" },

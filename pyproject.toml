@@ -21,7 +21,7 @@ analysis = [
     "numpy==1.26.4",
     "scikit-learn==1.4.2",
     "scipy==1.13.0",
-    "suite2p@git+https://@github.com/inscopix/isxSuite2p.git@955260df36f7beb532742cfe4801fe2edc9a16ae",
+    "suite2p@git+https://@github.com/inscopix/isxSuite2p.git@1334de6a838f05ef8bcc1a2453a27d73c01d8482",
     "imageio[ffmpeg]==2.33.0",
     "pytest==7.4.2",
     "isx==2.1.0",

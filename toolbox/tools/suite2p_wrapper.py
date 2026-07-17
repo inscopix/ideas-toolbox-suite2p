@@ -264,7 +264,7 @@ def run_suite2p_end_to_end_ideas_wrapper(
     viz_n_samp_cells: int = 20,
     viz_random_seed: int = 0,
     viz_show_all_footprints: bool = True,
-    block_size: Optional[str] = None,
+    block_size: Optional[str] = "[128,128]",
 ):
     """
     Ideas wrapper for tool to run end-to-end suite2p pipeline on Inscopix isxd or Bruker Ultima 2P movies.
