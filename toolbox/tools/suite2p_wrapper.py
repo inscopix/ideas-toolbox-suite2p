@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 from typing import List, Optional
@@ -263,6 +264,7 @@ def run_suite2p_end_to_end_ideas_wrapper(
     viz_n_samp_cells: int = 20,
     viz_random_seed: int = 0,
     viz_show_all_footprints: bool = True,
+    block_size: Optional[str] = None,
 ):
     """
     Ideas wrapper for tool to run end-to-end suite2p pipeline on Inscopix isxd or Bruker Ultima 2P movies.
@@ -294,7 +296,11 @@ def run_suite2p_end_to_end_ideas_wrapper(
     :param int viz_n_samp_cells: Number of sample cells for the cell extraction preview.
     :param int viz_random_seed: Random seed for selecting sample cells.
     :param bool viz_show_all_footprints: Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed.
+    :param List[int] block_size: [from suite2p docs] Size of blocks for non-rigid registration, in pixels. HIGHLY recommend keeping this a power of 2 and/or 3 (e.g. 128, 256, 384, etc) for efficient FFT.
     """
+    block_size = json.loads(block_size)
+    logger.debug(f"Parsed block size from string: {block_size}")
+
     run_suite2p_end_to_end(
         raw_movie_files=raw_movie_files,
         ops_file=ops_file,
@@ -323,6 +329,7 @@ def run_suite2p_end_to_end_ideas_wrapper(
         viz_n_samp_cells=viz_n_samp_cells,
         viz_random_seed=viz_random_seed,
         viz_show_all_footprints=viz_show_all_footprints,
+        block_size=block_size,
     )
 
     try:
