@@ -897,7 +897,7 @@ wheels = [
 
 [[package]]
 name = "ideas-python"
-version = "1.3.1"
+version = "1.3.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "backports-strenum" },
@@ -920,7 +920,7 @@ dependencies = [
     { name = "urllib3" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a0/d3/7c962967205a073b076406e5655660613f0147e3b8b5072cd36cc55269ad/ideas_python-1.3.1-py3-none-any.whl", hash = "sha256:d47661c620c705bed3ad7700a9c054fe1c27137cccb5131310fd59d7505e3cf5", size = 132876, upload-time = "2026-06-15T20:26:57.544Z" },
+    { url = "https://files.pythonhosted.org/packages/67/10/403238796c49b0ab12f6d9784b1ca897c54bf0ffcbf5e8d444eaf7edc86d/ideas_python-1.3.2-py3-none-any.whl", hash = "sha256:777959e9b72765d234426e20c36d9e022f248ed0ff6abf392c51a24921b4f13d", size = 134743, upload-time = "2026-07-03T13:55:23.352Z" },
 ]
 
 [package.optional-dependencies]
@@ -984,7 +984,7 @@ analysis = [
     { name = "cryptography", specifier = "==48.0.1" },
     { name = "dandi", specifier = "==0.63.0" },
     { name = "hdmf", specifier = "==3.14.0" },
-    { name = "ideas-python", extras = ["analysis"], specifier = "==1.3.1" },
+    { name = "ideas-python", extras = ["analysis"], specifier = "==1.3.2" },
     { name = "imageio", extras = ["ffmpeg"], specifier = "==2.33.0" },
     { name = "isx", specifier = "==2.1.0" },
     { name = "numpy", specifier = "==1.26.4" },
