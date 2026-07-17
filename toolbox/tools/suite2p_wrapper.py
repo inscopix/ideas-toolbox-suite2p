@@ -184,54 +184,94 @@ def run_suite2p_end_to_end(
 
     output_ops = np.load(f"{suite2p_output_dir}/ops.npy", allow_pickle=True).item()
 
-    # output preview(s)
-    preview.create_output_previews(
-        ops=output_ops,
-        steps="all",
-        vmin_perc=viz_vmin_perc,
-        vmax_perc=viz_vmax_perc,
-        cmap=viz_cmap,
-        show_grid=viz_show_grid,
-        ticks_step=int(viz_ticks_step),
-        display_rate=int(viz_display_rate),
-        n_samp_cells=int(viz_n_samp_cells),
-        thresh_spks_perc=thresh_spks_perc,
-        random_seed=int(viz_random_seed),
-        show_all_footprints=viz_show_all_footprints,
+    from natsort import natsorted
+
+    plane_folders = natsorted(
+        [
+            f.path
+            for f in os.scandir(suite2p_output_dir)
+            if f.is_dir() and f.name[:5] == "plane"
+        ]
     )
 
-    # handle output file(s)
-    if save_npy:
-        # zip suite2p outputs
-        zip_output_file = f"{ideas_output_dir}/suite2p_output.zip"
-        fname_list = ["F", "Fneu", "iscell", "ops", "spks", "stat"]
-        with ZipFile(zip_output_file, "w") as f:
-            for fname in fname_list:
-                f.write(f"{suite2p_output_dir}/{fname}.npy")
-    if save_isxd:
-        io.npy_to_isxd(
-            npy_dir=suite2p_output_dir,
-            output_dir=ideas_output_dir,
-            thresh_spks_perc=thresh_spks_perc,
-            start_time=start_time,
-        )
-    if save_mat:
-        mat_output_file = f"{suite2p_output_dir}/Fall.mat"
-        shutil.move(mat_output_file, ideas_output_dir)
-    if save_img:
-        img_path = io.save_local_corr_img(
+    for i, plane_folder in enumerate(plane_folders):
+        suite2p_output_dir = plane_folder
+
+        # output preview(s)
+        preview.create_output_previews(
             ops=output_ops,
-            output_dir=ideas_output_dir,
+            steps="all",
+            vmin_perc=viz_vmin_perc,
+            vmax_perc=viz_vmax_perc,
+            cmap=viz_cmap,
+            show_grid=viz_show_grid,
+            ticks_step=int(viz_ticks_step),
+            display_rate=int(viz_display_rate),
+            n_samp_cells=int(viz_n_samp_cells),
+            thresh_spks_perc=thresh_spks_perc,
+            random_seed=int(viz_random_seed),
+            show_all_footprints=viz_show_all_footprints,
         )
-        preview.preview_template_image(img_path)
 
-    # output metadata
-    metadata.create_output_metadata(
-        ops=output_ops, steps="all", efocus_vals=efocus_vals
-    )
+        # handle output file(s)
+        if save_npy:
+            # zip suite2p outputs
+            zip_output_file = f"{ideas_output_dir}/suite2p_output.zip"
+            fname_list = ["F", "Fneu", "iscell", "ops", "spks", "stat"]
+            with ZipFile(zip_output_file, "w") as f:
+                for fname in fname_list:
+                    f.write(f"{suite2p_output_dir}/{fname}.npy")
+        if save_isxd:
+            io.npy_to_isxd(
+                npy_dir=suite2p_output_dir,
+                output_dir=ideas_output_dir,
+                thresh_spks_perc=thresh_spks_perc,
+                start_time=start_time,
+            )
+        if save_mat:
+            mat_output_file = f"{suite2p_output_dir}/Fall.mat"
+            shutil.move(mat_output_file, ideas_output_dir)
+        if save_img:
+            img_path = io.save_local_corr_img(
+                ops=output_ops,
+                output_dir=ideas_output_dir,
+            )
+            preview.preview_template_image(img_path)
 
-    # clean up suite2p output folder (otherwise recognized as output by IDEAS)
-    shutil.rmtree(suite2p_output_dir)
+        # output metadata
+        metadata.create_output_metadata(
+            ops=output_ops, steps="all", efocus_vals=efocus_vals
+        )
+
+        # prepend all output filenames with plane{i}
+        output_files = [
+            "suite2p_output.zip",
+            "cellset_raw.isxd",
+            "eventset.isxd",
+            "ophys.nwb",
+            "Fall.mat",
+            "local_corr_img.tif",
+            "registration_fovs.svg",
+            "registration_offsets.svg",
+            "registration_movies.mp4",
+            "detection_footprints_all.svg",
+            "detection_footprints_accepted.svg",
+            "extracted_sample_sources_traces_spikes.svg",
+            "extracted_sample_sources_traces_only.svg",
+            "extracted_sample_sources_footprints.svg",
+            "raster_deconvolved_spikes.svg",
+            "extracted_sample_sources_traces_suite2p.svg",
+            "local_corr_img_preview.png",
+        ]
+        for output_file in output_files:
+            src = os.path.join(ideas_output_dir, output_file)
+            if os.path.exists(src):
+                name, ext = os.path.splitext(output_file)
+                dst = os.path.join(ideas_output_dir, f"{name}.{i}{ext}")
+                shutil.move(src, dst)
+        
+        # clean up suite2p output folder (otherwise recognized as output by IDEAS)
+        shutil.rmtree(suite2p_output_dir)
     print("ALL DONE!")
 
 
