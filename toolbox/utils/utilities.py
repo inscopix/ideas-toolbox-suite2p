@@ -14,7 +14,7 @@ def set_hardcoded_parameters(ops):
     ops["look_one_level_down"] = False
     ops["subfolders"] = None
     ops["move_bin"] = False
-    ops["combined"] = True
+    ops["combined"] = False
     ops["keep_movie_raw"] = True
     ops["reg_tif"] = False
     ops["reg_tif_chan2"] = False
