@@ -35,8 +35,15 @@ RUN apt-get -y update \
         python3-pip \
         git \
         ffmpeg \
-        linux-libc-dev=5.15.0-179.189 \
+        wget \
     && rm -rf /var/lib/apt/lists/*
+
+# Download cellpose model pre-trained from huggingface 
+# This model is usually downloaded by the cellpose package for suite2p ROI detection
+# Saving the model in the image prevents download issues when running the tool in a sandbox environment
+RUN mkdir -p /ideas/.cellpose/models \
+    && wget -O /ideas/.cellpose/models/cpsam https://huggingface.co/mouseland/cellpose-sam/resolve/main/cpsam?download=true \
+    && echo "e1440429eb384f95afe32bcba6510f90d518eaedc917ede549bed6804004abe2 /ideas/.cellpose/models/cpsam" | sha256sum --check
 
 # Create a venv with uv to install python dependencies
 # This can be done globally, but using venv is best practice
@@ -61,7 +68,6 @@ RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
     --mount=type=cache,target=/tmp/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    --mount=type=bind,source=resources,target=resources \
     uv sync --no-install-project --group analysis
 
 USER ideas
@@ -79,13 +85,13 @@ FROM base AS test
 
 USER root
 
-COPY --chown=ideas ./ /ideas
-
 RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
-    --mount=type=cache,target=/tmp/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --no-install-project --group analysis --group test
+--mount=type=cache,target=/tmp/.cache/uv \
+--mount=type=bind,source=uv.lock,target=uv.lock \
+--mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+uv sync --no-install-project --group analysis --group test
+
+COPY --chown=ideas ./ /ideas
 
 USER ideas
 

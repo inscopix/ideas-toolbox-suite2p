@@ -1,5 +1,6 @@
 # repo ignores
 outputs/
+resources/models
 
 # aws
 webhooks.json
