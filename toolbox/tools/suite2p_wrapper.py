@@ -252,7 +252,6 @@ def run_suite2p_end_to_end(
                 "suite2p_output.zip",
                 "cellset_raw.isxd",
                 "eventset.isxd",
-                "ophys.nwb",
                 "Fall.mat",
                 "local_corr_img.tif",
                 "registration_fovs.svg",
@@ -390,60 +389,80 @@ def run_suite2p_end_to_end_ideas_wrapper(
             raw_movie_files, ops_file, classifier_path
         )
 
-        for i in range(num_planes):
-            suffix = f"_plane{i}" if num_planes > 1 else ""
+        with outputs.register() as output_data:
+            ophys_file = None  # ophys file not per plane so tracked separately
+            for i in range(num_planes):
+                suffix = f"_plane{i}" if num_planes > 1 else ""
 
-            if num_planes > 1:
-                shutil.move(f"output_metadata{suffix}.json", "output_metadata.json")
-            metadata = outputs._load_and_remove_output_metadata()
-            with outputs.register() as output_data:
+                if num_planes > 1:
+                    shutil.move(f"output_metadata{suffix}.json", "output_metadata.json")
+                metadata = outputs._load_and_remove_output_metadata()
+
+                if save_NWB and i == 0:
+                    ophys_file = output_data.register_file(
+                        "ophys.nwb", prefix=output_prefix, subdir="ophys"
+                    )
+                    if ophys_file:
+                        ophys_file.register_metadata_dict(**metadata["ophys"])
+
                 (
                     suite2p_output_file,
                     cellset_raw_file,
                     eventset_file,
-                    ophys_file,
                     mat_file,
-                ) = None, None, None, None, None
+                ) = None, None, None, None
 
                 if save_npy:
                     suite2p_output_file = output_data.register_file(
                         f"suite2p_output{suffix}.zip",
                         prefix=output_prefix,
                         subdir="suite2p_output",
-                    ).register_metadata_dict(**metadata["suite2p_output"])
+                    )
+
+                    if suite2p_output_file:
+                        suite2p_output_file.register_metadata_dict(
+                            **metadata["suite2p_output"]
+                        )
 
                 if save_isxd:
                     cellset_raw_file = output_data.register_file(
                         f"cellset_raw{suffix}.isxd",
                         prefix=output_prefix,
                         subdir="cellset_raw",
-                    ).register_metadata_dict(**metadata["cellset_raw"])
+                    )
+
+                    if cellset_raw_file:
+                        cellset_raw_file.register_metadata_dict(
+                            **metadata["cellset_raw"]
+                        )
 
                     eventset_file = output_data.register_file(
                         f"eventset{suffix}.isxd",
                         prefix=output_prefix,
                         subdir="eventset",
-                    ).register_metadata_dict(**metadata["eventset"])
+                    )
 
-                if save_NWB:
-                    ophys_file = output_data.register_file(
-                        f"ophys{suffix}.nwb", prefix=output_prefix, subdir="ophys"
-                    ).register_metadata_dict(**metadata["ophys"])
+                    if eventset_file:
+                        eventset_file.register_metadata_dict(**metadata["eventset"])
 
                 if save_mat:
                     mat_file = output_data.register_file(
                         f"Fall{suffix}.mat", prefix=output_prefix, subdir="Fall"
-                    ).register_metadata_dict(**metadata["Fall"])
+                    )
+                    if mat_file:
+                        mat_file.register_metadata_dict(**metadata["Fall"])
 
                 if save_img:
-                    output_data.register_file(
+                    img_file = output_data.register_file(
                         f"local_corr_img{suffix}.tif",
                         prefix=output_prefix,
                         subdir="local_corr_img",
-                    ).register_preview(
-                        f"local_corr_img_preview{suffix}.png",
-                        caption="Local correlation image (from local_corr_img.tif)",
                     )
+                    if img_file:
+                        img_file.register_preview(
+                            f"local_corr_img_preview{suffix}.png",
+                            caption="Local correlation image (from local_corr_img.tif)",
+                        )
 
                 for f in [suite2p_output_file, ophys_file, mat_file]:
                     if not f:
