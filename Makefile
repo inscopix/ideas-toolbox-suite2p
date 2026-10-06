@@ -69,7 +69,7 @@ test: build
 		--platform ${PLATFORM} \
 		--rm \
 		${IMAGE_TAG} \
-		python -m pytest ${TEST_ARGS}
+		python3 -m pytest ${TEST_ARGS}
 
 # Applies linter on source code
 ruff: venv
