@@ -30,7 +30,10 @@ clean-venv:
 venv: .venv/touchfile
 
 .venv/touchfile: pyproject.toml
-	test -d $(VENV) || uv venv
+	@if [ -x "$(VENV)/bin/python" ] && ! $(VENV)/bin/python -c 'import sys; raise SystemExit(0 if sys.version_info[:2] == (3, 13) else 1)'; then \
+		rm -rf $(VENV); \
+	fi
+	test -d $(VENV) || uv venv --python 3.13
 	uv sync --no-install-project --only-group dev
 	touch $(VENV)/touchfile
 
@@ -84,7 +87,7 @@ ruff-check: venv
 # Run a tool in the repo
 # Specify the tool key to run
 run: build
-	ideas tools run $(tool) -s -c -n
+	uv run --python 3.13 --with ideas-python==1.3.2 ideas tools run $(tool) -s -c -n
 
 SEP="============================================================="
 
@@ -95,7 +98,7 @@ run-all: build
 		echo "Running $$(basename $(f))"; \
 		echo $(SEP); \
 		echo; \
-		ideas tools run -s -c -n $$(basename $(f)) || exit; \
+		uv run --python 3.13 --with ideas-python==1.3.2 ideas tools run -s -c -n $$(basename $(f)) || exit; \
 		echo ""; \
 	)
 
