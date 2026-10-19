@@ -1,4 +1,4 @@
-.PHONY:  clean clean-venv venv set-hooks setup build test ruff ruff-check run run-all bundle
+.PHONY: clean clean-venv venv set-hooks setup build test ruff ruff-check run run-all bundle
 
 IMAGE_REPO=platform
 IMAGE_NAME=suite2p
@@ -46,11 +46,14 @@ setup: venv set-hooks
 
 # Builds docker image
 # Installs necessary software dependencies for source code
+# Some Linux hosts use a low default `nofile` limit. During dependency
+# installation, Docker/uv can exceed that limit and fail with
+# "too many open files", so we raise it for the build step.
 build:
 	docker build . -t $(LATEST_IMAGE_TAG) \
 		--platform ${PLATFORM} \
 		--target ${TARGET} \
-		--ulimit nofile=65536:65536 
+		--ulimit nofile=65536:65536
 	docker tag ${LATEST_IMAGE_TAG} ${IMAGE_TAG}
 	@$(foreach f, $(TOOL_SPECS), jq --indent 4 '.container_image.label = "${LABEL}"' $(f) > tmp.json && mv tmp.json ${f};)\
 
@@ -89,7 +92,7 @@ ruff-check: venv
 # Run a tool in the repo
 # Specify the tool key to run
 run: build
-	uv run --python $(PYTHON_VERSION) --with ideas-python==1.3.2 ideas tools run $(tool) -s -c -n
+	uv run --python $(PYTHON_VERSION) --group analysis ideas tools run $(tool) -s -c -n
 
 SEP="============================================================="
 
@@ -100,9 +103,9 @@ run-all: build
 		echo "Running $$(basename $(f))"; \
 		echo $(SEP); \
 		echo; \
-		uv run --python $(PYTHON_VERSION) --with ideas-python==1.3.2 ideas tools run -s -c -n $$(basename $(f)) || exit; \
+		uv run --python $(PYTHON_VERSION) --group analysis ideas tools run -s -c -n $$(basename $(f)) || exit; \
 		echo ""; \
 	)
 
 bundle:
-	uv run --python $(PYTHON_VERSION) --with ideas-python==1.3.2 ideas tools bundle $(ARGS)
+	uv run --python $(PYTHON_VERSION) --group analysis ideas tools bundle $(ARGS)
