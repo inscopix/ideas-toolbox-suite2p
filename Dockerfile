@@ -67,7 +67,7 @@ ENV UV_CACHE_DIR=/tmp/.cache/uv
 USER ideas
 
 RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
-    --mount=type=cache,target=/tmp/.cache/uv,uid=1000,gid=1000 \
+    --mount=type=cache,id=uv-cache-ideas,target=/tmp/.cache/uv,uid=1000,gid=1000 \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     uv sync --python 3.13 --no-install-project --group analysis
@@ -84,7 +84,7 @@ CMD ["/bin/bash"]
 FROM base AS test
 
 RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
---mount=type=cache,target=/tmp/.cache/uv,uid=1000,gid=1000 \
+--mount=type=cache,id=uv-cache-ideas,target=/tmp/.cache/uv,uid=1000,gid=1000 \
 --mount=type=bind,source=uv.lock,target=uv.lock \
 --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
 uv sync --python 3.13 --no-install-project --group analysis --group test
