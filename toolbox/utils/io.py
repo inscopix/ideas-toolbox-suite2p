@@ -13,7 +13,9 @@ from tifffile import tifffile
 logger = logging.getLogger()
 
 
-def npy_to_isxd(npy_dir, output_dir, thresh_spks_perc, custom_fnames=None):
+def npy_to_isxd(
+    npy_dir, output_dir, thresh_spks_perc, custom_fnames=None, start_time=None
+):
     """
     Convert native suite2p output into Inscopix isxd cellset and eventset.
     """
@@ -31,7 +33,10 @@ def npy_to_isxd(npy_dir, output_dir, thresh_spks_perc, custom_fnames=None):
     iscell = np.load(f"{npy_dir}/{fname_list[4]}", allow_pickle=True)
 
     # if allow_overlap is False, then fluorescence traces of overlapping footprints are set to all zeros; the code below removes data from overlapping ROIs from preview figures
-    if not ops["allow_overlap"]:
+    # ops can be either just the settings for extraction from the individual tool, or a nested dictionary for each step in the end-to-end pipeline
+    if ("allow_overlap" in ops and not ops["allow_overlap"]) or (
+        "extraction" in ops and not ops["extraction"]["allow_overlap"]
+    ):
         idx_ok = np.where([len(np.unique(f)) > 1 for f in F])[0]
         F = F[idx_ok, :]
         spks = spks[idx_ok, :]
@@ -45,9 +50,9 @@ def npy_to_isxd(npy_dir, output_dir, thresh_spks_perc, custom_fnames=None):
     period_s = 1 / ops["fs"]
     num, den = period_s.as_integer_ratio()
     period = isx.Duration._from_num_den(num, den)
-    if "start_time" in ops.keys() and isinstance(ops["start_time"], np.ndarray):
+    if start_time:
         start = isx.Time._from_secs_since_epoch(
-            isx.Duration.from_usecs(int(ops["start_time"].astype(int)))
+            isx.Duration.from_usecs(start_time.astype(int))
         )
         timing = isx.Timing(num_samples=num_samples, period=period, start=start)
     else:

@@ -16,7 +16,7 @@
     "spatial_hp_reg": 42,
     "spatial_taper": 40.0,
     "nonrigid": true,
-    "block_size": "[128, 128]",
+    "block_size": "[64, 64]",
     "snr_thresh": 1.2,
     "maxregshiftNR": 5.0
 }

@@ -35,8 +35,15 @@ RUN apt-get -y update \
         python3-pip \
         git \
         ffmpeg \
-        linux-libc-dev=5.15.0-179.189 \
+        wget \
     && rm -rf /var/lib/apt/lists/*
+
+# Download cellpose model pre-trained from huggingface
+# This model is usually downloaded by the cellpose package for suite2p ROI detection
+# Saving the model in the image prevents download issues when running the tool in a sandbox environment
+RUN mkdir -p /ideas/.cellpose/models \
+    && wget -O /ideas/.cellpose/models/cpsam https://huggingface.co/mouseland/cellpose-sam/resolve/main/cpsam?download=true \
+    && echo "e1440429eb384f95afe32bcba6510f90d518eaedc917ede549bed6804004abe2 /ideas/.cellpose/models/cpsam" | sha256sum --check
 
 # Create a venv with uv to install python dependencies
 # This can be done globally, but using venv is best practice
@@ -51,20 +58,19 @@ ENV UV_COMPILE_BYTECODE=1
 ENV UV_TOOL_BIN_DIR=/usr/local/bin
 # Install venv into in the ideas user's home
 ENV UV_PROJECT_ENVIRONMENT=/ideas/venv VIRTUAL_ENV=/ideas/venv
-# Never download python, we use upstream python from python docker image
-ENV UV_NO_MANAGED_PYTHON=1 UV_PYTHON_DOWNLOADS=never
+# Allow uv to provision the pinned Python version required by the lockfile.
+ENV UV_PYTHON_DOWNLOADS=automatic
 # Strictly use frozen dependencies, and require cryptographic verification of each package
 ENV UV_FROZEN=1 UV_REQUIRE_HASHES=1 UV_VERIFY_HASHES=1
 ENV UV_CACHE_DIR=/tmp/.cache/uv
 
+USER ideas
+
 RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
-    --mount=type=cache,target=/tmp/.cache/uv \
+    --mount=type=cache,id=uv-cache-ideas,target=/tmp/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    --mount=type=bind,source=resources,target=resources \
-    uv sync --no-install-project --group analysis
-
-USER ideas
+    uv sync --python 3.13 --no-install-project --group analysis
 
 # Add venv bin to path
 ENV PATH="/ideas/${VENV}/bin:${PATH}"
@@ -77,15 +83,13 @@ CMD ["/bin/bash"]
 # your local folder with files generated during testing.
 FROM base AS test
 
-USER root
-
-COPY --chown=ideas ./ /ideas
-
 RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
-    --mount=type=cache,target=/tmp/.cache/uv \
+    --mount=type=cache,id=uv-cache-ideas,target=/tmp/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --no-install-project --group analysis --group test
+    uv sync --python 3.13 --no-install-project --group analysis --group test
+
+COPY --chown=ideas ./ /ideas
 
 USER ideas
 

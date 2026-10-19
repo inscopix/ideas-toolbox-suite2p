@@ -173,6 +173,17 @@
             "group": "Registration"
         },
         {
+            "key": "block_size",
+            "name": "Block Size",
+            "required": false,
+            "description": "[from suite2p docs for <block_size>] \"Size of blocks for non-rigid registration, in pixels. HIGHLY recommend keeping this a power of 2 and/or 3 (e.g. 128, 256, 384, etc) for efficient FFT.\" [list[int, int] with int > 1]",
+            "type": {
+                "param_type": "ToolStringParam",
+                "default": "[128, 128]"
+            },
+            "group": "Registration"
+        },
+        {
             "key": "threshold_scaling",
             "name": "ROI Threshold Scaling",
             "required": false,

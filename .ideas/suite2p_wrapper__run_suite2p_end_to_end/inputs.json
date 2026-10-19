@@ -22,5 +22,6 @@
     "viz_display_rate": 10.0,
     "viz_n_samp_cells": 20,
     "viz_random_seed": 0,
-    "viz_show_all_footprints": true
+    "viz_show_all_footprints": true,
+    "block_size": "[64,64]"
 }

@@ -12,7 +12,7 @@ data_dir = "data"
 
 
 @pytest.mark.parametrize(
-    "raw_movie_files,ops_file,classifier_path,params_from,tau,frames_include,save_npy,save_isxd,save_NWB,save_mat,save_img,maxregshift,th_badframes,nonrigid,threshold_scaling,neucoeff,thresh_spks_perc,expected_start_time,expected_ref_image,expected_F_shape,expected_F_mean,expected_spks_sum,expected_accepted_cells,",
+    "raw_movie_files,ops_file,classifier_path,params_from,tau,frames_include,save_npy,save_isxd,save_NWB,save_mat,save_img,maxregshift,th_badframes,nonrigid,threshold_scaling,neucoeff,thresh_spks_perc,block_size,expected_start_time,expected_ref_image,expected_F_shape,expected_F_mean,expected_spks_sum,expected_accepted_cells,",
     [
         [
             ["sample_100x128x128_movie.isxd"],
@@ -32,12 +32,13 @@ data_dir = "data"
             1.0,
             0.7,
             99.7,
+            [64, 64],
             "2024-09-20 13:22:01",
-            2967169,
-            (36, 100),
-            176.27736,
-            4244.0254,
-            5,
+            2965486,
+            (7, 100),
+            449.9792,
+            2240.7065,
+            1,
         ]
     ],
 )
@@ -59,6 +60,7 @@ def test_run_suite2p_end_to_end(
     threshold_scaling,
     neucoeff,
     thresh_spks_perc,
+    block_size,
     expected_start_time,
     expected_ref_image,
     expected_F_shape,
@@ -94,6 +96,7 @@ def test_run_suite2p_end_to_end(
         threshold_scaling=threshold_scaling,
         neucoeff=neucoeff,
         thresh_spks_perc=thresh_spks_perc,
+        block_size=block_size,
     )
 
     # ensure suite2p_output.zip file is present and contains all expected files

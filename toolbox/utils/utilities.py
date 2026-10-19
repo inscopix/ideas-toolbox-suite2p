@@ -7,14 +7,14 @@ def set_hardcoded_parameters(ops):
     """Set the hardcoded parameters in the ops dictionary, as a separate function to reduce redundancy between the different suite2p tools."""
     ops["force_sktiff"] = True
     ops["multiplane_parallel"] = False
-    ops["fast_disk"] = []
+    ops["fast_disk"] = None
     ops["delete_bin"] = False
     ops["nwb_driver"] = ""
     ops["save_path0"] = ""
     ops["look_one_level_down"] = False
-    ops["subfolders"] = []
+    ops["subfolders"] = None
     ops["move_bin"] = False
-    ops["combined"] = True
+    ops["combined"] = False
     ops["keep_movie_raw"] = True
     ops["reg_tif"] = False
     ops["reg_tif_chan2"] = False

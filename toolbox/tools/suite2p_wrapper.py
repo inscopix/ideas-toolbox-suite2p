@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 from typing import List, Optional
@@ -8,6 +9,7 @@ import numpy as np
 import suite2p
 from ideas.tools import log, outputs
 from ideas.tools.types import IdeasFile
+from natsort import natsorted
 
 from toolbox.utils import io, metadata, preview, utilities
 
@@ -43,6 +45,7 @@ def run_suite2p_end_to_end(
     viz_n_samp_cells: int = 20,
     viz_random_seed: int = 0,
     viz_show_all_footprints: bool = True,
+    block_size: Optional[List[int]] = None,
 ):
     """
     Tool to run end-to-end suite2p pipeline on Inscopix isxd or Bruker Ultima 2P movies.
@@ -74,17 +77,21 @@ def run_suite2p_end_to_end(
     :param int viz_n_samp_cells: Number of sample cells for the cell extraction preview.
     :param int viz_random_seed: Random seed for selecting sample cells.
     :param bool viz_show_all_footprints: Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed.
+    :param List[int] block_size: [from suite2p docs] Size of blocks for non-rigid registration, in pixels. HIGHLY recommend keeping this a power of 2 and/or 3 (e.g. 128, 256, 384, etc) for efficient FFT.
     """
     # initialize suite2p parameters
     if ops_file is None or len(ops_file) == 0:
         # load default parameters (user-defined parameters are included afterwards)
-        ops = suite2p.default_ops()
+        ops = suite2p.default_settings()
     else:
         # load custom parameters (overwrite those of the Analysis table provided to this function as input arguments)
         logger.info(f"Loading custom parameter file {ops_file}.")
         ops_ext = os.path.splitext(ops_file[0])[-1]
         if ops_ext == ".npy":
-            ops = np.load(ops_file[0], allow_pickle=True).item()
+            ops = (
+                suite2p.default_settings()
+                | np.load(ops_file[0], allow_pickle=True).item()
+            )
             if params_from:
                 logger.info(
                     "`ops_file` provided: overwriting input parameters from the analysis table."
@@ -117,7 +124,7 @@ def run_suite2p_end_to_end(
         start_time = movie.timing.start.to_datetime()
         # converting `start_time` to a NumPy array of dtype np.datetime64, otherwise it cannot be saved as a .mat file
         start_time = np.array(start_time, dtype=np.datetime64)
-        ops["isxd"] = True
+        ops["input_format"] = "isxd"
         efocus_vals = utilities.get_efocus_vals(raw_movie_files)
     elif file_ext in [".zip", ".tar.gz"]:
         logger.info(
@@ -134,6 +141,7 @@ def run_suite2p_end_to_end(
     elif file_ext in [".tif", ".tiff", ".ome.tif", ".ome.tiff"]:
         fs = ops["fs"]
         start_time = None
+        ops["input_format"] = "tif"
     else:
         raise ValueError(
             f"File format {file_ext} not recognized as either Inscopix .isxd, Bruker Ultima 2P .zip or .tar.gz, or standard .tif/.tiff/.ome.tif/.ome.tiff stack."
@@ -141,7 +149,6 @@ def run_suite2p_end_to_end(
 
     # Set user-defined parameters
     ops["fs"] = float(fs)
-    ops["start_time"] = start_time
     ops["tau"] = tau
     ops["keep_movie_raw"] = True
     ops["save_mat"] = save_mat
@@ -158,6 +165,8 @@ def run_suite2p_end_to_end(
             ops["classifier_path"] = classifier_path[0]
         else:
             ops["classifier_path"] = classifier_path
+    if block_size:
+        ops["block_size"] = block_size
 
     # Set hardcoded parameters
     ops = utilities.set_hardcoded_parameters(ops)
@@ -166,69 +175,122 @@ def run_suite2p_end_to_end(
     # define directory containing the input movie(s)
     if "data_dir" not in locals():
         data_dir = os.path.dirname(raw_movie_files[0])
-    db = {
-        "data_path": [data_dir],
-    }
+
+    db, settings, _ = suite2p.parameters.convert_settings_orig(ops)
+    db["data_path"] = [data_dir]
 
     # run pipeline
-    output_ops = suite2p.run_s2p(ops=ops, db=db)
-    suite2p_output_dir = os.path.dirname(output_ops["ops_path"])
+    suite2p.run_s2p(settings=settings, db=db)
 
-    # output preview(s)
-    preview.create_output_previews(
-        ops=output_ops,
-        steps="all",
-        vmin_perc=viz_vmin_perc,
-        vmax_perc=viz_vmax_perc,
-        cmap=viz_cmap,
-        show_grid=viz_show_grid,
-        ticks_step=int(viz_ticks_step),
-        display_rate=int(viz_display_rate),
-        n_samp_cells=int(viz_n_samp_cells),
-        thresh_spks_perc=thresh_spks_perc,
-        random_seed=int(viz_random_seed),
-        show_all_footprints=viz_show_all_footprints,
+    plane_folders = natsorted(
+        [
+            f.path
+            for f in os.scandir(ideas_output_dir)
+            if f.is_dir() and f.name[:5] == "plane"
+        ]
     )
+    num_planes = len(plane_folders)
+    logger.info(f"Plane folders: {plane_folders} {ideas_output_dir}")
 
-    # handle output file(s)
-    if save_npy:
-        # zip suite2p outputs
-        zip_output_file = f"{ideas_output_dir}/suite2p_output.zip"
-        fname_list = ["F", "Fneu", "iscell", "ops", "spks", "stat"]
-        with ZipFile(zip_output_file, "w") as f:
-            for fname in fname_list:
-                f.write(f"{suite2p_output_dir}/{fname}.npy")
-    if save_isxd:
-        io.npy_to_isxd(
-            npy_dir=suite2p_output_dir,
-            output_dir=ideas_output_dir,
-            thresh_spks_perc=thresh_spks_perc,
-        )
-    if save_mat:
-        mat_output_file = f"{suite2p_output_dir}/Fall.mat"
-        shutil.move(mat_output_file, ideas_output_dir)
-    if save_img:
-        img_path = io.save_local_corr_img(
+    for i, plane_folder in enumerate(plane_folders):
+        suite2p_output_dir = plane_folder
+
+        output_ops = np.load(f"{suite2p_output_dir}/ops.npy", allow_pickle=True).item()
+        output_ops["save_path"] = plane_folder
+
+        logger.info("Generating previews")
+        # output preview(s)
+        preview.create_output_previews(
             ops=output_ops,
-            output_dir=ideas_output_dir,
+            steps="all",
+            vmin_perc=viz_vmin_perc,
+            vmax_perc=viz_vmax_perc,
+            cmap=viz_cmap,
+            show_grid=viz_show_grid,
+            ticks_step=int(viz_ticks_step),
+            display_rate=int(viz_display_rate),
+            n_samp_cells=int(viz_n_samp_cells),
+            thresh_spks_perc=thresh_spks_perc,
+            random_seed=int(viz_random_seed),
+            show_all_footprints=viz_show_all_footprints,
         )
-        preview.preview_template_image(img_path)
 
-    # output metadata
-    metadata.create_output_metadata(
-        ops=output_ops, steps="all", efocus_vals=efocus_vals
-    )
+        # handle output file(s)
+        if save_npy:
+            logger.info("Saving to npy")
+            # zip suite2p outputs
+            zip_output_file = f"{ideas_output_dir}/suite2p_output.zip"
+            fname_list = ["F", "Fneu", "iscell", "ops", "spks", "stat"]
+            with ZipFile(zip_output_file, "w") as f:
+                for fname in fname_list:
+                    f.write(f"{suite2p_output_dir}/{fname}.npy")
+        if save_isxd:
+            io.npy_to_isxd(
+                npy_dir=suite2p_output_dir,
+                output_dir=ideas_output_dir,
+                thresh_spks_perc=thresh_spks_perc,
+                start_time=start_time,
+            )
+        if save_mat:
+            mat_output_file = f"{suite2p_output_dir}/Fall.mat"
+            shutil.move(mat_output_file, ideas_output_dir)
+        if save_img:
+            img_path = io.save_local_corr_img(
+                ops=output_ops,
+                output_dir=ideas_output_dir,
+            )
+            preview.preview_template_image(img_path)
 
-    # clean up suite2p output folder (otherwise recognized as output by IDEAS)
-    shutil.rmtree(suite2p_output_dir)
+        # output metadata
+        metadata.create_output_metadata(
+            ops=output_ops, steps="all", efocus_vals=efocus_vals
+        )
+
+        if num_planes > 1:
+            # prepend all output filenames with plane{i}
+            output_files = [
+                "suite2p_output.zip",
+                "cellset_raw.isxd",
+                "eventset.isxd",
+                "Fall.mat",
+                "local_corr_img.tif",
+                "registration_fovs.svg",
+                "registration_offsets.svg",
+                "registration_movies.mp4",
+                "detection_footprints_all.svg",
+                "detection_footprints_accepted.svg",
+                "extracted_sample_sources_traces_spikes.svg",
+                "extracted_sample_sources_traces_only.svg",
+                "extracted_sample_sources_footprints.svg",
+                "raster_deconvolved_spikes.svg",
+                "extracted_sample_sources_traces_suite2p.svg",
+                "local_corr_img_preview.png",
+                "output_metadata.json",
+            ]
+            for output_file in output_files:
+                src = os.path.join(ideas_output_dir, output_file)
+                if os.path.exists(src):
+                    name, ext = os.path.splitext(output_file)
+                    dst = os.path.join(ideas_output_dir, f"{name}_plane{i}{ext}")
+                    shutil.move(src, dst)
+
+        # clean up suite2p output folder (otherwise recognized as output by IDEAS)
+        shutil.rmtree(suite2p_output_dir)
+
+    # clean up files
+    for f in ["settings.npy", "db.npy"]:
+        os.remove(f)
+
     print("ALL DONE!")
+
+    return num_planes
 
 
 def run_suite2p_end_to_end_ideas_wrapper(
     *,
     raw_movie_files: List[IdeasFile],
-    ops_file: Optional[List[IdeasFile]] = None,
-    classifier_path: Optional[List[IdeasFile]] = None,
+    ops_file: Optional[IdeasFile] = None,
+    classifier_path: Optional[IdeasFile] = None,
     params_from: bool = False,
     tau: float = 1.0,
     frames_include: int = -1,
@@ -253,13 +315,14 @@ def run_suite2p_end_to_end_ideas_wrapper(
     viz_n_samp_cells: int = 20,
     viz_random_seed: int = 0,
     viz_show_all_footprints: bool = True,
+    block_size: Optional[str] = "[128,128]",
 ):
     """
     Ideas wrapper for tool to run end-to-end suite2p pipeline on Inscopix isxd or Bruker Ultima 2P movies.
 
     :param List[str] raw_movie_files: Input 2P movie(s).
-    :param Optional[List[str]] ops_file: Optional parameters file that allows for more granular control of all available suite2p parameters. See documentation for more details.
-    :param Optional[List[str]] classifier_path: [from suite2p docs] Path to classifier file you want to use for cell classification.
+    :param Optional[IdeasFile] ops_file: Optional parameters file that allows for more granular control of all available suite2p parameters. See documentation for more details.
+    :param Optional[IdeasFile] classifier_path: [from suite2p docs] Path to classifier file you want to use for cell classification.
     :param bool params_from: When a parameters file is provided as input, whether the parameters from the analysis table columns should be overwritten by the values from the file. Only effective when an optional parameters file is provided. Defaults to False.
     :param float tau: [from suite2p docs] The timescale of the sensor (in seconds), used for deconvolution kernel. The kernel is fixed to have this decay and is not fit to the data. We recommend: 0.7 for GCaMP6f; 1.0 for GCaMP6m; 1.25-1.5 for GCaMP6s.
     :param int frames_include: [from suite2p docs] If greater than zero, only [the first] <frames_include> frames are processed. Useful for testing parameters on a subset of data.
@@ -284,11 +347,15 @@ def run_suite2p_end_to_end_ideas_wrapper(
     :param int viz_n_samp_cells: Number of sample cells for the cell extraction preview.
     :param int viz_random_seed: Random seed for selecting sample cells.
     :param bool viz_show_all_footprints: Whether or not to show footprints of non-sample cells on the cell footprint FOV image. If False, only footprints of sample cells are displayed.
+    :param List[int] block_size: [from suite2p docs] Size of blocks for non-rigid registration, in pixels. HIGHLY recommend keeping this a power of 2 and/or 3 (e.g. 128, 256, 384, etc) for efficient FFT.
     """
-    run_suite2p_end_to_end(
+    block_size = json.loads(block_size)
+    logger.debug(f"Parsed block size from string: {block_size}")
+
+    num_planes = run_suite2p_end_to_end(
         raw_movie_files=raw_movie_files,
-        ops_file=ops_file,
-        classifier_path=classifier_path,
+        ops_file=None if not ops_file else [ops_file],
+        classifier_path=None if not classifier_path else [classifier_path],
         params_from=params_from,
         tau=tau,
         frames_include=frames_include,
@@ -313,6 +380,7 @@ def run_suite2p_end_to_end_ideas_wrapper(
         viz_n_samp_cells=viz_n_samp_cells,
         viz_random_seed=viz_random_seed,
         viz_show_all_footprints=viz_show_all_footprints,
+        block_size=block_size,
     )
 
     try:
@@ -320,92 +388,126 @@ def run_suite2p_end_to_end_ideas_wrapper(
         output_prefix = outputs.input_paths_to_output_prefix(
             raw_movie_files, ops_file, classifier_path
         )
-        metadata = outputs._load_and_remove_output_metadata()
+
         with outputs.register() as output_data:
-            (
-                suite2p_output_file,
-                cellset_raw_file,
-                eventset_file,
-                ophys_file,
-                mat_file,
-            ) = None, None, None, None, None
+            ophys_file = None  # ophys file not per plane so tracked separately
+            for i in range(num_planes):
+                suffix = f"_plane{i}" if num_planes > 1 else ""
 
-            if save_npy:
-                suite2p_output_file = output_data.register_file(
-                    "suite2p_output.zip", prefix=output_prefix, subdir="suite2p_output"
-                ).register_metadata_dict(**metadata["suite2p_output"])
+                if num_planes > 1:
+                    shutil.move(f"output_metadata{suffix}.json", "output_metadata.json")
+                metadata = outputs._load_and_remove_output_metadata()
 
-            if save_isxd:
-                cellset_raw_file = output_data.register_file(
-                    "cellset_raw.isxd", prefix=output_prefix, subdir="cellset_raw"
-                ).register_metadata_dict(**metadata["cellset_raw"])
+                if save_NWB and i == 0:
+                    ophys_file = output_data.register_file(
+                        "ophys.nwb", prefix=output_prefix, subdir="ophys"
+                    )
+                    if ophys_file:
+                        ophys_file.register_metadata_dict(**metadata["ophys"])
 
-                eventset_file = output_data.register_file(
-                    "eventset.isxd", prefix=output_prefix, subdir="eventset"
-                ).register_metadata_dict(**metadata["eventset"])
+                (
+                    suite2p_output_file,
+                    cellset_raw_file,
+                    eventset_file,
+                    mat_file,
+                ) = None, None, None, None
 
-            if save_NWB:
-                ophys_file = output_data.register_file(
-                    "ophys.nwb", prefix=output_prefix, subdir="ophys"
-                ).register_metadata_dict(**metadata["ophys"])
+                if save_npy:
+                    suite2p_output_file = output_data.register_file(
+                        f"suite2p_output{suffix}.zip",
+                        prefix=output_prefix,
+                        subdir="suite2p_output",
+                    )
 
-            if save_mat:
-                mat_file = output_data.register_file(
-                    "Fall.mat", prefix=output_prefix, subdir="Fall"
-                ).register_metadata_dict(**metadata["Fall"])
+                    if suite2p_output_file:
+                        suite2p_output_file.register_metadata_dict(
+                            **metadata["suite2p_output"]
+                        )
 
-            if save_img:
-                output_data.register_file(
-                    "local_corr_img.tif", prefix=output_prefix, subdir="local_corr_img"
-                ).register_preview(
-                    "local_corr_img_preview.png",
-                    caption="Local correlation image (from local_corr_img.tif)",
-                )
+                if save_isxd:
+                    cellset_raw_file = output_data.register_file(
+                        f"cellset_raw{suffix}.isxd",
+                        prefix=output_prefix,
+                        subdir="cellset_raw",
+                    )
 
-            for f in [suite2p_output_file, ophys_file, mat_file]:
-                if not f:
-                    continue
-                f.register_preview(
-                    "registration_fovs.svg",
-                    caption="Various FOVs from the registration process (from ops.npy)",
-                ).register_preview(
-                    "registration_offsets.svg",
-                    caption="x and y offsets for both rigid and non-rigid registration (from ops.npy)",
-                ).register_preview(
-                    "registration_movies.mp4",
-                    caption="Side-by-side raw and registered movies (from ops.npy, data_raw.bin, and data.bin)",
-                ).register_preview(
-                    "detection_footprints_all.svg",
-                    caption="Various FOVs from the ROI detection process (from ops.npy, stat.npy, and iscell.npy)",
-                ).register_preview(
-                    "detection_footprints_accepted.svg",
-                    caption="FOV of the accepted ROIs from the ROI detection process (from ops.npy, stat.npy, and iscell.npy)",
-                ).register_preview(
-                    "extracted_sample_sources_traces_suite2p.svg",
-                    caption="Sample fluorescence traces, neuropil traces and deconvolved spikes (from ops.npy, F.npy, Fneu.npy, spks.npy, and iscell.npy)",
-                )
+                    if cellset_raw_file:
+                        cellset_raw_file.register_metadata_dict(
+                            **metadata["cellset_raw"]
+                        )
 
-            for f in [suite2p_output_file, ophys_file, mat_file, cellset_raw_file]:
-                if not f:
-                    continue
-                f.register_preview(
-                    "extracted_sample_sources_traces_only.svg",
-                    caption="Sample fluorescence traces only (from ops.npy, F.npy, and iscell.npy)",
-                ).register_preview(
-                    "extracted_sample_sources_footprints.svg",
-                    caption="Footprints of the sample sources (from ops.npy, stat.npy, and iscell.npy)",
-                )
+                    eventset_file = output_data.register_file(
+                        f"eventset{suffix}.isxd",
+                        prefix=output_prefix,
+                        subdir="eventset",
+                    )
 
-            for f in [suite2p_output_file, ophys_file, mat_file, eventset_file]:
-                if not f:
-                    continue
-                f.register_preview(
-                    "extracted_sample_sources_traces_spikes.svg",
-                    caption="Sample fluorescence traces and deconvolved spikes (from ops.npy, F.npy, spks.npy, and iscell.npy)",
-                ).register_preview(
-                    "raster_deconvolved_spikes.svg",
-                    caption="Raster plot of the deconvolved spikes (from ops.npy, spks.npy, and iscell.npy)",
-                )
+                    if eventset_file:
+                        eventset_file.register_metadata_dict(**metadata["eventset"])
+
+                if save_mat:
+                    mat_file = output_data.register_file(
+                        f"Fall{suffix}.mat", prefix=output_prefix, subdir="Fall"
+                    )
+                    if mat_file:
+                        mat_file.register_metadata_dict(**metadata["Fall"])
+
+                if save_img:
+                    img_file = output_data.register_file(
+                        f"local_corr_img{suffix}.tif",
+                        prefix=output_prefix,
+                        subdir="local_corr_img",
+                    )
+                    if img_file:
+                        img_file.register_preview(
+                            f"local_corr_img_preview{suffix}.png",
+                            caption="Local correlation image (from local_corr_img.tif)",
+                        )
+
+                for f in [suite2p_output_file, ophys_file, mat_file]:
+                    if not f:
+                        continue
+                    f.register_preview(
+                        f"registration_fovs{suffix}.svg",
+                        caption="Various FOVs from the registration process (from ops.npy)",
+                    ).register_preview(
+                        f"registration_offsets{suffix}.svg",
+                        caption="x and y offsets for both rigid and non-rigid registration (from ops.npy)",
+                    ).register_preview(
+                        f"registration_movies{suffix}.mp4",
+                        caption="Side-by-side raw and registered movies (from ops.npy, data_raw.bin, and data.bin)",
+                    ).register_preview(
+                        f"detection_footprints_all{suffix}.svg",
+                        caption="Various FOVs from the ROI detection process (from ops.npy, stat.npy, and iscell.npy)",
+                    ).register_preview(
+                        f"detection_footprints_accepted{suffix}.svg",
+                        caption="FOV of the accepted ROIs from the ROI detection process (from ops.npy, stat.npy, and iscell.npy)",
+                    ).register_preview(
+                        f"extracted_sample_sources_traces_suite2p{suffix}.svg",
+                        caption="Sample fluorescence traces, neuropil traces and deconvolved spikes (from ops.npy, F.npy, Fneu.npy, spks.npy, and iscell.npy)",
+                    )
+
+                for f in [suite2p_output_file, ophys_file, mat_file, cellset_raw_file]:
+                    if not f:
+                        continue
+                    f.register_preview(
+                        f"extracted_sample_sources_traces_only{suffix}.svg",
+                        caption="Sample fluorescence traces only (from ops.npy, F.npy, and iscell.npy)",
+                    ).register_preview(
+                        f"extracted_sample_sources_footprints{suffix}.svg",
+                        caption="Footprints of the sample sources (from ops.npy, stat.npy, and iscell.npy)",
+                    )
+
+                for f in [suite2p_output_file, ophys_file, mat_file, eventset_file]:
+                    if not f:
+                        continue
+                    f.register_preview(
+                        f"extracted_sample_sources_traces_spikes{suffix}.svg",
+                        caption="Sample fluorescence traces and deconvolved spikes (from ops.npy, F.npy, spks.npy, and iscell.npy)",
+                    ).register_preview(
+                        f"raster_deconvolved_spikes{suffix}.svg",
+                        caption="Raster plot of the deconvolved spikes (from ops.npy, spks.npy, and iscell.npy)",
+                    )
 
         logger.info("Registered output data")
     except Exception:

@@ -1,0 +1,6 @@
+.git
+.venv
+venv
+outputs
+__pycache__
+.pytest_cache
