@@ -8,11 +8,6 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONFAULTHANDLER=1
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Arguments for python installation
-ARG PYTHON=python3.10
-ARG VENV=venv
-ARG PYTHON_VENV=/ideas/${VENV}/bin/python
-
 # Create ideas user
 # This is no longer necessary to do, but good practice anyways
 RUN addgroup ideas \
@@ -27,12 +22,8 @@ RUN apt-get -y update \
     && apt-get install -y --no-install-recommends \
         software-properties-common \
         gcc \
-        python3-dev \
         libgl1-mesa-glx \
         libglib2.0-0 \
-        python3.10 \
-        python3.10-venv \
-        python3-pip \
         git \
         ffmpeg \
         wget \
@@ -41,9 +32,10 @@ RUN apt-get -y update \
 # Download cellpose model pre-trained from huggingface 
 # This model is usually downloaded by the cellpose package for suite2p ROI detection
 # Saving the model in the image prevents download issues when running the tool in a sandbox environment
-RUN mkdir -p /ideas/.cellpose/models \
-    && wget -O /ideas/.cellpose/models/cpsam https://huggingface.co/mouseland/cellpose-sam/resolve/main/cpsam?download=true \
-    && echo "e1440429eb384f95afe32bcba6510f90d518eaedc917ede549bed6804004abe2 /ideas/.cellpose/models/cpsam" | sha256sum --check
+ADD --chown=ideas:ideas \
+    --checksum=sha256:e1440429eb384f95afe32bcba6510f90d518eaedc917ede549bed6804004abe2 \
+    https://huggingface.co/mouseland/cellpose-sam/resolve/7c61431b5fbb078f3296754bd15d9f51b320f837/cpsam \
+    /ideas/.cellpose/models/cpsam
 
 # Create a venv with uv to install python dependencies
 # This can be done globally, but using venv is best practice
@@ -73,7 +65,7 @@ RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
 USER ideas
 
 # Add venv bin to path
-ENV PATH="/ideas/${VENV}/bin:${PATH}"
+ENV PATH="/ideas/venv/bin:${PATH}"
 
 CMD ["/bin/bash"]
 
