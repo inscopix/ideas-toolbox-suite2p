@@ -13,6 +13,7 @@ endif
 # Define envs for virtualenv
 ROOT_DIR := $(shell dirname $(shell readlink -f $(firstword $(MAKEFILE_LIST))))
 VENV = $(ROOT_DIR)/.venv
+PYTHON_VERSION := $(shell cat .python-version)
 
 # Update the tool specs whenever a new version of a container image is created
 TOOL_SPECS=${shell ls -d .ideas/*/tool_spec.json}
@@ -29,14 +30,17 @@ clean-venv:
 
 venv: .venv/touchfile
 
-.venv/touchfile: pyproject.toml
-	test -d $(VENV) || uv venv
-	uv sync --no-install-project --only-group dev
+.venv/touchfile: pyproject.toml .python-version
+	@if [ -x "$(VENV)/bin/python" ] && ! $(VENV)/bin/python -c 'import sys; raise SystemExit(0 if sys.version_info[:2] == tuple(map(int, "$(PYTHON_VERSION)".split(".")[:2])) else 1)'; then \
+		rm -rf $(VENV); \
+	fi
+	test -d $(VENV) || uv venv --python $(PYTHON_VERSION)
+	uv sync --python $(PYTHON_VERSION) --no-install-project --only-group dev
 	touch $(VENV)/touchfile
 
 set-hooks: venv .pre-commit-config.yaml
 	@echo "Installing pre-commit hooks"
-	uv run pre-commit install
+	uv run --python $(PYTHON_VERSION) pre-commit install
 
 setup: venv set-hooks
 
@@ -45,7 +49,8 @@ setup: venv set-hooks
 build:
 	docker build . -t $(LATEST_IMAGE_TAG) \
 		--platform ${PLATFORM} \
-		--target ${TARGET}
+		--target ${TARGET} \
+		--ulimit nofile=65536:65536 
 	docker tag ${LATEST_IMAGE_TAG} ${IMAGE_TAG}
 	@$(foreach f, $(TOOL_SPECS), jq --indent 4 '.container_image.label = "${LABEL}"' $(f) > tmp.json && mv tmp.json ${f};)\
 
@@ -65,26 +70,26 @@ test: build
 		--platform ${PLATFORM} \
 		--rm \
 		${IMAGE_TAG} \
-		python -m pytest ${TEST_ARGS}
+		/ideas/venv/bin/python -m pytest ${TEST_ARGS}
 
 # Applies linter on source code
 ruff: venv
 	@echo "Running ruff..."
-	uv run ruff format . $(ARGS)
-	uv run ruff check --fix . $(ARGS)
+	uv run --python $(PYTHON_VERSION) ruff format . $(ARGS)
+	uv run --python $(PYTHON_VERSION) ruff check --fix . $(ARGS)
 
 # Checks code formatting of source code
 # Used in automated pr checks on github
 # Does not actually apply any linter changes on the source code,
 ruff-check: venv
 	@echo "Running lint..."
-	uv run ruff format --check . $(ARGS)
-	uv run ruff check --no-fix . $(ARGS)
+	uv run --python $(PYTHON_VERSION) ruff format --check . $(ARGS)
+	uv run --python $(PYTHON_VERSION) ruff check --no-fix . $(ARGS)
 
 # Run a tool in the repo
 # Specify the tool key to run
 run: build
-	ideas tools run $(tool) -s -c -n
+	uv run --python $(PYTHON_VERSION) --with ideas-python==1.3.2 ideas tools run $(tool) -s -c -n
 
 SEP="============================================================="
 
@@ -95,9 +100,9 @@ run-all: build
 		echo "Running $$(basename $(f))"; \
 		echo $(SEP); \
 		echo; \
-		ideas tools run -s -c -n $$(basename $(f)) || exit; \
+		uv run --python $(PYTHON_VERSION) --with ideas-python==1.3.2 ideas tools run -s -c -n $$(basename $(f)) || exit; \
 		echo ""; \
 	)
 
 bundle:
-	ideas tools bundle $(ARGS)
+	uv run --python $(PYTHON_VERSION) --with ideas-python==1.3.2 ideas tools bundle $(ARGS)

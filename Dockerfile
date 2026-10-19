@@ -58,19 +58,19 @@ ENV UV_COMPILE_BYTECODE=1
 ENV UV_TOOL_BIN_DIR=/usr/local/bin
 # Install venv into in the ideas user's home
 ENV UV_PROJECT_ENVIRONMENT=/ideas/venv VIRTUAL_ENV=/ideas/venv
-# Never download python, we use upstream python from python docker image
-ENV UV_NO_MANAGED_PYTHON=1 UV_PYTHON_DOWNLOADS=never
+# Allow uv to provision the pinned Python version required by the lockfile.
+ENV UV_PYTHON_DOWNLOADS=automatic
 # Strictly use frozen dependencies, and require cryptographic verification of each package
 ENV UV_FROZEN=1 UV_REQUIRE_HASHES=1 UV_VERIFY_HASHES=1
 ENV UV_CACHE_DIR=/tmp/.cache/uv
 
+USER ideas
+
 RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
-    --mount=type=cache,target=/tmp/.cache/uv \
+    --mount=type=cache,id=uv-cache-ideas,target=/tmp/.cache/uv,uid=1000,gid=1000 \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --no-install-project --group analysis
-
-USER ideas
+    uv sync --python 3.13 --no-install-project --group analysis
 
 # Add venv bin to path
 ENV PATH="/ideas/${VENV}/bin:${PATH}"
@@ -83,13 +83,11 @@ CMD ["/bin/bash"]
 # your local folder with files generated during testing.
 FROM base AS test
 
-USER root
-
 RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
---mount=type=cache,target=/tmp/.cache/uv \
+--mount=type=cache,id=uv-cache-ideas,target=/tmp/.cache/uv,uid=1000,gid=1000 \
 --mount=type=bind,source=uv.lock,target=uv.lock \
 --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-uv sync --no-install-project --group analysis --group test
+uv sync --python 3.13 --no-install-project --group analysis --group test
 
 COPY --chown=ideas ./ /ideas
 
