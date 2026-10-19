@@ -44,7 +44,7 @@ venv: .venv/touchfile
 
 set-hooks: venv .pre-commit-config.yaml
 	@echo "Installing pre-commit hooks"
-	uv run pre-commit install
+	uv run --python $(PYTHON_VERSION) pre-commit install
 
 setup: venv set-hooks
 
@@ -79,16 +79,16 @@ test: build
 # Applies linter on source code
 ruff: venv
 	@echo "Running ruff..."
-	uv run ruff format . $(ARGS)
-	uv run ruff check --fix . $(ARGS)
+	uv run --python $(PYTHON_VERSION) ruff format . $(ARGS)
+	uv run --python $(PYTHON_VERSION) ruff check --fix . $(ARGS)
 
 # Checks code formatting of source code
 # Used in automated pr checks on github
 # Does not actually apply any linter changes on the source code,
 ruff-check: venv
 	@echo "Running lint..."
-	uv run ruff format --check . $(ARGS)
-	uv run ruff check --no-fix . $(ARGS)
+	uv run --python $(PYTHON_VERSION) ruff format --check . $(ARGS)
+	uv run --python $(PYTHON_VERSION) ruff check --no-fix . $(ARGS)
 
 # Run a tool in the repo
 # Specify the tool key to run

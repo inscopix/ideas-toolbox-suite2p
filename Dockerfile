@@ -29,7 +29,7 @@ RUN apt-get -y update \
         wget \
     && rm -rf /var/lib/apt/lists/*
 
-# Download cellpose model pre-trained from huggingface 
+# Download cellpose model pre-trained from huggingface
 # This model is usually downloaded by the cellpose package for suite2p ROI detection
 # Saving the model in the image prevents download issues when running the tool in a sandbox environment
 ADD --chown=ideas:ideas \
@@ -50,8 +50,8 @@ ENV UV_COMPILE_BYTECODE=1
 ENV UV_TOOL_BIN_DIR=/usr/local/bin
 # Install venv into in the ideas user's home
 ENV UV_PROJECT_ENVIRONMENT=/ideas/venv VIRTUAL_ENV=/ideas/venv
-# Never download python, we use upstream python from python docker image
-ENV UV_NO_MANAGED_PYTHON=1 UV_PYTHON_DOWNLOADS=never
+# Allow uv to provision the pinned Python version required by the lockfile.
+ENV UV_PYTHON_DOWNLOADS=automatic
 # Strictly use frozen dependencies, and require cryptographic verification of each package
 ENV UV_FROZEN=1 UV_REQUIRE_HASHES=1 UV_VERIFY_HASHES=1
 ENV UV_CACHE_DIR=/tmp/.cache/uv
