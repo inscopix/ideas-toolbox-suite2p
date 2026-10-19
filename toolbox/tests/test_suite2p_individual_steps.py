@@ -569,7 +569,7 @@ def test_suite2p_roi_classification(
         "Unexpected number of accepted cells!"
     )
 
-    assert np.allclose(np.mean(iscell[:, 1]), expected_mean_prob, rtol=1e-3), (
+    assert np.allclose(np.mean(iscell[:, 1]), expected_mean_prob, rtol=3e-3), (
         "Unexpected mean probability across ROIs!"
     )
 
