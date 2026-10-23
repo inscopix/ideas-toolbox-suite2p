@@ -9,7 +9,7 @@ RUN apt-get -y update \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
         git \
-    && update-ca-certificates \
+    && update-ca-certificates
 
 # Create a venv with uv to install python dependencies
 # This can be done globally, but using venv is best practice
