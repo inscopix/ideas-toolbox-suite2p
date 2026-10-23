@@ -42,7 +42,7 @@ RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
     && /ideas/venv/bin/python -c "import pynwb" 
 
 # Base image for production use
-FROM public.ecr.aws/lts/ubuntu:22.04 as base
+FROM public.ecr.aws/lts/ubuntu:22.04 AS base
 
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
