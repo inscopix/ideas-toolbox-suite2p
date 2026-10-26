@@ -27,7 +27,7 @@ ENV UV_PROJECT_ENVIRONMENT=/ideas/venv VIRTUAL_ENV=/ideas/venv
 # Allow uv to download required python version based on pinned .python-version
 ENV UV_PYTHON_DOWNLOADS=automatic
 # Strictly use frozen dependencies, and require cryptographic verification of each package
-ENV UV_FROZEN=1 UV_REQUIRE_HASHES=1 UV_VERIFY_HASHES=1
+ENV UV_LOCKED=1 UV_REQUIRE_HASHES=1 UV_VERIFY_HASHES=1
 ENV UV_CACHE_DIR=/tmp/.cache/uv
 # Specify accessible directory to install python
 ENV UV_PYTHON_INSTALL_DIR=/opt/uv-python
@@ -68,9 +68,12 @@ WORKDIR /ideas
 RUN apt-get -y update \
     && apt-get upgrade -y --no-install-recommends \
     && apt-get install -y --no-install-recommends \
+        # Install and update ca certs for security
+        ca-certificates \
         libglib2.0-0 \
         libgl1-mesa-glx \
         ffmpeg \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # ========================== Python Dependencies Copied from Build Stage ===========================
