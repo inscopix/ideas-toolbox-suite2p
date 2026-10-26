@@ -49,7 +49,7 @@ setup: venv set-hooks
 
 # Builds docker image
 # Installs necessary software dependencies for source code
-build: venv
+build:
 	$(DOCKER_BUILD) \
 		--target ${TARGET}
 	docker tag ${LATEST_IMAGE_TAG} ${IMAGE_TAG}
@@ -58,7 +58,7 @@ build: venv
 	mv $(f).tmp $(f);)
 
 # Builds docker image checking security vulnerabilities
-security: venv
+security:
 	$(DOCKER_BUILD) \
 		--target final
 
@@ -91,11 +91,17 @@ ruff-check: venv
 
 # Run a tool in the repo
 # Specify the tool key to run
-run: build validate-ideas-cli
+run: venv validate-ideas-cli build
 	${IDEAS_CLI} tools run $(tool) -s -c -n
 
+# Build docker image, ensuring venv is up-to-date
+build-all: venv build
+
+# Test tools, ensuring venv is up-to-date
+test-all: venv build test
+
 # Run all tools in the repo consecutively
-run-all: build validate-ideas-cli
+run-all: venv validate-ideas-cli build
 	@set -e; \
 	for f in .ideas/*/; do \
 		echo "============================================================="; \

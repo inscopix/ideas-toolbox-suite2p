@@ -102,7 +102,7 @@ ENV UV_PROJECT_ENVIRONMENT=/ideas/venv VIRTUAL_ENV=/ideas/venv
 # Allow uv to provision the pinned Python version required by the lockfile.
 ENV UV_PYTHON_DOWNLOADS=automatic
 # Strictly use frozen dependencies, and require cryptographic verification of each package
-ENV UV_FROZEN=1 UV_REQUIRE_HASHES=1 UV_VERIFY_HASHES=1
+ENV UV_LOCKED=1 UV_REQUIRE_HASHES=1 UV_VERIFY_HASHES=1
 ENV UV_CACHE_DIR=/tmp/.cache/uv
 
 USER root
