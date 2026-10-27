@@ -78,8 +78,8 @@ RUN apt-get -y update \
 
 # ========================== Python Dependencies Copied from Build Stage ===========================
 
-COPY --from=builder --chown=ideas /ideas/venv /ideas/venv
-COPY --from=builder --chown=ideas /opt/uv-python /opt/uv-python
+COPY --from=builder /ideas/venv /ideas/venv
+COPY --from=builder /opt/uv-python /opt/uv-python
 
 USER ideas
 
@@ -96,7 +96,7 @@ FROM base AS test
 
 # Copy from the cache instead of linking since it's a mounted volume
 ENV UV_LINK_MODE=copy
-# Enable bytecode compilation
+# Disable bytecode compilation (causes too many files open OS error)
 ENV UV_COMPILE_BYTECODE=0
 # Ensure installed tools can be executed out of the box
 ENV UV_TOOL_BIN_DIR=/usr/local/bin
