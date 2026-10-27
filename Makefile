@@ -60,7 +60,7 @@ build:
 # Builds docker image checking security vulnerabilities
 security:
 	$(DOCKER_BUILD) \
-		--target final
+		--target final \
 		--no-cache-filter scanner
 
 # Runs unit tests in docker image
