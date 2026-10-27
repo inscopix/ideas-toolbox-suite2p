@@ -61,6 +61,7 @@ build:
 security:
 	$(DOCKER_BUILD) \
 		--target final
+		--no-cache-filter scanner
 
 # Runs unit tests in docker image
 # Used in automated pr checks on github
