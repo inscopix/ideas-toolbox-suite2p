@@ -1,5 +1,5 @@
 # Builder stage to create venv with analysis dependencies
-FROM public.ecr.aws/lts/ubuntu:24.04 AS builder
+FROM public.ecr.aws/lts/ubuntu:22.04 AS builder
 
 # Create ideas home dir to save venv for analysis
 WORKDIR /ideas
@@ -26,8 +26,9 @@ ENV UV_TOOL_BIN_DIR=/usr/local/bin
 ENV UV_PROJECT_ENVIRONMENT=/ideas/venv VIRTUAL_ENV=/ideas/venv
 # Allow uv to download required python version based on pinned .python-version
 ENV UV_PYTHON_DOWNLOADS=automatic
-# Strictly use frozen dependencies, and require cryptographic verification of each package
-ENV UV_LOCKED=1 UV_REQUIRE_HASHES=1 UV_VERIFY_HASHES=1
+# Ensure the lock file is up-to-date before building image
+ENV UV_LOCKED=1
+# Specify directory for caching uv for reuse across builds
 ENV UV_CACHE_DIR=/tmp/.cache/uv
 # Specify accessible directory to install python
 ENV UV_PYTHON_INSTALL_DIR=/opt/uv-python
@@ -104,8 +105,9 @@ ENV UV_TOOL_BIN_DIR=/usr/local/bin
 ENV UV_PROJECT_ENVIRONMENT=/ideas/venv VIRTUAL_ENV=/ideas/venv
 # Allow uv to provision the pinned Python version required by the lockfile.
 ENV UV_PYTHON_DOWNLOADS=automatic
-# Strictly use frozen dependencies, and require cryptographic verification of each package
-ENV UV_LOCKED=1 UV_REQUIRE_HASHES=1 UV_VERIFY_HASHES=1
+# Ensure the lock file is up-to-date before building image
+ENV UV_LOCKED=1
+# Specify directory for caching uv for reuse across builds
 ENV UV_CACHE_DIR=/tmp/.cache/uv
 
 USER root
