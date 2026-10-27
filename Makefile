@@ -99,7 +99,11 @@ run: venv validate-ideas-cli build
 build-all: venv build
 
 # Test tools, ensuring venv is up-to-date
-test-all: venv build test
+test-all: venv build
+test-all: TARGET=test
+test-all: IMAGE_TAG=${IMAGE_REPO}/${IMAGE_NAME}:${LABEL}-test
+test-all: LATEST_IMAGE_TAG=${IMAGE_REPO}/${IMAGE_NAME}:latest-test
+test-all: test
 
 # Run all tools in the repo consecutively
 run-all: venv validate-ideas-cli build

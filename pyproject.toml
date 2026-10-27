@@ -29,10 +29,6 @@ analysis = [
     "scikit-image",
     "opencv-python",
     "seaborn",
-    "setuptools",
-    "urllib3==2.8.0",
-    "cryptography==50.0.0",
-    "aiohttp==3.14.4",
 ]
 test = [
     "pytest",

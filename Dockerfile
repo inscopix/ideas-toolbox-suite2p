@@ -1,5 +1,5 @@
 # Builder stage to create venv with analysis dependencies
-FROM public.ecr.aws/lts/ubuntu:22.04 AS builder
+FROM public.ecr.aws/lts/ubuntu:24.04 AS builder
 
 # Create ideas home dir to save venv for analysis
 WORKDIR /ideas
