@@ -29,9 +29,6 @@ analysis = [
     "scikit-image",
     "opencv-python",
     "seaborn",
-    "setuptools",
-    "urllib3==2.8.0",
-    "cryptography==50.0.0",
 ]
 test = [
     "pytest",
@@ -41,6 +38,7 @@ test = [
     "pytest-watch",
 ]
 dev = [
+    "ideas-python==1.3.2",
     "pre-commit",
     "ruff",
 ]

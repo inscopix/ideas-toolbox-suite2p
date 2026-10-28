@@ -1,5 +1,48 @@
-# Create base image to run analysis in
-# Change the base image based on your use case
+# Builder stage to create venv with analysis dependencies
+FROM public.ecr.aws/lts/ubuntu:22.04 AS builder
+
+# Create ideas home dir to save venv for analysis
+WORKDIR /ideas
+
+RUN apt-get -y update \
+    && apt-get upgrade -y --no-install-recommends \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        git \
+    && update-ca-certificates
+
+# Create a venv with uv to install python dependencies
+# This can be done globally, but using venv is best practice
+
+# ========================== Python Dependency Installation with uv ===========================
+
+# Copy from the cache instead of linking since it's a mounted volume
+ENV UV_LINK_MODE=copy
+# Disable bytecode compilation (causes too many files open OS error)
+ENV UV_COMPILE_BYTECODE=0
+# Ensure installed tools can be executed out of the box
+ENV UV_TOOL_BIN_DIR=/usr/local/bin
+# Install venv into in the ideas user's home
+ENV UV_PROJECT_ENVIRONMENT=/ideas/venv VIRTUAL_ENV=/ideas/venv
+# Allow uv to download required python version based on pinned .python-version
+ENV UV_PYTHON_DOWNLOADS=automatic
+# Ensure the lock file is up-to-date before building image
+ENV UV_LOCKED=1
+# Specify directory for caching uv for reuse across builds
+ENV UV_CACHE_DIR=/tmp/.cache/uv
+# Specify accessible directory to install python
+ENV UV_PYTHON_INSTALL_DIR=/opt/uv-python
+
+RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
+    --mount=type=cache,id=uv-cache-ideas,target=/tmp/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    --mount=type=bind,source=.python-version,target=.python-version \
+    uv sync --no-install-project --group analysis \
+    # fix for pynwb api which requires write permissions to site-package dir
+    && /ideas/venv/bin/python -c "import pynwb" 
+
+# Base image for production use
 FROM public.ecr.aws/lts/ubuntu:22.04 AS base
 
 ENV LANG=C.UTF-8
@@ -9,7 +52,7 @@ ENV PYTHONFAULTHANDLER=1
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Arguments for python installation
-ARG PYTHON=python3.10
+ARG PYTHON=python3.13
 ARG VENV=venv
 ARG PYTHON_VENV=/ideas/${VENV}/bin/python
 
@@ -21,59 +64,28 @@ RUN addgroup ideas \
 # Create ideas home dir
 WORKDIR /ideas
 
-# ========================== Apt Dependency Installation ===========================
+# ========================== Apt Dependency Installation for Runtime ===========================
+
 RUN apt-get -y update \
     && apt-get upgrade -y --no-install-recommends \
     && apt-get install -y --no-install-recommends \
-        software-properties-common \
-        gcc \
-        python3-dev \
-        libgl1-mesa-glx \
+        # Install and update ca certs for security
+        ca-certificates \
         libglib2.0-0 \
-        python3.10 \
-        python3.10-venv \
-        python3-pip \
-        git \
+        libgl1-mesa-glx \
         ffmpeg \
-        wget \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Download cellpose model pre-trained from huggingface
-# This model is usually downloaded by the cellpose package for suite2p ROI detection
-# Saving the model in the image prevents download issues when running the tool in a sandbox environment
-RUN mkdir -p /ideas/.cellpose/models \
-    && wget -O /ideas/.cellpose/models/cpsam https://huggingface.co/mouseland/cellpose-sam/resolve/main/cpsam?download=true \
-    && echo "e1440429eb384f95afe32bcba6510f90d518eaedc917ede549bed6804004abe2 /ideas/.cellpose/models/cpsam" | sha256sum --check
+# ========================== Python Dependencies Copied from Build Stage ===========================
 
-# Create a venv with uv to install python dependencies
-# This can be done globally, but using venv is best practice
-
-# ========================== Python Dependency Installation with uv ===========================
-
-# Copy from the cache instead of linking since it's a mounted volume
-ENV UV_LINK_MODE=copy
-# Enable bytecode compilation
-ENV UV_COMPILE_BYTECODE=1
-# Ensure installed tools can be executed out of the box
-ENV UV_TOOL_BIN_DIR=/usr/local/bin
-# Install venv into in the ideas user's home
-ENV UV_PROJECT_ENVIRONMENT=/ideas/venv VIRTUAL_ENV=/ideas/venv
-# Allow uv to provision the pinned Python version required by the lockfile.
-ENV UV_PYTHON_DOWNLOADS=automatic
-# Strictly use frozen dependencies, and require cryptographic verification of each package
-ENV UV_FROZEN=1 UV_REQUIRE_HASHES=1 UV_VERIFY_HASHES=1
-ENV UV_CACHE_DIR=/tmp/.cache/uv
+COPY --from=builder /ideas/venv /ideas/venv
+COPY --from=builder /opt/uv-python /opt/uv-python
 
 USER ideas
 
-RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
-    --mount=type=cache,id=uv-cache-ideas,target=/tmp/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --python 3.13 --no-install-project --group analysis
-
 # Add venv bin to path
-ENV PATH="/ideas/${VENV}/bin:${PATH}"
+ENV PATH="/ideas/venv/bin:${PATH}"
 
 CMD ["/bin/bash"]
 
@@ -83,11 +95,29 @@ CMD ["/bin/bash"]
 # your local folder with files generated during testing.
 FROM base AS test
 
+# Copy from the cache instead of linking since it's a mounted volume
+ENV UV_LINK_MODE=copy
+# Disable bytecode compilation (causes too many files open OS error)
+ENV UV_COMPILE_BYTECODE=0
+# Ensure installed tools can be executed out of the box
+ENV UV_TOOL_BIN_DIR=/usr/local/bin
+# Install venv into in the ideas user's home
+ENV UV_PROJECT_ENVIRONMENT=/ideas/venv VIRTUAL_ENV=/ideas/venv
+# Allow uv to provision the pinned Python version required by the lockfile.
+ENV UV_PYTHON_DOWNLOADS=automatic
+# Ensure the lock file is up-to-date before building image
+ENV UV_LOCKED=1
+# Specify directory for caching uv for reuse across builds
+ENV UV_CACHE_DIR=/tmp/.cache/uv
+
+USER root
+
 RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
     --mount=type=cache,id=uv-cache-ideas,target=/tmp/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --python 3.13 --no-install-project --group analysis --group test
+    --mount=type=bind,source=.python-version,target=.python-version \
+    uv sync --no-install-project --group analysis --group test
 
 COPY --chown=ideas ./ /ideas
 
@@ -99,9 +129,16 @@ FROM base AS scanner
 
 USER root
 
-COPY --from=aquasec/trivy:0.69.3 /usr/local/bin/trivy /usr/local/bin/trivy
+# Install ca certs so trivy can download appropriate repositories
+RUN apt-get -y update \
+    && apt-get upgrade -y --no-install-recommends \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+    && update-ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN trivy rootfs --no-progress --ignore-unfixed --skip-files /usr/local/bin/trivy --severity CRITICAL,HIGH --exit-code 1 / \
+RUN --mount=from=aquasec/trivy:0.69.3,source=/usr/local/bin/trivy,target=/usr/local/bin/trivy \
+    trivy rootfs --no-progress --ignore-unfixed --skip-files /usr/local/bin/trivy --severity CRITICAL,HIGH --exit-code 1 / \
     && touch /scan-ok
 
 # Final stage - identical to runtime but depends on successful scan
