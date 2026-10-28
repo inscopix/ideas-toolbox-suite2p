@@ -9,6 +9,7 @@ from zipfile import ZipFile
 
 import isx
 import numpy as np
+import torch
 from ideas.tools import log, outputs
 from ideas.tools.types import IdeasFile
 from natsort import natsorted
@@ -18,6 +19,7 @@ from suite2p import (
     detection,
     extraction,
     io,
+    parameters,
     registration,
 )
 
@@ -49,7 +51,7 @@ def suite2p_binary_conversion(
     t0 = time.time()
 
     # initialize suite2p parameters
-    ops = default_ops()
+    ops = default_ops.default_ops()
 
     # set hardcoded parameters
     ops = utilities.set_hardcoded_parameters(ops)
@@ -72,8 +74,7 @@ def suite2p_binary_conversion(
         ops["aspect"] = ops["diameter"][0] / ops["diameter"][1]
 
     # check if there are binaries already made
-    if "save_folder" not in ops or len(ops["save_folder"]) == 0:
-        ops["save_folder"] = "suite2p"
+    ops["save_folder"] = "suite2p"
     save_folder = os.path.join(ops["save_path0"], ops["save_folder"])
     os.makedirs(save_folder, exist_ok=True)
     plane_folders = natsorted(
@@ -142,10 +143,43 @@ def suite2p_binary_conversion(
         "tif": io.tiff_to_binary,
     }
 
+    # conversion logic copied from run_s2p.py in suite2p fork
+    # https://github.com/MouseLand/suite2p/blob/90be8953c03c6f4275dcd392ac1c6f554116169e/suite2p/run_s2p.py#L414
+    db, settings, _ = parameters.convert_settings_orig(ops)
+    db["data_path"] = [data_dir]
+
+    # find files
+    fs, first_files = io.get_file_list(db)
+    db["file_list"] = fs
+    db["first_files"] = first_files
+
+    # copy dbs to list per plane + create folders
+    dbs = io.init_dbs(db)
+    save_folder = os.path.join(db["save_path0"], db["save_folder"])
+    np.save(os.path.join(save_folder, "db.npy"), db)
+    np.save(os.path.join(save_folder, "settings.npy"), settings)
+
+    # open all binary files for writing
+    import contextlib
+
+    with contextlib.ExitStack() as stack:
+        raw_str = "raw" if db.get("keep_movie_raw", False) else "reg"
+        fnames = [db[f"{raw_str}_file"] for db in dbs]
+        files = [stack.enter_context(open(f, "wb")) for f in fnames]
+        if db["nchannels"] > 1:
+            fnames_chan2 = [db[f"{raw_str}_file_chan2"] for db in dbs]
+            files_chan2 = [stack.enter_context(open(f, "wb")) for f in fnames_chan2]
+        else:
+            files_chan2 = None
+
+        ops0 = convert_funs[db["input_format"]](dbs, settings, files, files_chan2)
+
     # convert input movie to binary file
-    ops0 = convert_funs[ops["input_format"]](ops.copy())
-    if isinstance(ops, list):
+    if isinstance(ops0, list):
         ops0 = ops0[0]
+
+    settings = np.load(ops0["settings_path"], allow_pickle=True).item()
+    ops0 = settings | ops0
 
     plane_folders = natsorted(
         [
@@ -176,7 +210,7 @@ def suite2p_binary_conversion(
     # move output files into output folder
     ideas_output_dir = os.getcwd()
     shutil.move(ops0["raw_file"], f"{ideas_output_dir}/data_raw.bin")
-    shutil.move(ops0["ops_path"], f"{ideas_output_dir}/ops_binary_conversion.npy")
+    np.save(f"{ideas_output_dir}/ops_binary_conversion.npy", ops0)
     if os.path.exists(f"{ideas_output_dir}/suite2p/"):
         shutil.rmtree(f"{ideas_output_dir}/suite2p/")
     logger.info("ALL DONE!")
@@ -298,7 +332,7 @@ def suite2p_registration(
     Ly, Lx = ops["Ly"], ops["Lx"]
 
     # load input raw binary movie and create the output registered binary movie
-    f_raw = io.BinaryFile(Ly=Ly, Lx=Lx, filename=ops["raw_file"], write=True)
+    f_raw = io.BinaryFile(Ly=Ly, Lx=Lx, filename=ops["raw_file"])
     f_reg = io.BinaryFile(
         Ly=Ly, Lx=Lx, filename=ops["reg_file"], n_frames=f_raw.shape[0], write=True
     )  # Set registered binary file to have same n_frames
@@ -314,6 +348,8 @@ def suite2p_registration(
 
     align_by_chan2 = ops["functional_chan"] != ops["align_by_chan"]
     f_reg_chan2 = None
+
+    db, settings, ops = parameters.convert_settings_orig(ops)
     registration_outputs = registration.registration_wrapper(
         f_reg,
         f_raw=f_raw,
@@ -321,15 +357,13 @@ def suite2p_registration(
         f_raw_chan2=None,
         refImg=refImg,
         align_by_chan2=align_by_chan2,
-        ops=ops,
+        settings=settings["registration"],
+        save_path=ideas_output_dir,
+        device=torch.device("cpu"),
     )
 
-    ops = registration.save_registration_outputs_to_ops(registration_outputs, ops)
-    # add enhanced mean image
-    meanImgE = registration.compute_enhanced_mean_image(
-        ops["meanImg"].astype(np.float32), ops
-    )
-    ops["meanImgE"] = meanImgE
+    ops = db | settings | ops | registration_outputs
+    # enhanced mean image added by suite2p API
     # Inscopix edit: adding max projection image
     ops["max_proj"] = np.max(f_reg.data, axis=0)
 
@@ -340,7 +374,7 @@ def suite2p_registration(
     logger.info("----------- Total %0.2f sec" % plane_times["registration"])
     n_frames, Ly, Lx = f_reg.shape
 
-    if ops["two_step_registration"] and ops["keep_movie_raw"]:
+    if settings["registration"]["two_step_registration"] and ops["keep_movie_raw"]:
         logger.info("----------- REGISTRATION STEP 2")
         logger.info("(making mean image (excluding bad frames)")
         nsamps = min(n_frames, 1000)
@@ -356,7 +390,9 @@ def suite2p_registration(
             f_raw_chan2=None,
             refImg=refImg,
             align_by_chan2=align_by_chan2,
-            ops=ops,
+            settings=settings["registration"],
+            save_path=ideas_output_dir,
+            device=torch.device("cpu"),
         )
         if ops.get("ops_path"):
             np.save(ops["ops_path"], ops)
@@ -525,13 +561,19 @@ def suite2p_roi_detection(
         logger.info(f"NOTE: applying default {str(user_classfile)}")
         classfile = user_classfile
 
+    db, settings, ops = parameters.convert_settings_orig(ops)
+
     # CELL DETECTION
     t11 = time.time()
     plane_times = {}
     logger.info("----------- ROI DETECTION")
-    ops, stat = detection.detection_wrapper(f_reg, ops=ops, classfile=classfile)
+    new_ops, stat, _ = detection.detection_wrapper(
+        f_reg, settings=settings["detection"], classifier_path=classfile
+    )
     plane_times["detection"] = time.time() - t11
     logger.info("----------- Total %0.2f sec." % plane_times["detection"])
+
+    ops = db | settings | ops | new_ops
     # [end of suite2p code]
 
     # save output files into output folder
@@ -607,18 +649,26 @@ def suite2p_roi_extraction(
     ops["inner_neuropil_radius"] = inner_neuropil_radius
     ops["lam_percentile"] = lam_percentile
 
+    db, settings, ops = parameters.convert_settings_orig(ops)
+
     # [start of suite2p code]
     # ROI EXTRACTION
     t11 = time.time()
     plane_times = {}
     logger.info("----------- EXTRACTION")
     f_reg_chan2 = None
-    stat, F, Fneu, F_chan2, Fneu_chan2 = extraction.extraction_wrapper(
-        stat, f_reg, f_reg_chan2=f_reg_chan2, ops=ops
+    F, Fneu, _, _ = extraction.extraction_wrapper(
+        stat,
+        f_reg,
+        f_reg_chan2=f_reg_chan2,
+        settings=settings["extraction"],
+        device=torch.device("cpu"),
     )
 
     plane_times["extraction"] = time.time() - t11
     logger.info("----------- Total %0.2f sec." % plane_times["extraction"])
+
+    ops = db | settings | ops
     # [end of suite2p code]
 
     # save output files into output folder
@@ -699,6 +749,8 @@ def suite2p_roi_classification(
         logger.info(f"NOTE: applying default {str(user_classfile)}")
         classfile = user_classfile
 
+    db, settings, ops = parameters.convert_settings_orig(ops)
+
     # ROI CLASSIFICATION
     t11 = time.time()
     plane_times = {}
@@ -710,6 +762,8 @@ def suite2p_roi_classification(
     plane_times["classification"] = time.time() - t11
     logger.info("----------- Total %0.2f sec." % plane_times["classification"])
     # [end of suite2p code]
+
+    ops = db | settings | ops
 
     # save output file into output folder
     ideas_output_dir = os.getcwd()
@@ -791,6 +845,8 @@ def suite2p_spike_deconvolution(
     ops["sig_baseline"] = sig_baseline
     ops["prctile_baseline"] = prctile_baseline
 
+    db, settings, ops = parameters.convert_settings_orig(ops)
+
     # [start of suite2p code]
     # SPIKE DECONVOLUTION
     t11 = time.time()
@@ -799,18 +855,24 @@ def suite2p_spike_deconvolution(
     dF = F.copy() - ops["neucoeff"] * Fneu
     dF = extraction.preprocess(
         F=dF,
-        baseline=ops["baseline"],
-        win_baseline=ops["win_baseline"],
-        sig_baseline=ops["sig_baseline"],
-        fs=ops["fs"],
-        prctile_baseline=ops["prctile_baseline"],
+        baseline=settings["dcnv_preprocess"]["baseline"],
+        win_baseline=settings["dcnv_preprocess"]["win_baseline"],
+        sig_baseline=settings["dcnv_preprocess"]["sig_baseline"],
+        fs=settings["fs"],
+        prctile_baseline=settings["dcnv_preprocess"]["prctile_baseline"],
+        device=torch.device("cpu"),
     )
     spks = extraction.oasis(
-        F=dF, batch_size=ops["batch_size"], tau=ops["tau"], fs=ops["fs"]
+        F=dF,
+        batch_size=settings["extraction"]["batch_size"],
+        tau=settings["tau"],
+        fs=settings["fs"],
     )
     plane_times["deconvolution"] = time.time() - t11
     logger.info("----------- Total %0.2f sec." % plane_times["deconvolution"])
     # [end of suite2p code]
+
+    ops = db | settings | ops
 
     # save output file into output folder
     ideas_output_dir = os.getcwd()
@@ -916,6 +978,13 @@ def suite2p_output_conversion(
     ops["save_mat"] = save_mat
     ops["save_path"] = suite2p_output_dir
 
+    if save_NWB:
+        # NWB output will not be generated if mesoscope recording
+        ops["mesoscan"] = None
+
+    db, settings, ops = parameters.convert_settings_orig(ops)
+    ops = db | settings | ops
+
     # output metadata
     metadata.create_output_metadata(
         ops=ops,
@@ -962,6 +1031,9 @@ def suite2p_output_conversion(
         ]
         for file, fixed_fname in zip(file_list, fixed_fname_list):
             shutil.copyfile(file[0], os.path.join(plane_output_dir, fixed_fname))
+        np.save(os.path.join(plane_output_dir, "settings.npy"), ops | settings)
+        np.save(os.path.join(plane_output_dir, "db.npy"), ops | db)
+
         ops["save_path"] = plane_output_dir
         np.save(os.path.join(plane_output_dir, "ops.npy"), ops)
         io.save_nwb(ideas_output_dir)
@@ -976,7 +1048,7 @@ def suite2p_output_conversion(
         iscell = np.load(iscell_file[0], allow_pickle=True)
         ops["save_path"] = os.path.dirname(fluo_file[0])
         io.save_mat(
-            ops,
+            {"save_path": os.path.dirname(fluo_file[0])},
             stat,
             F,
             Fneu,

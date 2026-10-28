@@ -5,11 +5,18 @@ on:
     branches: ["main"]
   pull_request:
     # trigger all branches
+
+permissions:
+  contents: read
+
 jobs:
   pull-request-checks:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
     - uses: actions/checkout@v6
+      with:
+          persist-credentials: false
     - name: Set up Python 3.13
       uses: actions/setup-python@v6
       with:
@@ -20,10 +27,12 @@ jobs:
       with:
         version: '0.10.7'
         # Caches the uv executable and its internal cache directories
-        cache-dependency-path: pyproject.toml
+        cache-dependency-glob: "uv.lock"
     # Create a virtual environment and install dependencies
+    # First check to ensure uv.lock is synced with pyproject.toml
+    # Fail check otherwise to ensure user updates lock file locally
     - name: Setup venv
-      run: make venv
+      run: uv lock --check && make venv
     - name: Check code formatting
       run: make ruff-check
     - name: Check unit tests
