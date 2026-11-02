@@ -39,12 +39,18 @@ RUN apt-get -y update \
     && apt-get upgrade -y --no-install-recommends \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
-        git \
     && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # ========================== Builder stage to install analysis dependencies ===========================
 FROM base AS builder
+
+# Install packages required for building analysis dependencies
+RUN apt-get -y update \
+    && apt-get upgrade -y --no-install-recommends \
+    && apt-get install -y --no-install-recommends \
+        git \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create venv to install analysis dependencies
 RUN --mount=from=ghcr.io/astral-sh/uv:0.11.2,source=/uv,target=/bin/uv \
