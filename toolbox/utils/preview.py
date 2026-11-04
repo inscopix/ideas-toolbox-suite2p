@@ -2,6 +2,7 @@ import logging
 import os
 from colorsys import hsv_to_rgb, rgb_to_hsv
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation
@@ -24,12 +25,6 @@ def preview_binary_movie(
     fname = "movie_preview.mp4"
 
     L = ops["nframes"]
-    if ops["frames_include"] != -1 and ops["frames_include"] < L:
-        L = ops["frames_include"]
-    elif ops["frames_include"] > L:
-        logger.warning(
-            f"[Preview Binary Movie] Requested to include {ops['frames_include']} frames, but this dataset only has {L} frames."
-        )
     fs = ops["fs"]
 
     bin_info_dict = {
@@ -116,12 +111,6 @@ def preview_registration_offsets(ops):
         arr_dict.pop("yoff1")
 
     L = len(ops["xoff"])
-    if ops["frames_include"] != -1 and ops["frames_include"] < L:
-        L = ops["frames_include"]
-    elif ops["frames_include"] > L:
-        logger.warning(
-            f"[Preview Registration Offsets] Requested to include {ops['frames_include']} frames, but this dataset only has {L} frames."
-        )
     tb = np.arange(L) / ops["fs"]
 
     n_subplots = len(arr_dict)
@@ -164,12 +153,6 @@ def preview_registration_movies(
     yticks = np.arange(0, Ly + ticks_step, ticks_step)
 
     L = ops["nframes"]
-    if ops["frames_include"] != -1 and ops["frames_include"] < L:
-        L = ops["frames_include"]
-    elif ops["frames_include"] > L:
-        logger.warning(
-            f"[Preview Registration Movies] Requested to include {ops['frames_include']} frames, but this dataset only has {L} frames."
-        )
     fs = ops["fs"]
     arr_frames = np.arange(0, L, display_rate)
 
@@ -380,7 +363,7 @@ def preview_extraction_traces(
         has_iscell = False
 
     # if allow_overlap is False, then fluorescence traces of overlapping footprints are set to all zeros; the code below removes data from overlapping ROIs from preview figures
-    if not ops["allow_overlap"]:
+    if not ops["extraction"]["allow_overlap"]:
         idx_ok = np.where([len(np.unique(f)) > 1 for f in F])[0]
         F = F[idx_ok, :]
         Fneu = Fneu[idx_ok, :]
@@ -390,16 +373,6 @@ def preview_extraction_traces(
             iscell = iscell[idx_ok]
 
     N, L = F.shape
-    if ops["frames_include"] != -1 and ops["frames_include"] < L:
-        L = ops["frames_include"]
-        F = F[:, :L]
-        Fneu = Fneu[:, :L]
-        if has_spks:
-            spks = spks[:, :L]
-    elif ops["frames_include"] > L:
-        logger.warning(
-            f"[Preview Extraction Traces] Requested to include {ops['frames_include']} frames, but this dataset only has {L} frames."
-        )
     fs = ops["fs"]
     tb = np.arange(L) / fs
     Ly, Lx = ops["Ly"], ops["Lx"]
@@ -504,7 +477,7 @@ def preview_extraction_traces(
     if has_spks:
         fig, axes = plt.subplots(n_samp_cells, 1, figsize=figsize)
         for offset, idx in enumerate(idx_cells):
-            ax = axes[offset]
+            ax = axes if isinstance(axes, matplotlib.axes.Axes) else axes[offset]
             f = F[idx, :]
             f_neu = Fneu[idx, :]
             sp = spks[idx, :]

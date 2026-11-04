@@ -33,6 +33,8 @@ This toolbox is designed to run as a Docker image, which can be run on the IDEAS
 
 ## Executing the Toolbox
 
+For local development commands (`make setup`, `make run`, `make run-all`), use Python 3.13. The Makefile will create a Python 3.13 virtual environment automatically.
+
 To run the toolbox, you can use the following command:
 
 `make run TOOL=<tool_name>`
